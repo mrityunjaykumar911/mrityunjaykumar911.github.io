@@ -1,6 +1,6 @@
 Hi, I am Mrityunjay.
 
-Demo site up usingL Aerial
+Demo site up using Aerial
 
 Aerial by HTML5 UP
 html5up.net | @ajlkn
