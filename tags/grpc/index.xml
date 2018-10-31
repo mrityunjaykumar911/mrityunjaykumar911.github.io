@@ -13,10 +13,10 @@
     
     <item>
       <title>Running Machine Learning as Service</title>
-      <link>https://mrityunjaykumar911.github.io/publications/alldaydevops/</link>
+      <link>https://mrityunjaykumar911.github.io/publications/machinelearningasservice/</link>
       <pubDate>Fri, 12 Oct 2018 00:00:00 +0000</pubDate>
       
-      <guid>https://mrityunjaykumar911.github.io/publications/alldaydevops/</guid>
+      <guid>https://mrityunjaykumar911.github.io/publications/machinelearningasservice/</guid>
       <description>This talk looked at the nuances of deployment of Machine Learning models in production. In current era, when CI &amp;amp; CD are supported for almost all type of applications developed and with integration with services like GCP, AWS; one can deploy scalable solution at instant.
 However, the idiosyncratic complexity for deployment of Machine learning model in robust system is still a mystry and many firms have invested for add-on frameworks for developing a comparable solution to push it to production environemnt, but many still face the challanges like scalability, latency etc.</description>
     </item>
