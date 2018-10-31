@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Neural Networks on Mrityunjay Kumar</title>
+    <link>https://mrityunjaykumar911.github.io/tags/neural-networks/</link>
+    <description>Recent content in Neural Networks on Mrityunjay Kumar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 14 Sep 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://mrityunjaykumar911.github.io/tags/neural-networks/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Learning to fingerprint the latent structure in question articulation - ICMLA 2018</title>
+      <link>https://mrityunjaykumar911.github.io/publications/icmla2018papertalentica/</link>
+      <pubDate>Fri, 14 Sep 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrityunjaykumar911.github.io/publications/icmla2018papertalentica/</guid>
+      <description>GOAL The goal of the project is to find techniques to generate application-specific fingerprints for data. There are many machine learning applications that need to incrementally evolve in their ability to process data. When data does not match the processing ability, we see unexpected results and system misbehavior. If we are able to generate fingerprints for classes of data, and if we can discard data that does not match known fingerprints, then we have better control over how unexpected data can influence underlying algorithms.</description>
+    </item>
+    
+  </channel>
+</rss>
