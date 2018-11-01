@@ -13,7 +13,10 @@
 document.addEventListener("keydown", function(e) {
 if (e.keyCode == 83 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
 e.preventDefault();
-window.location=window.location.href+"MrityunjayKumar.pdf";
+
+setTimeout(function() {
+  window.location.href = window.location.host+"/cv/MrityunjayKumar.pdf";
+}, 1000);
 }
 }, false);
 </script>
