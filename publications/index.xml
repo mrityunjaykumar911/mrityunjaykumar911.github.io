@@ -30,5 +30,17 @@ However, the idiosyncratic complexity for deployment of Machine learning model i
       <description>GOAL The goal of the project is to find techniques to generate application-specific fingerprints for data. There are many machine learning applications that need to incrementally evolve in their ability to process data. When data does not match the processing ability, we see unexpected results and system misbehavior. If we are able to generate fingerprints for classes of data, and if we can discard data that does not match known fingerprints, then we have better control over how unexpected data can influence underlying algorithms.</description>
     </item>
     
+    <item>
+      <title>Fingerprinting Latent Structure in Data - DAIR IIT - Delhi</title>
+      <link>https://mrityunjaykumar911.github.io/publications/dair-presentation/</link>
+      <pubDate>Thu, 10 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrityunjaykumar911.github.io/publications/dair-presentation/</guid>
+      <description>Title:
+Fingerprinting Latent Structure in Data
+Abstract:
+As data-hungry algorithms find wide spread applications, there is an increased interest in exploring these algorithms in the context of small-data. In many niche industrial applications, data is not only held in secrecy for reasons of privacy and competitive advantage, but is also limited in volume and variety. Under these constraints, data-driven algorithms are expected to exhibit low application misbehavior. If one can discard data that does not match capabilities of underlying algorithms, there is better control over how unexpected data can influence the application behavior.</description>
+    </item>
+    
   </channel>
 </rss>

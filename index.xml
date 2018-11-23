@@ -40,6 +40,18 @@ However, the idiosyncratic complexity for deployment of Machine learning model i
     </item>
     
     <item>
+      <title>Fingerprinting Latent Structure in Data - DAIR IIT - Delhi</title>
+      <link>https://mrityunjaykumar911.github.io/publications/dair-presentation/</link>
+      <pubDate>Thu, 10 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrityunjaykumar911.github.io/publications/dair-presentation/</guid>
+      <description>Title:
+Fingerprinting Latent Structure in Data
+Abstract:
+As data-hungry algorithms find wide spread applications, there is an increased interest in exploring these algorithms in the context of small-data. In many niche industrial applications, data is not only held in secrecy for reasons of privacy and competitive advantage, but is also limited in volume and variety. Under these constraints, data-driven algorithms are expected to exhibit low application misbehavior. If one can discard data that does not match capabilities of underlying algorithms, there is better control over how unexpected data can influence the application behavior.</description>
+    </item>
+    
+    <item>
       <title>Added Docker Build Status Badge to shields.io</title>
       <link>https://mrityunjaykumar911.github.io/projects/contributions/shields-docker/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Talentica Software on Mrityunjay Kumar</title>
+    <link>https://mrityunjaykumar911.github.io/tags/talentica-software/</link>
+    <description>Recent content in Talentica Software on Mrityunjay Kumar</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 10 May 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://mrityunjaykumar911.github.io/tags/talentica-software/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Fingerprinting Latent Structure in Data - DAIR IIT - Delhi</title>
+      <link>https://mrityunjaykumar911.github.io/publications/dair-presentation/</link>
+      <pubDate>Thu, 10 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>https://mrityunjaykumar911.github.io/publications/dair-presentation/</guid>
+      <description>Title:
+Fingerprinting Latent Structure in Data
+Abstract:
+As data-hungry algorithms find wide spread applications, there is an increased interest in exploring these algorithms in the context of small-data. In many niche industrial applications, data is not only held in secrecy for reasons of privacy and competitive advantage, but is also limited in volume and variety. Under these constraints, data-driven algorithms are expected to exhibit low application misbehavior. If one can discard data that does not match capabilities of underlying algorithms, there is better control over how unexpected data can influence the application behavior.</description>
+    </item>
+    
+  </channel>
+</rss>
