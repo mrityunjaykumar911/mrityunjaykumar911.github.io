@@ -6,13 +6,6 @@ GEN="op"
 GEN_DATE="1223-release"
 CONFIG_TOMLFILE="config.toml"
 
-if [ $# -ge 0 ];then
-    echo "ted"
-    CONFIG_TOMLFILE=$1
-else
-    echo "roona"
-fi
-
 function CheckIfHugoInstalled ()
 {
     RET="`which hugo`"
