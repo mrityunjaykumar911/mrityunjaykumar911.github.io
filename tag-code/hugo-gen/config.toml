@@ -1,0 +1,422 @@
+# Page settings
+
+baseURL = "https://www3.cs.stonybrook.edu/~mrkumar/"
+languageCode = "en"
+title = "Mrityunjay-Kumar"
+theme = "hugo-devresume-theme"
+googleAnalytics = "UA-116277626-1"
+
+
+[params]
+    author = "Mrityunjay"
+    description = "Mrityunjay Kumar"
+
+    primaryColor = "#54B689"
+    textPrimaryColor = "#292929"
+
+    [params.profile]
+        enable = true
+        name = "Mrityunjay Kumar"
+        tagline = "SWE @ Microsoft | Building Distributed Systems | Stony Brook University"
+        pronounce = "MRIT-yen-jay koo-MARR"
+        short_name = "jay"
+        avatar = "image.jpg"
+
+    [params.contact]
+        enable = true
+        location = "Palo Alto, California, US"
+
+        [[params.contact.list]]
+        enabled = false
+        icon = "fas fa-phone-square"
+        url = "tel:#"
+        text = "631 710 1058"
+
+        [[params.contact.list]]
+        enabled = false
+        icon = "fas fa-envelope-square"
+        url = "mailto:#"
+        text = "mrkumar@cs.stonybrook.edu"
+        
+        [[params.contact.list]]
+        enabled = false
+        icon = "fas fa-globe"
+        url = "https://www3.cs.stonybrook.edu/~mrkumar/"
+        text = "~mrkumar"
+
+        [[params.contact.list]]
+        enabled = true
+        icon = "fas fa-blog"
+        url = "https://blog-mjay.firebaseapp.com/"
+        text = "blog"
+
+        [[params.contact.list]]
+        enabled = true
+        icon = "fas fa-link"
+        url = "/~mrkumar/cv/cv/MrityunjayKumarCV.pdf.html"
+        text = "Resume in html"
+        
+        [[params.contact.list]]
+        enabled = true
+        icon = "fas fa-download"
+        url = "/~mrkumar/cv/cv/MrityunjayKumarCV.pdf"
+        text = "Curriculum Vitae"
+
+
+    [params.skills]
+        enable = true
+
+        [[params.skills.list]]
+        title = "Relevant Courses"
+        [[params.skills.list.items]]
+        details = "Distributed Systems; Operating System"
+        [[params.skills.list.items]]
+        details = "Computer Vision; Data Visualization;"
+        [[params.skills.list.items]]
+        details = "Data Science Fundamentals"
+
+        [[params.skills.list]]
+        title = "Technical"
+        [[params.skills.list.items]]
+        details = "C++/ Python/ C/ Java/ Golang"
+        [[params.skills.list.items]]
+        details = "Spark, Storm, Keras, Scikit-learn"
+        [[params.skills.list.items]]
+        details = "protobuf, gRPC,SimpleRPC, Neo4j"
+
+        [[params.skills.list]]
+        title = "Professional"
+        [[params.skills.list.items]]
+        details = "Team player"
+        [[params.skills.list.items]]
+        details = "Strong problem solver"
+        [[params.skills.list.items]]
+        details = "Good time management"
+
+        [[params.skills.list]]
+        title = "Workflow"
+        [[params.skills.list.items]]
+        details = "Agile Development"
+        [[params.skills.list.items]]
+        details = "Scrum"
+
+
+
+    [params.education]
+        enable = true
+
+        [[params.education.list]]
+        degree = "MS in Computer Science"
+        university = "Stony Brook University, NY"
+        dates = "Jan 2019 - May 2020"
+        
+        [[params.education.list]]
+        degree = "B.Tech in Computer Science"
+        university = "Maulana Azad National Institute of technology, Bhopal, India"
+        dates = "2010 - 2014"
+
+
+
+    [params.awards]
+        enable = true
+
+        [[params.awards.list]]
+        name = "Winner for Talentica Semis Codefest"
+        body = "Talentica Software"
+        date = "Feb 2018"
+
+        [[params.awards.list]]
+        name = "Runner Up Talentica prelims Codefest"
+        body = "Talentica Software"
+        date = "Jan 2018"
+        
+        [[params.awards.list]]
+        name = "Mediatek On-Spot VAward"
+        body = "Mediatek"
+        date = "April 2016"
+
+        [[params.awards.list]]
+        name = "Mediatek On-Spot VAward"
+        body = "Mediatek"
+        date = "Jan 2016"
+
+        [[params.awards.list]]
+        name = "Mediatek On-Spot VAward"
+        body = "Mediatek"
+        date = "Nov 2015"
+
+    [params.languages]
+        enable = true
+
+        [[params.languages.list]]
+        name = "English"
+        level = "Fluent"
+        [[params.languages.list]]
+        name = "Hindi"
+        level = "Native"
+
+    [params.interview]
+        enable = false
+
+    [params.summary]
+        enable = true
+        text = "Currently, I work in a role in Microsoft's PowerPoint backend service engineering team. I have over 7 years of professional experience in software development, including over 2 years with VMware's vSAN storage team, and 3 years as a Senior Software Engineer on the Data Science team at Talentica Software. Additionally, I spent 2 years in the multimedia team at Mediatek."
+
+    [params.whatilookfor]
+        enable = true
+        text = "I am eager to pursue new opportunities in the field of distributed systems and I am confident that my skills and experience make me a valuable asset to any organization in this area."
+
+    [params.current_experience]
+        enable = true
+
+     [[params.current_experience.list]]
+        title = "Software Engineer - 2"
+        dates = "May 2022-till"
+        company = "Microsoft"
+        details = "Powerpoint Backend engineering team"
+        project = ""
+        team_name = "VDFS"
+        details_title_on = false
+        team_home = "https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan.doc/GUID-82565B82-C911-42F7-85B1-E9EF973EE90C.html"
+    
+    #### end
+
+    [params.research_experience]
+        enable = true
+
+    [[params.research_experience.list]]
+        title = "Graduate Research Assistant"
+        dates = "June 2019 - May 2020"
+        function = "Part time"
+        company = "Advisor : Prof. Shuai Mu"
+        details = "Distributed Multi-core Transactional Database"
+        project = ""
+        prof_name = "Prof. Shuai Mu"
+        details_title_on = false
+        prof_home = "http://mpaxos.com/"
+    [[params.research_experience.list.items]]
+        details_title = ""
+        details = "Implementing asynchronous replication with multi-process paxos to remove contention"
+        
+    [[params.research_experience.list.items]]
+        details_title = ""
+        details = "Implemented fast header-only/compiled, C++ logging library facilitating aligned memory allocators with features like Rotating log and auto-flush in approx. 1200 LOC. "
+
+    [[params.research_experience.list.items]]
+        details_title = ""
+        details = "Implemented optimistic replay protocol to guarantee serializibility and wrote verification pipeline for logged streams."
+
+    [[params.research_experience.list.items]]
+        details_title = ""
+        details = "Wrote various evaluation micro-benchmarks to inspect contention points and indenfied flows help of mutrace and gprof tool"
+
+    [params.experience]
+        enable = true
+        focus = true
+
+        [[params.experience.list]]
+        title = "Member Of Technical Staff - III"
+        function = "Full time"
+        dates = "July 2020 - April 2022"
+        company = "VMware Inc."
+        details = "Lead effort for designing FSCK user-space tool infrastructure for VMware Distributed Storage. Core part of snapshot dev team."
+
+        [[params.experience.list.items]]
+        details_title = "Distributed FSCK [Infrastructure]"
+        details = "Conceptualized and implemented distributed FSCK tool for analyzing and repairing storage metadata. This tool is leveraged to analyze the state of metadata storage on disk after crash recovery by forming analysis matrices and cross consistency patterns between multiple metadata data structures like B+ trees, bitmap, segment usage table. The service can be scheduled or run on-demand to check the health of the storage system k-v store. In addition, the service is also used for other storage features, such as snapshots, un-map, segment cleaning to verify consistency and integrity of the metadata."
+
+        [[params.experience.list.items]]
+        details_title = "Distributed FSCK [Core Algorithms]"
+        details = "End-to-end implementation of a cloud-native microservice to validate the integrity of the file system key-value store (such as B+ trees). New validating algorithm can be attached in both online and offline modes, leveraging lazy evaluation at runtime."
+
+        [[params.experience.list.items]]
+        details_title = "Snapsnot Crash Consistency"
+        details = "Implemented serialized transactional consistency of snapshots in presence of crash. It was implemented via replaying commited reads from persisted WALs."
+
+        [[params.experience.list.items]]
+        details_title = "Snapsnot Telemetry & Monitoring"
+        details = "Implemented aggregated snapshot capacity from scratch to support statistics collection with p99 latency in range of 30 ms."
+
+        [[params.experience.list]]
+        title = "Teaching Assistant"
+        function = "Part time"
+        dates = "June 2019 - June 2019"
+        company = "Stony Brook University"
+        details = "Taught Introduction to Data Science (CSE-351) with Prof. Martin Radfar. Helped to set quizes and midterms. Wrote test module to auto generate scores for homework assignments and quizes"
+
+        [[params.experience.list]]
+        title = "Senior Software Engineer"
+        function = "Full time"
+        dates = "April 2016 - Jan 2019"
+        company = "Talentica Software"
+
+        details = "I joined data science team as a software engineer and worked almost three years in Applications ranging from search engine, File Sync Application, NLP Pipelines, Chat bots and applying machine learning algorithms in network based solutions. We developed a novel algorithm which coins the answerability of a question."
+
+        [[params.experience.list.key_focus]]
+        key_area="Estimation & Prediction algorithms for Wireless Systems"
+        
+        [[params.experience.list.items]]
+        details_title = "Network Traffic Estimation"
+        details = "Implemented a ensembled regression model for network bandwidth prediction using SLA metrics and real feedback from native Speedtest Tool."
+        status_icon = "check"
+        status_text = "In Production"
+
+        [[params.experience.list.items]]
+        details_title = "ML Model Realtime Deployment"
+        details = "Implemented an ingestion pipeline for model deployment using Storm, Kafka, Python, Java"
+
+        [[params.experience.list.items]]
+        details_title = "Indoor Location Positioning for BLE assets"
+        details = "95% classifying the region for Static Assets and 68% accuracy in Regression based on region triangulation using RSSI and the interference correction"
+        prod_status = "In production"
+        status_icon = "check"
+
+        [[params.experience.list.items]]
+        details_title = "Network Traffic Identification"
+        details = "Developed a multi-modal Machine Learning model for network traffic classification for Audio and Video streaming using Ensemble of regression and auto-encoders."
+        status_icon = "fail"
+        prod_status = "Incomplete"
+
+        [[params.experience.list.items]]
+        details_title = "Data dump tool for AWS Athena"
+        details = "Added an ad-hoc client to Storm topology to support collection of Real-time data to Disk & Batch pipeline using Java, Spark."
+
+        [[params.experience.list.items]]
+        details_title = "Live BLE asset view"
+        details = "Developed a live Bluetooth Low Energy asset view portal to support data collection team, adding 70% more correctness to site data calibration using JavaScript, Kafka, Python"
+
+        [[params.experience.list.items]]
+        details_title = "Machine Learning Algorithm object storage service"
+        details = "Designed continuous delivery pipeline for Machine Learning models using gRPC, protobuf, Redis, RabbitMQ, AWS S3 improving deployment frequency by 40%. Wrote multiple clients in Java, python, Go, C++ to facilitate object serialization, improving frequency of model update as weekly release."
+        status_icon = "check"
+        prod_status = "In house tool"
+        
+        [[params.experience.list.items]]
+        details_title = "Single cell Identity Classification"
+        details = "Auto-encoder based neural network to identify the single cells with 83% accuracy for cell based print technology."
+        prod_status = "In production"
+        status_icon = "check"
+
+
+        [[params.experience.list.items]]
+        details_title = "File Sync Application"
+        details = "Lead development of file sync tool developement; Implemented delta file sync Service in c++ to reduce load in sync server by 200%.; Wrote stateless software update tool to push new releases without killing of running tool; Developed a client application update framework to support release notification for multi-talent architecture using Java, C++, Python; Designed rate limiter service to prevent throttling of indexing service, improving sync frequency by 30%."
+        prod_status = "In production"
+        status_icon = "check"
+
+
+        [[params.experience.list.items]]
+        details_title = "Financial Document Search Engine"
+        details = "Improved search relevancy by 45%. Improved Online Ontology enhancer by 30%, NLP Pipeline for Document Clustering, Keyword Extraction, Text Classification."
+        prod_status = "In production"
+        status_icon = "check"
+
+
+        [[params.experience.list]]
+        title = "Software Engineer"
+        function = "Full time"
+        dates = "Aug 2014 - April 2016"
+        company = "MediaTek India"
+        details = "Joined multimedia team and helped with development of Audio Player in feature phones. Also, I lead development of in-house tools for stress based testing for Wifi/BT/GPS."
+
+        [[params.experience.list.items]]
+        details_title = "Audio Player Module"
+        details = "Improved Audio Player sub-modules Playlist, Integrated BT Stack in MMI Layer"
+        prod_status = "In production"
+        status_icon = ""
+
+        [[params.experience.list.items]]
+        details_title = "Internal Tool Development"
+        details = "Wrote SW Layer code for Stress Test based Combo(GPS-WiFi-BT) Tool; Implemented event driven asynchronous architecture for packet data interface"
+        prod_status = "In production"
+        status_icon = ""
+
+    [params.projects]
+        enable = true
+
+        [[params.projects.list]]
+        title = "Raft"
+        meta = "CSE 535 Asynchronous Lab"
+        tagline = "Implemented Sharded and replicated fault-tolerance key-value store based on raft protocol."
+
+        [[params.projects.list]]
+        title = "Map-Reduce library"
+        meta = "CSE 535 Asynchronous Lab"
+        tagline = " Implemented distributed map reduce library and worker failures from paper"
+
+        [[params.projects.list]]
+        title = "Backup File System in Linux Kernel"
+        meta = "Stony Brook FSL Lab"
+        tagline = "Implemented stackable file system which takes created backup on every successful write/delete/rename having queue based version & retention policy."
+
+        [[params.projects.list]]
+        title = "Encryption based System tool for Linux Kernel"
+        meta = "Stony Brook FSL Lab"
+        tagline = "Implemented system call for encrypt/decrypt file using AES provided by kernel crypto API."
+
+        [[params.projects.list]]
+        title = "Music Recommendation System"
+        meta = "Data Visualization Lab"
+        tagline = "Implemented recommendation system for music based on mood and activities."
+        share_link = "https://sbu-musicx.herokuapp.com/user.html"
+        pre_name = "Project Link"
+
+    [params.information]
+        enable = true
+
+        [[params.information.list]]
+        title = "Conference Papers"
+
+        [[params.information.list.items]]
+        details = "R. Guntur and Mrityunjay Kumar. Learning to fingerprint the latent structure in question articulation. In 2018 17th IEEE International Conference on Machine Learning and Applications (ICMLA), pages 73–80, Dec 2018."
+        link = "https://ieeexplore.ieee.org/document/8614044"
+        
+    
+    [params.innovation]
+        enable = true
+
+        [[params.innovation.list]]
+        title = "Thesis / Patents"
+
+        [[params.innovation.list.items]]
+        enabled = true
+        details = "Rolis: a software approach to efficiently replicating multi-core transactions. EuroSys 2022"
+        link = "https://dl.acm.org/doi/abs/10.1145/3492321.3519561"
+        contributions = "Development & evaluation of novelty of the paper in an early stage."
+        institute="Stony Brook University"
+        year="2020"
+
+        [[params.innovation.list.items]]
+        enabled = false
+        details = "Verification of METADATA Consistency across snapshot COPY-ON-WRITE (COW) B+TREE LOGICAL MAPS"
+        link = ""
+        contributions = "Designed from scratch & delivered to production"
+        institute="VMware Inc."
+        year="2021"
+
+
+    [params.social]
+        enable = true
+
+        [[params.social.list]]
+        icon = "fab fa-github-square"
+        url = "//github.com/mrityunjaykumar911"
+        title = "github/mrityunjaykumar911"
+        [[params.social.list]]
+        icon = "fab fa-linkedin"
+        url = "//linkedin.com/in/mrkumar20"
+        title = "linkedin/mrkumar20"
+        [[params.social.list]]
+        icon = "fab fa-twitter-square"
+        url = "//twitter.com/mjay_nitb"
+        title = "@mjay_nitb"
+        [[params.social.list]]
+        icon = "fab fa-quora"
+        url = "//quora.com/profile/Mrityunjay-Kumar"
+        title = "Mrityunjay-Kumar"
+        
+
+
+
+
+
