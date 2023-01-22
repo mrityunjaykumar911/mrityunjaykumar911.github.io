@@ -4,6 +4,14 @@ reset=`tput sgr0`
 TARGET_WEB_FOLDER_NAME="kmrityunjay-hugo-website-gen"
 GEN="op"
 GEN_DATE="1223-release"
+CONFIG_TOMLFILE="config.toml"
+
+if [ $# -ge 0 ];then
+    echo "ted"
+    CONFIG_TOMLFILE=$1
+else
+    echo "roona"
+fi
 
 function CheckIfHugoInstalled ()
 {
@@ -41,7 +49,8 @@ function CleanupHugoWeb ()
 
 function ReplaceConfigToML ()
 {
-    cp config.toml $TARGET_WEB_FOLDER_NAME/config.toml
+    echo "config ML file is $CONFIG_TOMLFILE"
+    cp $CONFIG_TOMLFILE $TARGET_WEB_FOLDER_NAME/config.toml
 }
 
 function CloneGitSubModule ()

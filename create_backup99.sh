@@ -1,4 +1,5 @@
-GUID_DIRNAME="DIR_2132"
+GUID_DIRNAME="DIR_2133"
+RELEASE="tag-code/release/public-2023-01-22-03:22:59.tgz"
 GEN_DATE=$(date '+%Y-%m-%d-%H:%M:%S')
 NEWBACKUP_FOLDER="$GUID_DIRNAME"
 SOURCE_NEW_FILES="kmrityunjay-hugo-website-gen/public"
@@ -40,7 +41,7 @@ function NewRelease ()
 
 function ExtractRelease ()
 {
-    tar -xzvf tag-code/release/public-2023-01-22-02:27:19.tgz
+    tar -xzvf $RELEASE
 }
 
 function Execute ()
