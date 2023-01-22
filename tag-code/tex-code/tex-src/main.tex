@@ -1,0 +1,269 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage{fontawesome}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{
+    \textbf{#1}{ #2 \vspace{-2pt}}
+  }
+}
+\newcommand{\resumeSubListItemWithoutDesc}[1]{
+  \vspace{2pt}\item\small{
+    { #1 \vspace{-2pt}}
+  }
+}
+\newcommand{\resumeItemWithoutDesc}[1]{
+  \item\small{
+    { #1 \vspace{-2pt}}
+  }
+}
+\newcommand{\resumeItemSubListHeading}[1]{
+ \vspace{1pt}\item\small{
+    \textbf{#1}\vspace{-1pt}
+  }
+}
+\newcommand{\resumeSubsectionheading}[4]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+\newcommand{\resumeSubsectionheadingSubtitle}[5]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+       \textit{#3} & \textit{\small #4} \\
+       \textit{#5} & \textit{}
+    \end{tabular*}\vspace{-10pt}
+}
+\newcommand{\resumeSubheading}[2]{
+  \vspace{-1pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeItemListHeading}[2]{
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textit{#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
+
+\renewcommand{\labelitemii}{$\circ$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemSubListStart}{\begin{itemize}}
+\newcommand{\resumeItemSubListEnd}{\end{itemize}\vspace{-5pt}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  CV STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{\href{https://www.cs.stonybrook.edu/~mrkumar}{\Large Mrityunjay Kumar}} & Email : \href{mailto:mjay.cse@gmail.com}{mjay.cse@gmail.com}\vspace{0.5mm}\\
+  \href{https://www.linkedin.com/in/mj2030}{\textbf{\faLinkedin}/mj2030} \href{https://github.com/mrityunjaykumar911}{\textbf{\faGit}/mrityunjaykumar911} & Mobile : +1-631-710-1058 \\
+\end{tabular*}\\
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubsectionheading
+      {Stony Brook University}{New York, USA}
+      {Degree: Master of Science in Computer Science}{Jan-2019 -- May-2020}
+    \resumeSubsectionheading
+      {Maulana Azad National Institute Of Technology}{Bhopal, India}
+      {Degree: Bachelor in Technology with major in Computer Science \& Engineering}{July-2010 -- April-2014}
+  \resumeSubHeadingListEnd
+
+%--------PROGRAMMING SKILLS------------
+\section{Programming Skills}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Programming Languages:}
+    {C++, C, Java, Golang, JavaScript, SQL}
+    
+    \resumeSubItem{Technologies:} 
+    {Apache Storm, Apache Spark, Redis, REST,Apache Kafka, AWS, Git/Perforce, MATLAB}
+    
+    \resumeSubItem{Relevant Coursework:}
+    {Distributed Systems, Operating Systems, Analysis of algorithms, Visualization}
+  \resumeSubHeadingListEnd
+
+\section{Experience}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Microsoft} {May'2022 -- till}\\
+      \vspace*{4px}
+      \resumeItemListHeading{Software Engineer-2}{Mountain View, CA}
+      \resumeItemListStart
+        \resumeItemSubListHeading{Snap Service}
+            \resumeItemSubListStart
+                \resumeSubListItemWithoutDesc
+                {Implemented new lightweight service layer to provide native renderer workers to download from Storage service to Azure blob cache to improve streaming latency by 25\%.}
+                \resumeSubListItemWithoutDesc
+                {Implemented testing framework to improve service reliability score by 85\% and improved deployment frequency by 10\%.}
+            \resumeItemSubListEnd
+      \resumeItemListEnd
+  \resumeSubheading
+      {VMware Inc. } {July'2020 -- May'2022}\\
+      \vspace*{4px}
+      \resumeItemListHeading{Member of Technical Staff-III}{Palo Alto, CA}
+      \resumeItemListStart
+        \resumeItemSubListHeading{Virtual distributed file system, Storage layer}
+            \resumeItemSubListStart
+                \resumeSubListItemWithoutDesc
+                {Conceptualized and implemented distributed \textbf{FSCK} tool for analyzing and repairing storage metadata. This tool is leveraged to analyze the state of metadata storage on disk after crash recovery by forming analysis matrices and cross consistency patterns between multiple metadata data structures like B+ trees, bitmap, segment usage table}
+                \resumeSubListItemWithoutDesc
+                {End-to-end implementation of a cloud-native microservice to validate the integrity of the file system \textbf{k-v store} (such as \textbf{B+ trees}). The service can be scheduled or run on-demand to check the health of the storage system k-v store. In addition, the service is also used for other storage features, such as snapshots, un-map, segment cleaning to verify consistency and integrity of the metadata.}
+                \resumeSubListItemWithoutDesc
+                {Implemented aggregated snapshot capacity from scratch to support statistics collection with p99 latency in range of 30 ms.}
+            \resumeItemSubListEnd
+      \resumeItemListEnd
+    \resumeSubheading
+      {Distributed Systems Lab - Stony Book University } {June'2019 -- May'2020}\\
+      \vspace*{4px}
+      \resumeItemListHeading{Graduate Research Assistant, {\href{http://mpaxos.com/}{\color{blue}Prof. Shuai Mu}}}{Stony Brook, NY}
+      \resumeItemListStart
+        \resumeItemSubListHeading{Distributed Multi-core Transactional Database Engine}
+            \resumeItemSubListStart
+                \resumeSubListItemWithoutDesc
+                {Implemented \textbf{asynchronous replication} with multi-process \textbf{paxos} to achieve minimal loss in throughput}
+                \resumeSubListItemWithoutDesc
+                {Designed multi-core log truncation mechanism to support check-pointing for the transaction recovery protocol, which allowed read only transactions to scale 10M ops/sec.}
+                \resumeSubListItemWithoutDesc
+                {Implemented replay protocol to guarantee \textbf{serializibility} and consistency check pipeline for in-memory streams \& disk logs.}
+                \resumeSubListItemWithoutDesc
+                {Implemented verification pipeline for generating CPU/Heap/Memory throttling graph using \textbf{gperftools} \& \textbf{mutrace} tool.}
+                \resumeSubListItemWithoutDesc
+                {Implemented fast header-only/compiled, C++ logging library facilitating aligned memory allocators with features like Rotating log and auto-flush to make transparent transaction serialization}
+                \newline
+            \resumeItemSubListEnd
+      \resumeItemListEnd
+    \resumeSubheading
+      {Talentica Software}{April'2016 -- Jan'2019}
+      
+      \resumeItemListHeading{Senior Software Engineer }{Pune, India}
+      \resumeItemListStart
+        \resumeItemSubListHeading{Estimation \& Prediction algorithms for Wireless Systems}
+            \resumeItemSubListStart
+            \resumeSubListItemWithoutDesc
+                {Designed \& Implemented a stream data pipeline for machine learning inferences \& predictions using \textbf{Apache Storm, Apache Kafka, AWS, Cassandra}.}
+            \resumeSubListItemWithoutDesc
+                {Improved network traffic prediction accuracy to \textbf{80\%} using important native SLA metrics, RF Frequencies \& feedback loop from auxiliary methods.}
+            \resumeSubListItemWithoutDesc
+              {Implemented feedback pipeline to improve accuracy of indoor location prediction algorithm by {95\% for live BLE assets}.}
+            \resumeSubListItemWithoutDesc
+              {Developed a multi-modal Machine Learning model for network traffic classification for Audio and Video streaming using Ensemble of regression and auto-encoders.}
+              \resumeSubListItemWithoutDesc
+              {Added an ad-hoc client to Storm topology to support collection of Real-time data to Disk \& Batch pipeline using {Java, Apache Spark}.}
+              \resumeSubListItemWithoutDesc
+              {Developed a live BLE asset view portal to support data collection team, adding 70\% more correctness to site calibration using {JavaScript, Apache Kafka, Python}.}
+            \resumeItemSubListEnd
+            \vspace{1pt}
+        \resumeItemSubListHeading{Machine Learning Algorithm object storage service}
+         \resumeItemSubListStart
+             \resumeItemWithoutDesc
+              {Designed continuous delivery pipeline for Machine Learning models using {gRPC, protobuf, Redis, RabbitMQ, AWS S3} improving deployment frequency by 40\%.}
+             \resumeItemWithoutDesc
+             {Wrote polyglot client suite in {Java, python, Go, C\texttt{++}} to facilitate generic object serialization which lead to improved continuous deployment frequency.}
+             \newline
+        \resumeItemSubListEnd
+        \resumeItemSubListHeading{File Sync Application}
+            \resumeItemSubListStart
+            \resumeSubListItemWithoutDesc
+                {Implemented delta file sync Service in {C\texttt{++}} using native git-tree diff algorithm which reduce load in sync server by 400\%.}
+            \resumeSubListItemWithoutDesc
+               {Developed an update framework to support release notification \& binary upgrade for multi-talent architecture using {Java, C\texttt{++}, Python}.} \vspace{0.7mm}
+            \resumeSubListItemWithoutDesc
+              {Designed rate limiter service to prevent throttling of indexing layer \& sync layer, improving average P99 sync latency by 30\%.}
+            \resumeItemSubListEnd
+        \resumeItemSubListHeading{Financial Document Search Engine:}
+        \resumeItemSubListStart
+        \resumeSubListItemWithoutDesc
+        {Improved search relevancy by 45\%. Improved Online Ontology enhancer by 30\% via optimizing Neo4j query consumption, NLP Pipeline for Document Clustering, Keyword Extraction, Text Classification.}
+        \resumeItemSubListEnd
+        \resumeItemListEnd
+    \resumeSubheading
+      {MediaTek}{Aug'2014 -- April'2016}
+      
+      \resumeItemListHeading{Software Engineer}{Noida, India}
+      \resumeItemListStart
+        % \resumeItemSubListHeading{Audio Player Module on MTK Native OS}
+            % \resumeItemSubListStart
+         \resumeSubListItemWithoutDesc
+        {As a \textbf{feature owner} of Audio module, implemented design and bug-fixes for new product release. Improved playlist design to reduce playlist update{ overload by 25\%}, Integrated BT Stack in MMI Layer}
+        % \resumeItemSubListEnd
+        \resumeSubListItemWithoutDesc
+        {Wrote Software Layer code for Stress Test based Combo {GPS-WiFi-BT} Tool in VC\texttt{++}}
+        % \resumeItemSubListEnd
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+%-----------PROJECTS-----------------
+\section{Projects}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Raft - A distributed fault tolerant in-memory key value database}\\
+    \vspace*{6px}
+      {- Implemented Sharded and replicated fault-tolerance key-value store based on raft protocol from scratch in Go.}\\
+      {- Tweaked leader's election to ensure progress in case of repetitive failure in re-election step}
+    \resumeSubItem{Map-Reduce library}
+      {Implemented distributed map reduce library and worker failures from paper.}
+    \resumeSubItem{Backup File System in Linux Kernel}
+      {Implemented \textbf{stackable virtual file system} with Custom Visibility, Retention  and Version Management Policy to support backup to flat files under guidance of \textbf{Prof. Erez Zadok} using C and \textbf{Linux VFS Layer}.}
+    \resumeSubItem{Encryption based System tool for Linux Kernel}
+      {Implemented system call for encrypt/decrypt file using AES algorithm provided by \textbf{Linux kernel} crypto API under guidance of \textbf{Prof. Erez Zadok} in C.}
+  \resumeSubHeadingListEnd
+  
+%-----------Publications-----------------
+\section{Publications}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Learning to Fingerprint the Latent Structure in Question Articulation:}
+      {In this paper, we show that the latent patterns of questions can be represented as a system that maximizes a cost function related to the underlying objective and can be approximated to building a memory of patterns represented as a trained neural auto-encoder. [\href{https://ieeexplore.ieee.org/document/8614044}{\color{blue}{publication}}]}
+  \resumeSubHeadingListEnd
+
+
+
+\end{document}

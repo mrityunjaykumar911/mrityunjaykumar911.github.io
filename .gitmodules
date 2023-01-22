@@ -1,0 +1,12 @@
+[submodule "tag-code/tex-code/mrityunjay-hugo/themes/ananke"]
+	path = tag-code/tex-code/mrityunjay-hugo/themes/ananke
+	url = https://github.com/theNewDynamic/gohugo-theme-ananke
+[submodule "tag-code/tex-code/mrityunjay-hugo/themes/mrityunjay-hugo/themes/devresume"]
+	path = tag-code/tex-code/mrityunjay-hugo/themes/mrityunjay-hugo/themes/devresume
+	url = https://github.com/cowboysmall-tools/hugo-devresume-theme.git
+[submodule "tag-code/tex-code/themes/devresume"]
+	path = tag-code/tex-code/themes/devresume
+	url = https://github.com/cowboysmall-tools/hugo-devresume-theme.git
+[submodule "tag-code/tex-code/kmrityunjay-hugo-parent/themes/devresume"]
+	path = tag-code/tex-code/kmrityunjay-hugo-parent/themes/devresume
+	url = https://github.com/cowboysmall-tools/hugo-devresume-theme.git
