@@ -1,7 +1,7 @@
-GUID_DIRNAME="DIR_2133"
-RELEASE="tag-code/release/public-2023-01-22-03:22:59.tgz"
+#!/bin/bash
+read -e -p "Enter relative path of release folder, git one!!" RELEASE
 GEN_DATE=$(date '+%Y-%m-%d-%H:%M:%S')
-NEWBACKUP_FOLDER="$GUID_DIRNAME"
+NEWBACKUP_FOLDER="$GEN_DATE"
 SOURCE_NEW_FILES="kmrityunjay-hugo-website-gen/public"
 
 function CreateBackup ()
