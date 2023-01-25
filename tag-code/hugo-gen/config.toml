@@ -37,12 +37,6 @@ googleAnalytics = "G-2JMPRPCPBP"
         icon = "fas fa-envelope-square"
         url = "mailto:#"
         text = "mrkumar@cs.stonybrook.edu"
-        
-        [[params.contact.list]]
-        enabled = false
-        icon = "fas fa-globe"
-        url = "https://www3.cs.stonybrook.edu/~mrkumar/"
-        text = "~mrkumar"
 
         [[params.contact.list]]
         enabled = true

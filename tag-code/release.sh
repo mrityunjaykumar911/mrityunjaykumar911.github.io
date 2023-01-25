@@ -1,13 +1,15 @@
 source ./common.config.sh
-# RELEASE_GITHUB=false
 TARGET_WEB_FOLDER_NAME="kmrityunjay-hugo-website-gen"
 GEN="release"
 GEN_DATE=$(date '+%Y-%m-%d-%H:%M:%S')
 INTERMEDIATE_GEN="1223-release"
+SCM_CONTROL="git"
 
 if [ $RELEASE_GITHUB == true ]; then
+    SCM_CONTROL="git"
     GEN_DATE="${GEN_DATE}-git"
 else
+    SCM_CONTROL="FTP"
     GEN_DATE="${GEN_DATE}-FTP"
 fi
 
@@ -15,7 +17,7 @@ echo "release is ${GEN_DATE}"
 
 function Init ()
 {
-    mkdir -p $GEN
+    mkdir -p $GEN/$SCM_CONTROL
 }
 
 function CreateBackup ()
@@ -37,7 +39,7 @@ function CopyFileToDestination ()
 
 function Retar ()
 {
-    tar -vcf "$GEN/public-$GEN_DATE.tgz" "$TARGET_WEB_FOLDER_NAME/public"
+    tar -vcf "$GEN/$SCM_CONTROL/public-$GEN_DATE.tgz" "$TARGET_WEB_FOLDER_NAME/public"
 }
 
 function Execute ()

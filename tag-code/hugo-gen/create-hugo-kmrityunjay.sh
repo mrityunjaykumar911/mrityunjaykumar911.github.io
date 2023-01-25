@@ -1,3 +1,4 @@
+source ../common.config.sh
 red=`tput setaf 1`
 green=`tput setaf 2`
 reset=`tput sgr0`
@@ -5,6 +6,10 @@ TARGET_WEB_FOLDER_NAME="kmrityunjay-hugo-website-gen"
 GEN="op"
 GEN_DATE="1223-release"
 CONFIG_TOMLFILE="config.toml"
+
+if [ $RELEASE_GITHUB == true ]; then
+    CONFIG_TOMLFILE="config-github.toml"
+fi
 
 function CheckIfHugoInstalled ()
 {

@@ -1,5 +1,4 @@
 source ./common.config.sh
-# RELEASE_GITHUB=false
 function Execute ()
 {
     cd hugo-gen
