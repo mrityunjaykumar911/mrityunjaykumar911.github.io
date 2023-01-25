@@ -1,3 +1,4 @@
+source ./common.config.sh
 TARGET_WEB_FOLDER_NAME="kmrityunjay-hugo-website-gen"
 
 function CleanUpHugo ()
@@ -10,12 +11,24 @@ function CleanUpHugo ()
 function CleanUpRelease ()
 {
     rm -rf $TARGET_WEB_FOLDER_NAME
+    CleanUpTarRelease
+}
+
+function CleanUpTarRelease ()
+{
+    if [ "$CLEANUP_RELEASE_FLAG" == true ]; then
+        rm -rf release/*
+    fi
 }
 
 function Execute ()
 {
     CleanUpHugo
     CleanUpRelease
+    
 }
 
-Execute
+
+if [ "$CLEANUPEXEC" == true ]; then
+    Execute
+fi

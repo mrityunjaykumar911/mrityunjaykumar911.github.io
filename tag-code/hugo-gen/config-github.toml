@@ -4,7 +4,7 @@ baseURL = "https://www3.cs.stonybrook.edu/~mrkumar/"
 languageCode = "en"
 title = "Mrityunjay-Kumar"
 theme = "hugo-devresume-theme"
-googleAnalytics = "UA-116277626-1"
+googleAnalytics = 'G-2JMPRPCPBP'
 
 
 [params]
@@ -358,7 +358,7 @@ googleAnalytics = "UA-116277626-1"
         title = "Music Recommendation System"
         meta = "Data Visualization Lab"
         tagline = "Implemented recommendation system for music based on mood and activities."
-        share_link = "https://sbu-musicx.herokuapp.com/user.html"
+        share_link = "https://sbu-musicx.up.railway.app/user.html"
         pre_name = "Project Link"
 
     [params.information]
