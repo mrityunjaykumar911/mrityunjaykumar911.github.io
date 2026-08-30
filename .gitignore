@@ -5,6 +5,10 @@ dist/
 # dependencies
 node_modules/
 
+# Playwright output
+playwright-report/
+test-results/
+
 # local-only résumé overlay — current-employer detail that must NOT be
 # published or committed. Loaded only by `astro dev` with ?preview.
 src/data/resume.local.yaml

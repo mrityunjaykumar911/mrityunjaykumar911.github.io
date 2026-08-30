@@ -82,16 +82,49 @@ const jsonLd = {
   {
     redirectFlaggedRequests && (
       <script is:inline>
-        (() => {
-          const params = new URLSearchParams(window.location.search);
-          const flags = (params.get('flags') || '').split(/[\s,]+/);
-          if (params.has('preview') || flags.includes('latest')) {
-            const target = new URL('latest.html', window.location.href);
-            target.search = window.location.search;
-            target.hash = window.location.hash;
-            window.location.replace(target.href);
-          }
+        {`
+        (async () => {
+          var p = new URLSearchParams(location.search);
+          var flags = (p.get('flags') || '').split(/[\\s,]+/);
+          if (!p.has('preview') && flags.indexOf('latest') === -1) return;
+          // Swap in the pre-built full version WITHOUT navigating, so the
+          // address bar stays on "/?preview" rather than "/latest.html".
+          try {
+            var url = new URL('latest.html', location.href).href;
+            var res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) return;
+            var html = await res.text();
+            document.open();
+            document.write(html);
+            document.close();
+          } catch (e) {}
         })();
+        `}
+      </script>
+    )
+  }
+
+  {
+    !preview.active && (
+      <script is:inline>
+        {`
+        (() => {
+          var mk = [
+            '',
+            '     __  __ _  __',
+            '    |  \\\\/  | |/ /   MRITYUNJAY KUMAR',
+            "    | |\\\\/| | ' /",
+            '    | |  | | . \\\\    You opened the console. Nice.',
+            '    |_|  |_|_|\\\\_\\\\   There is a fuller cut of this page:',
+            ''
+          ].join('\\n');
+          var url = location.origin + (location.pathname.replace(/\\/$/, '') || '') + '/?preview';
+          try {
+            console.log('%c' + mk, 'color:#0b6b61;font-family:monospace;font-size:12px;line-height:1.4');
+            console.log('%c\\u2192 ' + url, 'color:#e45b40;font-weight:bold;font-size:13px');
+          } catch (e) {}
+        })();
+        `}
       </script>
     )
   }
