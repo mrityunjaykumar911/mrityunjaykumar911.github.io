@@ -1,0 +1,286 @@
+# ---------------------------------------------------------------------------
+# Single source of truth for the site's PUBLISHED content.
+#
+# Edit → commit → push. GitHub Actions rebuilds and redeploys. The build runs
+# this through a Zod schema (src/data/schema.ts); a typo'd key or missing
+# field FAILS the build rather than shipping something broken.
+#
+# Current-employer specifics that you do not want published live in
+# src/data/resume.local.yaml (git-ignored) and appear only under
+# `astro dev` with ?flags=latest. See HANDOFF.md §1a.
+#
+# Inline markup allowed in prose/bullets:  *emphasis*  **strong**  `code`
+#   [link text](https://example.com)
+# The hero `headline` additionally uses *asterisks* to mark the highlighted word.
+# ---------------------------------------------------------------------------
+
+profile:
+  name: Mrityunjay Kumar
+  pronunciation: MRIT-yen-jay koo-MARR
+  role: Senior ML Engineer
+  focus: Distributed Systems & Backend Infrastructure
+  company: Microsoft
+  location: Palo Alto, California
+  email: mjay.cse@gmail.com
+  avatar: /images/mrityunjay-portrait.jpg
+  resumePdf: /cv/MrityunjayKumar-CV.pdf
+
+  headline: I build systems that stay *reliable* when things get complicated.
+  intro: >-
+    I'm Mrityunjay, a senior ML engineer in the San Francisco Bay Area. My work
+    spans distributed storage, backend services, data infrastructure, and the
+    careful engineering between them.
+  signals:
+    - 12+ years in software engineering
+    - Microsoft · VMware · Talentica · MediaTek
+    - MS Computer Science, Stony Brook
+  about:
+    - >-
+      I care about systems that remain understandable under pressure: explicit
+      tradeoffs, useful observability, and designs that account for failure
+      from the start.
+    - >-
+      Across storage, cloud services, data pipelines, and embedded software,
+      I've learned to move between the architecture diagram and the details
+      that make it true.
+  contactHeading: Working on a difficult systems problem?
+
+  # <meta description> / OpenGraph / JSON-LD — plain text, no markup.
+  tagline: >-
+    Software engineer focused on distributed systems, storage, and backend
+    infrastructure.
+  summary: >-
+    Software engineer with a decade across distributed systems and backend
+    infrastructure: distributed storage and crash consistency, cloud services,
+    and real-time data pipelines. Co-author **EuroSys 2022** (Rolis). Patent
+    holder in snapshot metadata verification.
+
+links:
+  - label: GitHub
+    handle: mrityunjaykumar911
+    href: https://github.com/mrityunjaykumar911
+    icon: github
+  - label: LinkedIn
+    handle: mrkumar20
+    href: https://www.linkedin.com/in/mrkumar20/
+    icon: linkedin
+  - label: Email
+    handle: mjay.cse@gmail.com
+    href: mailto:mjay.cse@gmail.com
+    icon: mail
+  - label: Résumé
+    handle: PDF
+    href: /cv/MrityunjayKumar-CV.pdf
+    icon: file
+
+capabilities:
+  - label: Languages
+    value: C++ · Python · C · Java · Go
+  - label: Systems
+    value: Distributed storage · Backend services · Data infrastructure
+  - label: Education
+    value: MS, Computer Science — Stony Brook University
+  - label: Foundations
+    value: Consensus · Replication · Reliability · Observability
+
+# Not rendered — feeds JSON-LD `knowsAbout` for search engines.
+skills:
+  - group: Systems
+    items:
+      - Distributed systems
+      - Consensus protocols (Paxos, Raft)
+      - Transactional databases
+      - Crash consistency
+      - Cloud-native microservices
+      - High-throughput pipeline design
+  - group: Platforms
+    items:
+      - Azure
+      - AWS
+      - Docker
+      - Redis
+      - Kafka
+      - gRPC
+  - group: Languages
+    items:
+      - Python
+      - C++
+      - C
+      - Java
+      - Go
+
+experience:
+  # Per role: one-paragraph `summary`, then `lead` (headline bullets, always
+  # visible) + optional `detail` groups behind a "Full detail" toggle, + `tags`.
+  # Pre-Microsoft roles keep the full project-level record from the older CV.
+  - company: Microsoft
+    role: Senior ML Engineer
+    location: Palo Alto, CA
+    start: 2022-05
+    end: null # null renders as "Present"
+    summary: >-
+      Building and operating backend services for PowerPoint, with an emphasis
+      on dependable service engineering at global product scale.
+    tags:
+      - Backend systems
+      - Service reliability
+      - Cloud infrastructure
+
+  - company: VMware
+    role: Member of Technical Staff III
+    location: Palo Alto, CA
+    start: 2020-07
+    end: 2022-05
+    summary: >-
+      Led the design of the FSCK user-space tool infrastructure for VMware's
+      distributed storage (vSAN); core member of the snapshot dev team.
+    lead:
+      - >-
+        Conceptualized and built **distributed FSCK** for analyzing and
+        repairing storage metadata — cross-consistency matrices across B+
+        trees, bitmaps, and segment usage tables, in online and offline modes
+        via lazy evaluation.
+      - >-
+        Built a cloud-native microservice validating the filesystem key-value
+        store with pluggable validation algorithms; reused for snapshots,
+        unmap, and segment cleaning.
+      - >-
+        Implemented serialized transactional **snapshot crash consistency** by
+        replaying committed reads from persisted write-ahead logs.
+      - >-
+        Built aggregated snapshot capacity statistics from scratch; p99 latency
+        ≈ 30 ms.
+    tags:
+      - Distributed storage
+      - Crash consistency
+      - Metadata integrity
+      - C++
+
+  - company: Talentica Software
+    role: Senior Software Engineer
+    location: Pune, India
+    start: 2016-04
+    end: 2019-01
+    summary: >-
+      Data Science team — three years across search, ML pipelines, file sync,
+      chatbots, and network analytics, applying ML to network-based problems.
+    lead:
+      - >-
+        Led **file-sync** tool development: a delta-sync service in C++ cut
+        sync-server load by **200%**; also a stateless updater, a multi-tenant
+        client update framework, and a rate limiter that improved sync
+        frequency **30%**.
+      - >-
+        Built a **financial-document search engine** — **+45%** search
+        relevancy, **+30%** online ontology enhancer, with an NLP pipeline for
+        clustering, keyword extraction, and text classification.
+      - >-
+        Designed an **ML model object-storage / delivery pipeline** (gRPC,
+        protobuf, Redis, RabbitMQ, S3): **+40%** deployment frequency, clients
+        in Java / Python / Go / C++, weekly release cadence.
+      - >-
+        **BLE indoor location**: 95% region classification for static assets,
+        68% regression accuracy via RSSI triangulation + interference
+        correction; a live asset-view portal added **70%** correctness to site
+        calibration.
+    detail:
+      - title: More Talentica work
+        bullets:
+          - >-
+            Network traffic estimation — an ensembled regression model for
+            bandwidth prediction from SLA metrics and native Speedtest feedback.
+          - >-
+            Network traffic identification — a multi-modal ML model (regression
+            ensemble + auto-encoders) classifying audio vs. video streams.
+          - Real-time ML model deployment pipeline on Storm, Kafka, Python, Java.
+          - >-
+            AWS Athena data-dump tool — an ad-hoc Storm-topology client feeding
+            a disk + batch pipeline (Java, Spark).
+          - >-
+            Single-cell identity classification — an auto-encoder network, 83%
+            accuracy for cell-based print technology.
+    tags:
+      - Data platforms
+      - Machine learning
+      - NLP / search
+      - Distributed pipelines
+
+  - company: MediaTek
+    role: Software Engineer
+    location: Noida, India
+    start: 2014-08
+    end: 2016-04
+    summary: >-
+      Multimedia team — audio-player development for feature phones; led
+      in-house stress-test tooling for Wi-Fi / Bluetooth / GPS.
+    lead:
+      - >-
+        Improved the audio-player playlist sub-module and integrated the
+        Bluetooth stack into the MMI layer.
+      - >-
+        Built the SW-layer for a combo (GPS-Wi-Fi-BT) stress-test tool with an
+        event-driven asynchronous architecture for the packet-data interface.
+    tags:
+      - Embedded systems
+      - Multimedia
+      - C / C++
+
+research:
+  feature:
+    label: Graduate research · Stony Brook University · Advisor Prof. Shuai Mu
+    title: Replicating multi-core transactions without giving up performance.
+    body: >-
+      Asynchronous replication with multi-process Paxos to remove contention;
+      a header-only C++ logging library (~1200 LOC) with aligned allocators,
+      rotating logs, and auto-flush; an optimistic replay protocol for
+      serializability with a stream-verification pipeline; and evaluation
+      micro-benchmarks profiled with mutrace and gprof. Development and
+      early-stage evaluation contributions to Rolis (EuroSys 2022).
+    link:
+      href: http://mpaxos.com/
+      text: Visit the research group
+
+  notes:
+    - type: Publication
+      title: "Rolis: a software approach to efficiently replicating multi-core transactions"
+      meta: EuroSys 2022 · development & early-stage evaluation
+      href: https://dl.acm.org/doi/10.1145/3492321.3519576
+    - type: Patent
+      title: Verification of metadata consistency across snapshot COW B+ tree logical maps
+      meta: US11573860B1
+      href: https://patents.google.com/patent/US11573860B1
+    - type: Publication
+      title: Learning to fingerprint the latent structure in question articulation
+      meta: R. Guntur, M. Kumar · IEEE ICMLA 2018 · pp. 73–80
+      href: https://ieeexplore.ieee.org/document/8614044
+    - type: Teaching
+      title: "Teaching Assistant — Introduction to Data Science (CSE-351)"
+      meta: Stony Brook University · with Prof. Martin Radfar · 2019
+    - type: Systems project
+      title: Sharded, replicated, fault-tolerant key-value store on Raft
+      meta: CSE 535 Asynchronous Systems Lab
+    - type: Systems project
+      title: Distributed MapReduce library with worker-failure recovery
+      meta: CSE 535 Asynchronous Systems Lab
+    - type: Kernel project
+      title: Versioned stackable backup filesystem for the Linux kernel
+      meta: Stony Brook FSL · queue-based versioning + retention policy
+    - type: Kernel project
+      title: AES encrypt / decrypt system call via the kernel crypto API
+      meta: Stony Brook FSL
+    - type: Project
+      title: Mood- and activity-based music recommendation
+      meta: Data Visualization Lab
+      href: https://sbu-musicx.up.railway.app/user.html
+
+education:
+  - school: Stony Brook University
+    degree: M.S. in Computer Science
+    location: Stony Brook, NY
+    start: 2019
+    end: 2020
+  - school: NIT Bhopal (MANIT)
+    degree: B.Tech. in Computer Science & Engineering
+    location: Bhopal, India
+    start: 2010
+    end: 2014

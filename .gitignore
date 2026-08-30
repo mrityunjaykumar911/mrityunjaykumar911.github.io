@@ -1,1 +1,17 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# local-only résumé overlay — current-employer detail that must NOT be
+# published or committed. Loaded only by `astro dev` with ?preview.
+src/data/resume.local.yaml
+
+# misc
 *.log
+.DS_Store
+.env
+.env.*
+!.env.example

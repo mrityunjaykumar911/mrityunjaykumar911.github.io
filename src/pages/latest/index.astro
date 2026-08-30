@@ -1,0 +1,11 @@
+---
+import ResumePage from '../../components/ResumePage.astro';
+import type { PreviewState } from '../../lib/preview';
+
+const preview: PreviewState = {
+  active: true,
+  flags: new Set(['latest']),
+};
+---
+
+<ResumePage preview={preview} canonicalPath="/" />

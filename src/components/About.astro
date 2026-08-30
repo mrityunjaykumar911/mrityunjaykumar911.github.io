@@ -1,0 +1,103 @@
+---
+import type { Capability } from '../data/schema';
+
+interface Props {
+  id: string;
+  paragraphs: string[];
+  capabilities: Capability[];
+}
+
+const { id, paragraphs, capabilities } = Astro.props;
+---
+
+<section class="section about-section" id={id} aria-labelledby={`${id}-title`}>
+  <div class="section-heading reveal">
+    <p class="section-number">04</p>
+    <div>
+      <p class="eyebrow">About</p>
+      <h2 id={`${id}-title`}>Broad tools. One engineering mindset.</h2>
+    </div>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-copy reveal">
+      {paragraphs.map((p) => <p>{p}</p>)}
+    </div>
+
+    <dl class="capabilities reveal">
+      {
+        capabilities.map((cap) => (
+          <div class="capability">
+            <dt class="mono-label">{cap.label}</dt>
+            <dd>{cap.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.85fr);
+    gap: clamp(48px, 10vw, 130px);
+    align-items: start;
+  }
+
+  .about-copy {
+    font-family: var(--serif);
+    font-size: clamp(24px, 3vw, 36px);
+    line-height: 1.24;
+  }
+
+  .about-copy p {
+    margin: 0 0 26px;
+  }
+
+  .about-copy p:last-child {
+    margin-bottom: 0;
+    color: var(--teal);
+  }
+
+  .capabilities {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    margin: 0;
+  }
+
+  .capability {
+    min-height: 170px;
+    padding: 26px;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .capability dt {
+    margin-bottom: 14px;
+    color: var(--coral);
+  }
+
+  .capability dd {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  @media (max-width: 900px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .capabilities {
+      grid-template-columns: 1fr;
+    }
+
+    .capability {
+      min-height: 0;
+    }
+  }
+</style>

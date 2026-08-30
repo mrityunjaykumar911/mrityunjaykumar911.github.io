@@ -1,0 +1,94 @@
+# Public, flag-gated résumé detail. This file is shipped with the static site
+# and is therefore discoverable even when the published page does not display
+# it. Keep only information approved for public disclosure here.
+
+flag: latest
+
+profile:
+  role: Senior ML Engineer
+  focus: RL Reward & Evaluation Infrastructure
+  headline: I build the RL Infrastructure and Applied AI systems that keep RL *honest*.
+  intro: >-
+    I'm Mrityunjay, a core ML engineer in the San Francisco Bay Area. I work on
+    the RL Infrastructure and evaluation side of RL for tool-using agents — reward signal
+    correctness, LLM-as-judge grading, multi-turn evaluation, and multimodal
+    tool integration into live rollouts.
+  tagline: >-
+    Core ML engineer working on the reward and evaluation side of RL for
+    tool-using agents.
+  summary: >-
+    Core ML engineer focused on the reward and evaluation side of RL for
+    tool-using agents: reward signal correctness, LLM-as-judge grading,
+    multi-turn evaluation, and multimodal tool integration into live RL
+    rollouts. Co-author **EuroSys 2022** (Rolis). Patent holder in storage
+    metadata verification.
+
+experienceOverrides:
+  Microsoft:
+    role: Senior ML Engineer — PowerPoint agent
+    summary: >-
+      Reward correctness, multi-turn evaluation, and multimodal tool
+      integration for the PowerPoint agent's live RL rollouts.
+    tags:
+      - RL reward & evaluation
+      - LLM-as-judge
+      - Multimodal tool execution
+    lead:
+      - >-
+        Diagnosed a corrupt reward signal — single-turn eval was blind to
+        turn-level error propagation — and designed the multi-turn *simulation*
+        methodology that replaced it.
+      - >-
+        Scaled the RL tool-execution stack to **7,000 containers** under SLO,
+        unblocking concurrent RL pipelines across teams.
+      - >-
+        **5.7x** platform throughput (0.70 → 4.01 files/s) by resolving a
+        three-stage bottleneck chain.
+    detail:
+      - title: RL reward signal & evaluation
+        bullets:
+          - Built *LLM-as-judge* reward grading for multi-turn agent trajectories.
+          - >-
+            Built a document-render-to-image visual grading pipeline; `ETag`
+            optimistic concurrency dedupes rewards across parallel graders.
+          - >-
+            Drove an org-wide checkpoint pre-screening gate — RL candidates
+            simulated before end-to-end integration, cutting compute wasted on
+            non-viable checkpoints.
+          - >-
+            Established the first per-slide latency profile (33–75s/slide),
+            isolating LLM reasoning (7–30s) from tool execution (5–8s/turn).
+      - title: Multimodal RL environment & tool execution
+        bullets:
+          - >-
+            Integrated an image-generation engine as an agent-callable tool,
+            extending the agent's action space to a new modality.
+          - >-
+            Owned the tool-execution stack: client-to-daemon architecture,
+            per-trajectory VM provisioning, async multimodal pipeline; held
+            P50 < 60s / P95 < 120s / P99 < 180s at 7,000 containers.
+          - >-
+            Unified Anthropic Claude, Azure OpenAI (incl. O-series), and
+            internal serving endpoints behind one provider-adapter interface.
+      - title: Production platform, scale & observability
+        bullets:
+          - >-
+            Engineered the platform: nginx-balanced Python orchestration over a
+            .NET/COM PowerPoint execution tier, Redis store + queue, 20+
+            containers on ACI.
+          - >-
+            5.7x throughput / 7.8x worker utilization (12% → 94%): base64
+            upload elimination, COM-pool redistribution, CPU-quota cache-thrash
+            fix. 200-file batch 285s → 49.8s.
+          - >-
+            Cleared two RL-scale blockers (platform throttling at 1.4M req/10
+            min; VM-lifecycle leak blocking 20k-VM parallelism); end-to-end
+            OpenTelemetry/Jaeger tracing, per-turn attributable.
+      - title: ML platform & fine-tuning data pipeline
+        bullets:
+          - >-
+            Authored a model-first platform architecture (ingestion, grading,
+            eval, observability) adopted as org blueprint.
+          - >-
+            Designed a multi-turn SFT data strategy: three-phase curation, full
+            training schema, DAG execution cutting agent latency ≈100s → 37s.

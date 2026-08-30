@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { resume } from '../data/resume';
+import { withBase } from '../lib/url';
+
+const { profile } = resume;
+const home = withBase('/');
+const resumePdf = withBase(profile.resumePdf);
+---
+
+<Base
+  title="Page not found | Mrityunjay Kumar"
+  description="That page does not exist."
+  noindex
+>
+  <main class="notfound" id="main">
+    <p class="mono-label">Error 404</p>
+    <h1>That page doesn't exist.</h1>
+    <p class="notfound-body">
+      The previous version of this site published a few paths that are gone now.
+      Everything lives on one page.
+    </p>
+    <div class="notfound-actions">
+      <a class="button button-primary" href={home}>
+        Home <Icon name="arrow-up-right" size={16} />
+      </a>
+      <a class="button" href={resumePdf}>
+        Résumé <Icon name="download" size={16} />
+      </a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .notfound {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 10px;
+    min-height: 100svh;
+    max-width: 46ch;
+    margin: 0 auto;
+    padding: 2rem var(--gutter);
+  }
+
+  .notfound .mono-label {
+    color: var(--coral);
+  }
+
+  .notfound h1 {
+    font-family: var(--serif);
+    font-size: clamp(38px, 8vw, 64px);
+    line-height: 1;
+  }
+
+  .notfound-body {
+    margin-top: 6px;
+    color: var(--ink-soft);
+  }
+
+  .notfound-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 18px;
+    border: 1px solid var(--ink);
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .button-primary {
+    background: var(--ink);
+    color: var(--paper-bright);
+  }
+
+  .button-primary:hover {
+    background: var(--teal-dark);
+  }
+
+  .button:not(.button-primary):hover {
+    background: var(--ink);
+    color: var(--paper-bright);
+  }
+</style>

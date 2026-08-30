@@ -1,0 +1,274 @@
+---
+import Icon from './Icon.astro';
+import { escapeHtml } from '../lib/text';
+import type { Resume } from '../data/schema';
+
+interface Props {
+  profile: Resume['profile'];
+  linkedin: string | null;
+}
+
+const { profile, linkedin } = Astro.props;
+
+// The headline allows one *word* wrapped in asterisks; render that span with
+// the acid underline-swipe. Everything else is escaped literally.
+const headlineHtml = escapeHtml(profile.headline).replace(
+  /\*([^*]+)\*/,
+  '<em class="hero-mark">$1</em>'
+);
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-copy reveal">
+    <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> {profile.role} at {profile.company}</p>
+    <h1 id="hero-title" set:html={headlineHtml} />
+    <p class="hero-intro">{profile.intro}</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="#work">
+        Explore my work <Icon name="arrow-down-right" size={16} />
+      </a>
+      {
+        linkedin && (
+          <a class="button button-secondary" href={linkedin} target="_blank" rel="noreferrer">
+            Connect on LinkedIn <Icon name="arrow-up-right" size={16} />
+          </a>
+        )
+      }
+    </div>
+  </div>
+
+  <div class="hero-visual reveal" data-delay="1">
+    <div class="portrait-frame">
+      <img
+        src={profile.avatar}
+        alt={`Portrait of ${profile.name}`}
+        width="480"
+        height="600"
+        loading="eager"
+        decoding="async"
+      />
+      <div class="systems-note" aria-hidden="true">
+        <span>CONSENSUS</span>
+        <span>STORAGE</span>
+        <span>BACKENDS</span>
+      </div>
+    </div>
+    <p class="portrait-note"><span>Based in</span> {profile.location}</p>
+  </div>
+
+  <p class="hero-index" aria-hidden="true">01 / 04</p>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+    align-items: center;
+    gap: clamp(42px, 7vw, 96px);
+    width: var(--content);
+    min-height: calc(100vh - 76px);
+    max-height: 900px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vh, 92px) 0 54px;
+  }
+
+  .hero-copy {
+    padding-bottom: 24px;
+  }
+
+  .hero .eyebrow {
+    margin-bottom: 22px;
+    color: var(--ink-soft);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--coral);
+    box-shadow: 0 0 0 5px rgba(228, 91, 64, 0.14);
+  }
+
+  .hero h1 {
+    max-width: 12ch;
+    font-family: var(--serif);
+    font-size: clamp(46px, 6vw, 88px);
+    font-weight: 500;
+    line-height: 0.98;
+  }
+
+  .hero h1 :global(.hero-mark) {
+    position: relative;
+    font-style: normal;
+    color: var(--teal);
+  }
+
+  .hero h1 :global(.hero-mark)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 4px;
+    left: 0;
+    z-index: -1;
+    height: 0.42em;
+    background: var(--acid);
+    transform: rotate(-1deg);
+  }
+
+  .hero-intro {
+    max-width: 62ch;
+    margin-top: 28px;
+    color: var(--ink-soft);
+    font-size: clamp(16px, 1.4vw, 19px);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--ink);
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+
+  .button-primary {
+    background: var(--ink);
+    color: var(--paper-bright);
+  }
+
+  .button-primary:hover {
+    background: var(--teal-dark);
+    transform: translateY(-3px);
+  }
+
+  .button-secondary:hover {
+    transform: translateY(-3px);
+  }
+
+  .hero-visual {
+    position: relative;
+    align-self: center;
+  }
+
+  /* Photo sits in a hard-edged ink frame with a solid teal plate offset
+     behind it — a printed-card look that reads intentional on any image. */
+  .portrait-frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border: 1px solid var(--ink);
+    background: var(--paper-bright);
+  }
+
+  .portrait-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translate(14px, 14px);
+    background: var(--teal);
+    z-index: -1;
+  }
+
+  .portrait-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 22%;
+    filter: saturate(0.85) contrast(1.02);
+  }
+
+  .portrait-note {
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .portrait-note span {
+    color: var(--ink-soft);
+    margin-right: 6px;
+  }
+
+  /* Coral stamp sits inside the frame so it never collides with the caption. */
+  .systems-note {
+    position: absolute;
+    left: -14px;
+    bottom: 18px;
+    z-index: 1;
+    display: grid;
+    gap: 2px;
+    padding: 12px 16px;
+    background: var(--coral);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .hero-index {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      max-height: none;
+      padding-top: 56px;
+    }
+
+    .hero-visual {
+      display: grid;
+      grid-template-columns: minmax(0, 420px);
+      justify-content: start;
+    }
+
+    .hero-index {
+      display: none;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .hero {
+      gap: 40px;
+    }
+
+    .hero h1 {
+      font-size: clamp(42px, 13vw, 58px);
+    }
+
+    .hero-actions,
+    .hero-actions .button {
+      width: 100%;
+    }
+
+    .systems-note {
+      left: 0;
+      bottom: 14px;
+    }
+
+    .portrait-frame::before {
+      transform: translate(10px, 10px);
+    }
+  }
+</style>

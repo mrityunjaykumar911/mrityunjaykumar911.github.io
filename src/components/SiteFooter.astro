@@ -1,0 +1,67 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  name: string;
+  year: number;
+}
+
+const { name, year } = Astro.props;
+---
+
+<footer class="site-footer">
+  <p>© {year} {name}</p>
+  <p>Built with Astro · <a href="https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io" target="_blank" rel="noreferrer">Source</a></p>
+  <a class="to-top" href="#top">Back to top <Icon name="arrow-up" size={14} /></a>
+</footer>
+
+<style>
+  .site-footer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    min-height: 92px;
+    padding: 20px var(--gutter);
+    background: var(--ink);
+    color: #aeb9b4;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .site-footer p {
+    margin: 0;
+  }
+
+  .site-footer p:nth-child(2) {
+    text-align: center;
+  }
+
+  .site-footer a {
+    color: var(--paper-bright);
+    text-decoration: none;
+  }
+
+  .site-footer .to-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    justify-self: end;
+  }
+
+  @media (max-width: 620px) {
+    .site-footer {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 30px 20px;
+    }
+
+    .site-footer p:nth-child(2) {
+      text-align: left;
+    }
+
+    .site-footer .to-top {
+      justify-self: start;
+    }
+  }
+</style>

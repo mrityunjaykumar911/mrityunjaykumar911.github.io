@@ -1,0 +1,50 @@
+---
+interface Props {
+  signals: string[];
+}
+
+const { signals } = Astro.props;
+---
+
+<section class="signal-strip" aria-label="At a glance">
+  {signals.map((s) => <p>{s}</p>)}
+</section>
+
+<style>
+  .signal-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    min-height: 64px;
+    padding: 0 var(--gutter);
+    background: var(--acid);
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .signal-strip p {
+    margin: 0;
+    padding: 10px 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .signal-strip p + p {
+    border-left: 1px solid var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    .signal-strip {
+      grid-template-columns: 1fr;
+      padding: 0;
+    }
+
+    .signal-strip p + p {
+      border-left: 0;
+      border-top: 1px solid var(--ink);
+    }
+  }
+</style>

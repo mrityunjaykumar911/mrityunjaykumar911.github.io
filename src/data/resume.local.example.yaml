@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Template for src/data/resume.local.yaml (git-ignored).
+#
+#   cp src/data/resume.local.example.yaml src/data/resume.local.yaml
+#
+# Holds content you do NOT want published — e.g. detailed current-employer
+# work. Folded onto resume.yaml only by `astro dev` with a matching preview
+# flag; never by a build. See src/lib/preview.ts and `localOverlaySchema`.
+#
+#   npm run dev
+#   http://localhost:4321/?flags=<name>   reveal content gated on <name>
+#   http://localhost:4321/?preview        reveal everything
+#   http://localhost:4321/                the published view (no overlay)
+# ---------------------------------------------------------------------------
+
+# Gate the whole overlay behind one flag name.
+flag: latest
+
+# Optional — shallow-merged over profile: in resume.yaml. Any subset of keys.
+profile:
+  role: Your real current title
+  focus: Your real current focus
+  headline: A sharper hero line with one *highlighted* word.
+  tagline: A sharper meta description.
+  summary: The fuller summary you would rather not publish yet.
+
+# Optional — keyed by `company` exactly as in resume.yaml. Merged over the
+# role. Any subset of: role / summary / tags / lead / detail.
+experienceOverrides:
+  Microsoft:
+    role: The real job title
+    summary: One paragraph of real scope.
+    tags:
+      - Area one
+      - Area two
+    lead:
+      - A current headline result, one line.
+      - Another, one line.
+    detail:
+      - title: A sub-area
+        bullets:
+          - A specific result.
+          - Another specific result.

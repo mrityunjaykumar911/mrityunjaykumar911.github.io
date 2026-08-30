@@ -1,0 +1,326 @@
+/* ===========================================================================
+   Tokens — a committed warm-paper theme. No dark mode: the palette (paper
+   ground, three loud accents) is the design, and inverting it would fight it.
+   The Research section inverts locally instead.
+   ========================================================================= */
+
+:root {
+  --paper: #f4f1e8;
+  --paper-bright: #fcfaf4;
+  --ink: #17201d;
+  --ink-soft: #4d5853;
+  --line: #cbc9bd;
+  --teal: #0b6b61;
+  --teal-dark: #064941;
+  --coral: #e45b40;
+  --acid: #d5ef72;
+
+  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --content: min(1180px, calc(100vw - 64px));
+  --gutter: max(32px, calc((100vw - 1180px) / 2));
+
+  color-scheme: light;
+}
+
+/* ===========================================================================
+   Base
+   ========================================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Faint engineering-grid wash behind everything. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(23, 32, 29, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 32, 29, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===========================================================================
+   Shared primitives
+   ========================================================================= */
+
+.eyebrow,
+.section-number,
+.mono-label {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: #fff;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Section shell: generous vertical rhythm, gutter-aware horizontal padding. */
+.section {
+  padding: clamp(80px, 11vw, 150px) var(--gutter);
+}
+
+.section-heading {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 0.7fr);
+  gap: 30px;
+  align-items: end;
+  margin-bottom: clamp(48px, 7vw, 84px);
+}
+
+.section-heading .section-number {
+  align-self: start;
+  color: var(--coral);
+}
+
+.section-heading .eyebrow {
+  margin-bottom: 12px;
+  color: var(--ink-soft);
+}
+
+.section-heading h2 {
+  max-width: 720px;
+  font-family: var(--serif);
+  font-size: clamp(40px, 5vw, 68px);
+  line-height: 1.02;
+}
+
+.section-lede {
+  color: var(--ink-soft);
+  font-size: 17px;
+}
+
+/* Inline markup emitted by inlineMarkup(). */
+.prose a {
+  color: inherit;
+  text-decoration-color: var(--coral);
+  text-underline-offset: 4px;
+}
+
+.prose strong {
+  font-weight: 700;
+}
+
+.prose em {
+  font-style: italic;
+}
+
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  background: rgba(23, 32, 29, 0.06);
+}
+
+/* Scroll-reveal — JS adds .is-visible (see index.astro). No-JS: visible. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --content: min(100% - 40px, 700px);
+    --gutter: 20px;
+  }
+
+  .section-heading {
+    grid-template-columns: 45px 1fr;
+  }
+
+  .section-heading .section-lede {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .section-heading {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .section-heading .section-lede {
+    grid-column: 1;
+    margin-top: 18px;
+  }
+}
+
+/* ===========================================================================
+   Print — flatten to an ink-on-white document.
+   ========================================================================= */
+
+@media print {
+  :root {
+    --paper: #fff;
+    --paper-bright: #fff;
+    --ink: #000;
+    --ink-soft: #333;
+    --line: #bbb;
+    --teal: #000;
+    --teal-dark: #000;
+    --coral: #000;
+    --acid: #fff;
+  }
+
+  body::before,
+  .site-header,
+  .hero-actions,
+  .preview-banner,
+  .menu-button,
+  .contact-section,
+  .site-footer a {
+    display: none !important;
+  }
+
+  .section,
+  .research-section,
+  .contact-section {
+    padding-block: 1rem;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .experience,
+  .feature-story,
+  .research-note {
+    break-inside: avoid;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  .prose a[href^='http']::after,
+  .research-note a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: #555;
+    word-break: break-all;
+  }
+
+  @page {
+    margin: 14mm;
+  }
+}

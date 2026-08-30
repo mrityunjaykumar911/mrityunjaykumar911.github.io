@@ -1,0 +1,273 @@
+---
+import { formatRange, inlineMarkup } from '../lib/text';
+import type { Role } from '../data/schema';
+
+interface Props {
+  id: string;
+  roles: Role[];
+}
+
+const { id, roles } = Astro.props;
+---
+
+<section class="section work-section" id={id} aria-labelledby={`${id}-title`}>
+  <div class="section-heading reveal">
+    <p class="section-number">02</p>
+    <div>
+      <p class="eyebrow">Selected experience</p>
+      <h2 id={`${id}-title`}>Engineering for the real world.</h2>
+    </div>
+    <p class="section-lede">
+      From user-facing productivity software to crash-consistent storage, I work
+      where reliability and scale are product features.
+    </p>
+  </div>
+
+  <ol class="experience-list">
+    {
+      roles.map((role, i) => (
+        <li class="experience reveal">
+          <div class="experience-meta">
+            <p class="company">{role.company}</p>
+            <p>
+              <time datetime={role.start}>{formatRange(role.start, role.end)}</time>
+            </p>
+          </div>
+
+          <div class="experience-body">
+            <h3>{role.role}</h3>
+            <p class="experience-summary prose" set:html={inlineMarkup(role.summary)} />
+
+            {role.lead.length > 0 && (
+              <ul class="experience-lead prose">
+                {role.lead.map((b) => (
+                  <li set:html={inlineMarkup(b)} />
+                ))}
+              </ul>
+            )}
+
+            {role.detail.length > 0 && (
+              <details class="experience-more">
+                <summary>
+                  <span class="more-open">Full detail</span>
+                  <span class="more-close">Hide detail</span>
+                </summary>
+                <div class="experience-detail">
+                  {role.detail.map((group) => (
+                    <div class="detail-group">
+                      {group.title && <p class="detail-title mono-label">{group.title}</p>}
+                      <ul class="prose">
+                        {group.bullets.map((b) => (
+                          <li set:html={inlineMarkup(b)} />
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+
+            {role.tags.length > 0 && (
+              <ul class="tag-list" aria-label="Areas of work">
+                {role.tags.map((t) => (
+                  <li>{t}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <span class="experience-number" aria-hidden="true">
+            {String(i + 1).padStart(2, '0')}
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .experience-list {
+    list-style: none;
+  }
+
+  .experience {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(160px, 0.42fr) minmax(0, 1fr);
+    gap: clamp(28px, 6vw, 84px);
+    padding: 38px 72px 38px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .experience:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .experience-meta p {
+    margin: 0;
+  }
+
+  .experience-meta .company {
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+
+  .experience-meta p:last-child {
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .experience-body h3 {
+    margin-bottom: 12px;
+    font-family: var(--serif);
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 500;
+    line-height: 1.08;
+  }
+
+  .experience-summary {
+    max-width: 66ch;
+    color: var(--ink-soft);
+  }
+
+  .experience-lead {
+    list-style: none;
+    max-width: 66ch;
+    margin-top: 16px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .experience-lead li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .experience-lead li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 8px;
+    height: 1px;
+    background: var(--coral);
+  }
+
+  .experience-more {
+    margin-top: 16px;
+  }
+
+  .experience-more summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--teal-dark);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .experience-more summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .experience-more summary::after {
+    content: '+';
+    font-size: 14px;
+  }
+
+  .experience-more[open] summary::after {
+    content: '–';
+  }
+
+  .more-close {
+    display: none;
+  }
+
+  .experience-more[open] .more-open {
+    display: none;
+  }
+
+  .experience-more[open] .more-close {
+    display: inline;
+  }
+
+  .experience-detail {
+    display: grid;
+    gap: 18px;
+    margin-top: 16px;
+    max-width: 66ch;
+  }
+
+  .detail-title {
+    margin-bottom: 6px;
+    color: var(--coral);
+  }
+
+  .experience-detail ul {
+    list-style: none;
+    display: grid;
+    gap: 7px;
+  }
+
+  .experience-detail li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .experience-detail li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 8px;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    margin-top: 22px;
+  }
+
+  .tag-list li {
+    padding: 5px 11px;
+    border: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  .experience-number {
+    position: absolute;
+    top: 34px;
+    right: 0;
+    color: var(--line);
+    font-family: var(--serif);
+    font-size: 36px;
+  }
+
+  @media (max-width: 620px) {
+    .experience {
+      grid-template-columns: 1fr;
+      gap: 18px;
+      padding: 30px 0 34px;
+    }
+
+    .experience-number {
+      top: 22px;
+      font-size: 24px;
+    }
+  }
+</style>

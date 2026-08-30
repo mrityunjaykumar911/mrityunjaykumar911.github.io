@@ -1,0 +1,178 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from './SiteHeader.astro';
+import Hero from './Hero.astro';
+import SignalStrip from './SignalStrip.astro';
+import Work from './Work.astro';
+import Research from './Research.astro';
+import About from './About.astro';
+import Contact from './Contact.astro';
+import SiteFooter from './SiteFooter.astro';
+import PreviewBanner from './PreviewBanner.astro';
+
+import { resolveResume } from '../data/resume';
+import { stripMarkup } from '../lib/text';
+import { withBase } from '../lib/url';
+import type { PreviewState } from '../lib/preview';
+
+interface Props {
+  preview: PreviewState;
+  redirectFlaggedRequests?: boolean;
+  canonicalPath?: string;
+}
+
+const {
+  preview,
+  redirectFlaggedRequests = false,
+  canonicalPath,
+} = Astro.props;
+const resolved = resolveResume(preview);
+const profile = {
+  ...resolved.profile,
+  avatar: withBase(resolved.profile.avatar),
+  resumePdf: withBase(resolved.profile.resumePdf),
+};
+const links = resolved.links.map((link) => ({
+  ...link,
+  href: withBase(link.href),
+}));
+const { capabilities, skills, experience, research, education } = resolved;
+
+const nav = [
+  { href: '#work', label: 'Work' },
+  { href: '#research', label: 'Research' },
+  { href: '#about', label: 'About' },
+];
+
+const title = `${profile.name} | ${profile.role}`;
+const description = stripMarkup(profile.tagline);
+const buildYear = new Date().getFullYear();
+const linkedin = links.find((link) => link.icon === 'linkedin')?.href ?? null;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  url: new URL(withBase('/'), Astro.site).href,
+  image: new URL(profile.avatar, Astro.site).href,
+  email: `mailto:${profile.email}`,
+  jobTitle: profile.role,
+  description: stripMarkup(profile.summary),
+  worksFor: { '@type': 'Organization', name: profile.company },
+  address: { '@type': 'PostalAddress', addressLocality: profile.location },
+  alumniOf: education.map((school) => ({
+    '@type': 'CollegeOrUniversity',
+    name: school.school,
+  })),
+  knowsAbout: skills.flatMap((group) => group.items),
+  sameAs: links
+    .filter((link) => link.href.startsWith('http'))
+    .map((link) => link.href),
+};
+---
+
+<Base
+  title={title}
+  description={description}
+  image={profile.avatar}
+  jsonLd={jsonLd}
+  noindex={preview.active}
+  canonicalPath={canonicalPath}
+>
+  {
+    redirectFlaggedRequests && (
+      <script is:inline>
+        (() => {
+          const params = new URLSearchParams(window.location.search);
+          const flags = (params.get('flags') || '').split(/[\s,]+/);
+          if (params.has('preview') || flags.includes('latest')) {
+            const target = new URL('latest.html', window.location.href);
+            target.search = window.location.search;
+            target.hash = window.location.hash;
+            window.location.replace(target.href);
+          }
+        })();
+      </script>
+    )
+  }
+
+  {preview.active && <PreviewBanner flags={[...preview.flags]} />}
+
+  <SiteHeader name={profile.name} resumePdf={profile.resumePdf} nav={nav} />
+
+  <main id="main">
+    <Hero profile={profile} linkedin={linkedin} />
+    <SignalStrip signals={profile.signals} />
+    <Work id="work" roles={experience} />
+    <Research id="research" research={research} />
+    <About id="about" paragraphs={profile.about} capabilities={capabilities} />
+    <Contact heading={profile.contactHeading} links={links} />
+  </main>
+
+  <SiteFooter name={profile.name} year={buildYear} />
+</Base>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
+  const navigation = document.querySelector<HTMLElement>('[data-site-nav]');
+
+  if (menuButton && navigation) {
+    const setOpen = (open: boolean) => {
+      menuButton.setAttribute('aria-expanded', String(open));
+      navigation.classList.toggle('is-open', open);
+      const label = menuButton.querySelector('.sr-only');
+      if (label) label.textContent = open ? 'Close navigation' : 'Open navigation';
+    };
+    menuButton.addEventListener('click', () =>
+      setOpen(menuButton.getAttribute('aria-expanded') !== 'true')
+    );
+    navigation
+      .querySelectorAll('a')
+      .forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reveals = document.querySelectorAll('.reveal');
+  if (reduceMotion || !('IntersectionObserver' in window)) {
+    reveals.forEach((element) => element.classList.add('is-visible'));
+  } else {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            revealObserver.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.12 }
+    );
+    reveals.forEach((element) => revealObserver.observe(element));
+  }
+
+  const spy = new Map<string, HTMLAnchorElement>();
+  document
+    .querySelectorAll<HTMLAnchorElement>('[data-site-nav] a[href^="#"]')
+    .forEach((link) => spy.set(link.getAttribute('href')!.slice(1), link));
+  const targets = [...spy.keys()]
+    .map((id) => document.getElementById(id))
+    .filter((element): element is HTMLElement => element !== null);
+  if (targets.length) {
+    const seen = new Set<string>();
+    const spyObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) seen.add(entry.target.id);
+          else seen.delete(entry.target.id);
+        }
+        const active = targets.find((target) => seen.has(target.id))?.id;
+        spy.forEach((link, id) => {
+          if (id === active) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        });
+      },
+      { rootMargin: '-20% 0px -70% 0px' }
+    );
+    targets.forEach((target) => spyObserver.observe(target));
+  }
+</script>

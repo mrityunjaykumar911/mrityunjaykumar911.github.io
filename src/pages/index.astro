@@ -1,0 +1,12 @@
+---
+import ResumePage from '../components/ResumePage.astro';
+import { readPreview } from '../lib/preview';
+
+const preview = readPreview(Astro.url);
+---
+
+<ResumePage
+  preview={preview}
+  redirectFlaggedRequests={!import.meta.env.DEV}
+  canonicalPath="/"
+/>

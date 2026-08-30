@@ -1,0 +1,122 @@
+---
+import '../styles/global.css';
+import { withBase } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Root-relative path to the social preview image. */
+  image?: string;
+  /** JSON-LD graph, serialised into a ld+json script tag. */
+  jsonLd?: unknown;
+  noindex?: boolean;
+  canonicalPath?: string;
+}
+
+const {
+  title,
+  description,
+  image = '/images/mrityunjay.jpg',
+  jsonLd,
+  noindex = false,
+  canonicalPath,
+} = Astro.props;
+
+const canonical = new URL(withBase(canonicalPath ?? Astro.url.pathname), Astro.site).href;
+const socialImage = new URL(withBase(image), Astro.site).href;
+const favicon = withBase('/favicon.ico');
+const appleTouchIcon = withBase('/images/mrityunjay.jpg');
+const manropeFont = withBase('/fonts/manrope-var.woff2');
+const newsreaderFont = withBase('/fonts/newsreader-var.woff2');
+const dmMonoRegularFont = withBase('/fonts/dm-mono-400.woff2');
+const dmMonoMediumFont = withBase('/fonts/dm-mono-500.woff2');
+const fontFaces = `
+  @font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('${manropeFont}') format('woff2');
+  }
+  @font-face {
+    font-family: 'Newsreader';
+    font-style: normal;
+    font-weight: 500 600;
+    font-display: swap;
+    src: url('${newsreaderFont}') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('${dmMonoRegularFont}') format('woff2');
+  }
+  @font-face {
+    font-family: 'DM Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('${dmMonoMediumFont}') format('woff2');
+  }
+`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style is:inline set:html={fontFaces} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <link rel="icon" href={favicon} sizes="any" />
+    <link rel="apple-touch-icon" href={appleTouchIcon} />
+
+    {/* Self-hosted fonts (src/styles/global.css). Preload the two that paint
+        immediately; DM Mono is small and non-critical. */}
+    <link
+      rel="preload"
+      href={manropeFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href={newsreaderFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <meta name="theme-color" content="#f4f1e8" />
+
+    {/* The previous site had no social metadata at all — links to it unfurled
+        as a bare URL. */}
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Mrityunjay Kumar" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialImage} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage} />
+
+    {
+      jsonLd && (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      )
+    }
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>
