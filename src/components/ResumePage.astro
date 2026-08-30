@@ -102,8 +102,22 @@ const consoleHint = `
       ''
     ].join('\\n');
     var url = location.origin + (location.pathname.replace(/\\/$/, '') || '') + '/?preview';
-    console.log('%c' + mark, 'color:#0b6b61;font-family:monospace;font-size:12px;line-height:1.4');
-    console.log('%c\\u2192 ' + url, 'color:#e45b40;font-weight:bold;font-size:13px');
+    var showGreeting = function () {
+      console.log('%c' + mark, 'color:#0b6b61;font-family:monospace;font-size:12px;line-height:1.4');
+      console.log('%c\\u2192 ' + url, 'color:#e45b40;font-weight:bold;font-size:13px');
+    };
+
+    showGreeting();
+
+    // Docking DevTools substantially shrinks the page. Replay once so the
+    // greeting is visible even when the console was opened after page load.
+    var initialWidth = window.innerWidth;
+    var replayAfterDock = function () {
+      if (Math.abs(window.innerWidth - initialWidth) < 120) return;
+      window.removeEventListener('resize', replayAfterDock);
+      showGreeting();
+    };
+    window.addEventListener('resize', replayAfterDock);
   })();
 `;
 ---

@@ -48,6 +48,31 @@ test('normal URL does not load the detailed resume', async ({ page }) => {
   await expect(page.getByText(privateMarker, { exact: false })).toHaveCount(0);
 });
 
+test('normal URL prints the console greeting and preview link', async ({ page }) => {
+  const messages: string[] = [];
+  page.on('console', (message) => messages.push(message.text()));
+
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+
+  expect(messages.some((message) => message.includes('MRITYUNJAY KUMAR'))).toBe(true);
+  expect(
+    messages.some((message) =>
+      message.includes('→ http://127.0.0.1:4173/?preview')
+    )
+  ).toBe(true);
+
+  const greetingsBeforeResize = messages.filter((message) =>
+    message.includes('MRITYUNJAY KUMAR')
+  ).length;
+  await page.setViewportSize({ width: 900, height: 720 });
+  await expect
+    .poll(
+      () => messages.filter((message) => message.includes('MRITYUNJAY KUMAR')).length
+    )
+    .toBeGreaterThan(greetingsBeforeResize);
+});
+
 for (const query of ['?flags=latest', '?preview']) {
   test(`${query} loads the detailed public resume`, async ({ page }) => {
     await page.goto(`/${query}`);
