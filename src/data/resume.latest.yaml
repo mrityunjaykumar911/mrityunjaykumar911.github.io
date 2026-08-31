@@ -105,9 +105,9 @@ experienceOverrides:
       - title: ML platform & fine-tuning
         bullets:
           - >-
-            Pioneered PowerPoint's first fine-tuned-model workflow: synthetic
-            data generation, throttling-resistant batching, secure deployment,
-            inference, and integration into agent workflows.
+            Built PowerPoint's first end-to-end fine-tuned model workflow,
+            covering synthetic-data generation, batched data preparation,
+            secure deployment, inference, and workflow integration.
           - >-
             Authored a model-first platform architecture (ingestion, grading,
             eval, observability) adopted as org blueprint.

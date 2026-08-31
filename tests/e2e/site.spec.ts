@@ -21,7 +21,9 @@ test('published page stays generic and exposes complete metadata', async ({ page
   }
 
   const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
-  await expect(microsoftRole.getByText('4.6x faster', { exact: false })).toBeVisible();
+  await expect(
+    microsoftRole.getByText('reduced evaluation time by 4.6x', { exact: false })
+  ).toBeVisible();
   for (const tag of [
     'ML systems',
     'Agent infrastructure',

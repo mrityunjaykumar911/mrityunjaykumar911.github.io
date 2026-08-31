@@ -134,17 +134,17 @@ experience:
     end: null # null renders as "Present"
     summary: >-
       Building production ML and agent infrastructure for PowerPoint, spanning
-      model evaluation, fine-tuning pipelines, agentic workflows, and reliable
+      model evaluation, fine-tuning pipelines, slide-generation workflows, and reliable
       cloud services.
     lead:
       - >-
-        Pioneered PowerPoint's first fine-tuned-model workflow, spanning
-        synthetic-data generation, throttling-resistant batching, secure model
-        deployment, inference, and agent integration.
+        Built PowerPoint's first end-to-end fine-tuned model workflow, including
+        synthetic-data generation, batched data preparation, secure deployment,
+        inference, and integration with PowerPoint workflows.
       - >-
-        Built extensible agentic slide-generation and evaluation systems with
-        pluggable models and datasets, end-to-end telemetry, and a parallel
-        evaluation framework delivering **4.6x faster** processing.
+        Designed extensible slide-generation and evaluation systems with
+        configurable models and datasets, end-to-end telemetry, and parallel
+        execution that reduced evaluation time by **4.6x**.
       - >-
         Designed and operated PowerPoint cloud services across commercial and
         government environments, adding automated validation, observability,
