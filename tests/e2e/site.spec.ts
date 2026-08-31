@@ -49,6 +49,14 @@ test('published page stays generic and exposes complete metadata', async ({ page
     'href',
     'https://mrityunjaykumar911.github.io/'
   );
+  await expect(page.locator('link[rel="sitemap"]')).toHaveAttribute(
+    'href',
+    '/sitemap-index.xml'
+  );
+  await expect(page.locator('link[rel="alternate"][type="text/plain"]')).toHaveAttribute(
+    'href',
+    '/llms.txt'
+  );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     'content',
     /\/images\/mrityunjay-portrait\.jpg$/
@@ -65,6 +73,32 @@ test('published page stays generic and exposes complete metadata', async ({ page
   expect(
     await portrait.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
   ).toBe(true);
+});
+
+test('crawler resources expose professional context without contact PII', async ({ request }) => {
+  const robotsResponse = await request.get('/robots.txt');
+  expect(robotsResponse.ok()).toBe(true);
+  expect(robotsResponse.headers()['content-type']).toContain('text/plain');
+  const robots = await robotsResponse.text();
+  expect(robots).toContain('User-agent: *');
+  expect(robots).toContain('Allow: /');
+  expect(robots).toContain('Disallow: /latest.html');
+  expect(robots).toContain(
+    'Sitemap: https://mrityunjaykumar911.github.io/sitemap-index.xml'
+  );
+
+  const contextResponse = await request.get('/llms.txt');
+  expect(contextResponse.ok()).toBe(true);
+  expect(contextResponse.headers()['content-type']).toContain('text/plain');
+  const context = await contextResponse.text();
+  expect(context).toContain('# Mrityunjay Kumar');
+  expect(context).toContain('Distributed infrastructure for reliable LLM agents');
+  expect(context).toContain('Zero-to-one architecture');
+  expect(context).not.toMatch(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i);
+  expect(context).not.toMatch(/mailto:/i);
+  const contextWithoutUrls = context.replace(/https?:\/\/\S+/g, '');
+  expect(contextWithoutUrls).not.toMatch(/\+?\d[\d\s().-]{7,}\d/);
+  expect(context).not.toContain(privateMarker);
 });
 
 test('normal URL does not load the detailed resume', async ({ page }) => {

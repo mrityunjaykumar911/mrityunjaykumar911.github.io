@@ -23,7 +23,10 @@ export default defineConfig({
   integrations: [
     sitemap({
       // Neither the error page nor flag-gated detail is a search destination.
-      filter: (page) => !page.includes('/404') && !page.includes('/latest'),
+      filter: (page) =>
+        !page.includes('/404') &&
+        !page.includes('/latest') &&
+        !page.endsWith('.txt'),
     }),
   ],
   build: {

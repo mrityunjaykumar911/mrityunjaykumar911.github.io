@@ -30,6 +30,8 @@ const canonical = new URL(withBase(canonicalPath ?? Astro.url.pathname), Astro.s
 const socialImage = new URL(withBase(image), Astro.site).href;
 const favicon = withBase('/favicon.ico');
 const appleTouchIcon = withBase('/images/mrityunjay.jpg');
+const sitemap = withBase('/sitemap-index.xml');
+const llmsContext = withBase('/llms.txt');
 const manropeFont = withBase('/fonts/manrope-var.woff2');
 const newsreaderFont = withBase('/fonts/newsreader-var.woff2');
 const dmMonoRegularFont = withBase('/fonts/dm-mono-400.woff2');
@@ -76,6 +78,8 @@ const fontFaces = `
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="sitemap" type="application/xml" href={sitemap} />
+    <link rel="alternate" type="text/plain" href={llmsContext} title="LLM context" />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     <link rel="icon" href={favicon} sizes="any" />
