@@ -40,10 +40,14 @@ profile:
       tradeoffs, useful observability, and designs that account for failure
       from the start.
     - >-
-      Across storage, cloud services, data pipelines, and embedded software,
-      I've learned to move between the architecture diagram and the details
-      that make it true.
-  contactHeading: Working on a difficult systems problem?
+      I take complex systems from **0 → 1**: turning ambiguous problems into
+      clear architectures, building the critical path, and carrying them into
+      production with measurable outcomes.
+  contactHeading: I build distributed infrastructure that makes LLM agents reliable in production.
+  contactAreas:
+    - Inference engines
+    - Rigorous evals
+    - RL systems at scale
 
   # <meta description> / OpenGraph / JSON-LD — plain text, no markup.
   tagline: >-

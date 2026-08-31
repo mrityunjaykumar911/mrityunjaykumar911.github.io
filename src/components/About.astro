@@ -1,5 +1,6 @@
 ---
 import type { Capability } from '../data/schema';
+import { inlineMarkup } from '../lib/text';
 
 interface Props {
   id: string;
@@ -21,7 +22,7 @@ const { id, paragraphs, capabilities } = Astro.props;
 
   <div class="about-grid">
     <div class="about-copy reveal">
-      {paragraphs.map((p) => <p>{p}</p>)}
+      {paragraphs.map((p) => <p set:html={inlineMarkup(p)} />)}
     </div>
 
     <dl class="capabilities reveal">

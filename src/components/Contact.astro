@@ -4,17 +4,30 @@ import type { Link } from '../data/schema';
 
 interface Props {
   heading: string;
+  areas: string[];
   links: Link[];
 }
 
-const { heading, links } = Astro.props;
+const { heading, areas, links } = Astro.props;
 const isExternal = (href: string) => href.startsWith('http');
 const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-up-right');
 ---
 
 <section class="contact-section" aria-labelledby="contact-title">
   <p class="eyebrow">Let's compare notes</p>
-  <h2 id="contact-title">{heading}</h2>
+  <div class="contact-pitch">
+    <h2 id="contact-title">{heading}</h2>
+    <ol class="contact-areas" aria-label="Areas of focus">
+      {
+        areas.map((area, index) => (
+          <li>
+            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            {area}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
 
   <div class="contact-links">
     {
@@ -56,13 +69,42 @@ const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-u
     margin-bottom: 14px;
   }
 
-  .contact-section h2 {
+  .contact-pitch {
     position: relative;
     z-index: 1;
-    max-width: 20ch;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr);
+    gap: clamp(36px, 8vw, 120px);
+    align-items: end;
+    max-width: 1200px;
+  }
+
+  .contact-section h2 {
+    max-width: 22ch;
     font-family: var(--serif);
     font-size: clamp(40px, 5vw, 68px);
     line-height: 1.02;
+  }
+
+  .contact-areas {
+    list-style: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .contact-areas li {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .contact-areas span {
+    opacity: 0.62;
   }
 
   .contact-links {
@@ -92,6 +134,15 @@ const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-u
   }
 
   @media (max-width: 620px) {
+    .contact-pitch {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+
+    .contact-section h2 {
+      max-width: none;
+    }
+
     .contact-links,
     .contact-links a {
       width: 100%;

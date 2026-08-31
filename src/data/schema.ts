@@ -45,6 +45,8 @@ const profile = z.object({
   about: z.array(z.string()).min(1),
   /** Heading for the closing contact section. */
   contactHeading: z.string(),
+  /** Three proof points supporting the closing elevator pitch. */
+  contactAreas: z.array(z.string()).length(3),
   /** <meta description> / OpenGraph / JSON-LD. Plain text. */
   tagline: z.string(),
   summary: z.string(),

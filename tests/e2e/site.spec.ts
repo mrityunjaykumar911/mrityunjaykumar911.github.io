@@ -32,6 +32,18 @@ test('published page stays generic and exposes complete metadata', async ({ page
   ]) {
     await expect(microsoftRole.getByText(tag, { exact: true })).toBeVisible();
   }
+  await expect(
+    page.getByRole('heading', {
+      name: 'I build distributed infrastructure that makes LLM agents reliable in production.',
+    })
+  ).toBeVisible();
+  const focusAreas = page.getByRole('list', { name: 'Areas of focus' });
+  for (const area of ['Inference engines', 'Rigorous evals', 'RL systems at scale']) {
+    await expect(focusAreas.getByRole('listitem').filter({ hasText: area })).toBeVisible();
+  }
+  await expect(
+    page.locator('p').filter({ hasText: 'I take complex systems from 0 → 1' })
+  ).toBeVisible();
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
