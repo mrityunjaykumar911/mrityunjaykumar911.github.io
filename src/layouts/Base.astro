@@ -1,5 +1,8 @@
 ---
 import '../styles/global.css';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/source-sans-3';
+import '@fontsource-variable/azeret-mono';
 import { withBase } from '../lib/url';
 
 interface Props {
@@ -32,40 +35,6 @@ const favicon = withBase('/favicon.ico');
 const appleTouchIcon = withBase('/images/mrityunjay.jpg');
 const sitemap = withBase('/sitemap-index.xml');
 const llmsContext = withBase('/llms.txt');
-const manropeFont = withBase('/fonts/manrope-var.woff2');
-const newsreaderFont = withBase('/fonts/newsreader-var.woff2');
-const dmMonoRegularFont = withBase('/fonts/dm-mono-400.woff2');
-const dmMonoMediumFont = withBase('/fonts/dm-mono-500.woff2');
-const fontFaces = `
-  @font-face {
-    font-family: 'Manrope';
-    font-style: normal;
-    font-weight: 400 700;
-    font-display: swap;
-    src: url('${manropeFont}') format('woff2');
-  }
-  @font-face {
-    font-family: 'Newsreader';
-    font-style: normal;
-    font-weight: 500 600;
-    font-display: swap;
-    src: url('${newsreaderFont}') format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Mono';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('${dmMonoRegularFont}') format('woff2');
-  }
-  @font-face {
-    font-family: 'DM Mono';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('${dmMonoMediumFont}') format('woff2');
-  }
-`;
 ---
 
 <!doctype html>
@@ -73,7 +42,6 @@ const fontFaces = `
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style is:inline set:html={fontFaces} />
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -85,23 +53,7 @@ const fontFaces = `
     <link rel="icon" href={favicon} sizes="any" />
     <link rel="apple-touch-icon" href={appleTouchIcon} />
 
-    {/* Self-hosted fonts (src/styles/global.css). Preload the two that paint
-        immediately; DM Mono is small and non-critical. */}
-    <link
-      rel="preload"
-      href={manropeFont}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href={newsreaderFont}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <meta name="theme-color" content="#f4f1e8" />
+    <meta name="theme-color" content="#f6f8f5" />
 
     {/* The previous site had no social metadata at all — links to it unfurled
         as a bare URL. */}

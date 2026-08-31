@@ -52,12 +52,14 @@ profile:
   # <meta description> / OpenGraph / JSON-LD — plain text, no markup.
   tagline: >-
     Senior ML engineer building production ML systems, agent infrastructure,
-    evaluation pipelines, and reliable distributed services.
+    evaluation pipelines, and reliable, high-throughput distributed serving
+    systems.
   summary: >-
     Senior ML engineer with 12+ years across production ML systems, agent
-    infrastructure, distributed services, and storage. Builds model evaluation,
-    fine-tuning, data, and observability platforms for PowerPoint. Co-author
-    **EuroSys 2022** (Rolis). Patent holder in snapshot metadata verification.
+    infrastructure, distributed serving and execution systems, and storage.
+    Builds model evaluation, fine-tuning, data, and observability platforms for
+    PowerPoint. Co-author **EuroSys 2022** (Rolis). Patent holder in snapshot
+    metadata verification.
 
 links:
   - label: GitHub
@@ -83,9 +85,9 @@ capabilities:
   - label: ML systems
     value: Agent infrastructure · Model evaluation · Fine-tuning pipelines
   - label: Distributed systems
-    value: Cloud services · Data infrastructure · Transactional storage
+    value: Inference serving · Load balancing & autoscaling · Transactional storage
   - label: Production
-    value: Azure · MLOps · Reliability · Observability
+    value: Latency & throughput · Fault detection & recovery · Observability · Azure
 
 # Not rendered — feeds JSON-LD `knowsAbout` for search engines.
 skills:
@@ -95,11 +97,19 @@ skills:
       - LLM agent infrastructure
       - Model evaluation
       - Fine-tuning pipelines
+      - PyTorch
+      - Hugging Face Transformers
       - Synthetic data generation
       - MLOps
   - group: Systems
     items:
       - Distributed systems
+      - Inference serving systems
+      - Load balancing & request routing
+      - Autoscaling & orchestration
+      - Latency & throughput optimization
+      - Fault detection & recovery
+      - Distributed RL / post-training infrastructure
       - Consensus protocols (Paxos, Raft)
       - Transactional databases
       - Crash consistency
@@ -137,10 +147,15 @@ experience:
     start: 2022-05
     end: null # null renders as "Present"
     summary: >-
-      Building production ML and agent infrastructure for PowerPoint, spanning
-      model evaluation, fine-tuning pipelines, slide-generation workflows, and reliable
-      cloud services.
+      Building production ML and agent infrastructure for PowerPoint — model
+      evaluation, fine-tuning pipelines, and the distributed serving and
+      execution systems that run these workloads at scale with low latency and
+      high reliability.
     lead:
+      - >-
+        Scaled the agent's distributed execution and serving infrastructure to
+        thousands of concurrent containers under strict latency SLOs, with load
+        balancing, autoscaling, and automated fault detection and recovery.
       - >-
         Built PowerPoint's first end-to-end fine-tuned model workflow, including
         synthetic-data generation, batched data preparation, secure deployment,
@@ -155,7 +170,7 @@ experience:
         and incident-response tooling.
     tags:
       - ML systems
-      - Agent infrastructure
+      - Inference & serving infrastructure
       - Model evaluation
       - Fine-tuning & MLOps
 

@@ -18,7 +18,10 @@ const initials = name
 <header class="site-header" id="top">
   <a class="wordmark" href="#top" aria-label={`${name}, home`}>
     <span class="wordmark-mark">{initials}</span>
-    <span class="wordmark-name">{name}</span>
+    <span class="wordmark-copy">
+      <span class="wordmark-name">{name}</span>
+      <span class="wordmark-role">ML systems · production infrastructure</span>
+    </span>
   </a>
 
   <button
@@ -48,11 +51,11 @@ const initials = name
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 76px;
+    height: 72px;
     padding: 0 var(--gutter);
     border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--paper) 92%, transparent);
-    backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--paper-bright) 88%, transparent);
+    backdrop-filter: blur(18px);
   }
 
   .wordmark {
@@ -66,20 +69,43 @@ const initials = name
   .wordmark-mark {
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
-    background: var(--ink);
-    color: var(--paper-bright);
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--ink);
+    background: var(--paper-bright);
+    color: var(--ink);
     font-family: var(--mono);
     font-size: 13px;
+  }
+
+  .wordmark-copy {
+    display: grid;
+    line-height: 1.1;
+  }
+
+  .wordmark-name {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 650;
+  }
+
+  .wordmark-role {
+    margin-top: 4px;
+    color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
   }
 
   .site-nav {
     display: flex;
     align-items: center;
     gap: 32px;
-    font-size: 14px;
-    font-weight: 600;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
   }
 
   .site-nav a {
@@ -135,6 +161,21 @@ const initials = name
     cursor: pointer;
   }
 
+  @media (min-width: 1800px) {
+    .site-header {
+      height: 84px;
+    }
+
+    .wordmark-name {
+      font-size: 18px;
+    }
+
+    .wordmark-role,
+    .site-nav {
+      font-size: 14px;
+    }
+  }
+
   @media (max-width: 900px) {
     .menu-button {
       display: grid;
@@ -142,7 +183,7 @@ const initials = name
 
     .site-nav {
       position: absolute;
-      top: 76px;
+      top: 72px;
       right: 0;
       left: 0;
       display: none;
@@ -164,7 +205,7 @@ const initials = name
   }
 
   @media (max-width: 620px) {
-    .wordmark-name {
+    .wordmark-copy {
       display: none;
     }
   }

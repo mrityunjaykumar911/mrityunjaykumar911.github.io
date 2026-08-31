@@ -1,27 +1,27 @@
 /* ===========================================================================
-   Tokens — a committed warm-paper theme. No dark mode: the palette (paper
-   ground, three loud accents) is the design, and inverting it would fight it.
-   The Research section inverts locally instead.
+   Reliability Trace — an operational, high-contrast visual system.
    ========================================================================= */
 
 :root {
-  --paper: #f4f1e8;
-  --paper-bright: #fcfaf4;
-  --ink: #17201d;
-  --ink-soft: #4d5853;
-  --line: #cbc9bd;
-  --teal: #0b6b61;
-  --teal-dark: #064941;
-  --coral: #e45b40;
-  --acid: #d5ef72;
+  --paper: #f6f8f5;
+  --paper-bright: #ffffff;
+  --ink: #101715;
+  --ink-soft: #53615d;
+  --line: #c8d2ce;
+  --teal: #087f6d;
+  --teal-dark: #055b50;
+  --coral: #e44c2a;
+  --acid: #b8f06a;
+  --blue: #315ee8;
+  --fog: #e8eeeb;
 
-  --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-  --sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --display: 'Bricolage Grotesque Variable', sans-serif;
+  --sans: 'Source Sans 3 Variable', sans-serif;
+  --mono: 'Azeret Mono Variable', monospace;
+  --serif: var(--display);
 
-  --content: min(1180px, calc(100vw - 64px));
-  --gutter: max(32px, calc((100vw - 1180px) / 2));
+  --content: min(1240px, calc(100vw - 72px));
+  --gutter: max(36px, calc((100vw - 1240px) / 2));
 
   color-scheme: light;
 }
@@ -45,7 +45,9 @@ html {
 body {
   margin: 0;
   color: var(--ink);
-  background: var(--paper);
+  background-color: var(--paper);
+  background-image: linear-gradient(135deg, rgba(49, 94, 232, 0.035), transparent 34%),
+    linear-gradient(315deg, rgba(8, 127, 109, 0.04), transparent 38%);
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.65;
@@ -53,16 +55,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Faint engineering-grid wash behind everything. */
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(23, 32, 29, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 32, 29, 0.035) 1px, transparent 1px);
-  background-size: 32px 32px;
+  display: none;
 }
 
 h1,
@@ -73,6 +67,7 @@ h4 {
   font-weight: 500;
   line-height: 1.1;
   text-wrap: balance;
+  letter-spacing: 0;
 }
 
 p {
@@ -129,7 +124,7 @@ ol {
 .mono-label {
   margin: 0;
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -189,9 +184,10 @@ ol {
 
 .section-heading h2 {
   max-width: 720px;
-  font-family: var(--serif);
-  font-size: clamp(40px, 5vw, 68px);
-  line-height: 1.02;
+  font-family: var(--display);
+  font-size: clamp(38px, 4.5vw, 64px);
+  font-weight: 650;
+  line-height: 0.98;
 }
 
 .section-lede {
@@ -221,22 +217,62 @@ ol {
   background: rgba(23, 32, 29, 0.06);
 }
 
-/* Scroll-reveal — JS adds .is-visible (see index.astro). No-JS: visible. */
+/* Scroll-reveal is progressive enhancement: content is never hidden by motion. */
 .reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  opacity: 1;
+  transform: none;
 }
 
 .reveal.is-visible {
-  opacity: 1;
-  transform: none;
+  animation: evidence-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes evidence-enter {
+  from {
+    opacity: 0.72;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+
+@media (min-width: 1800px) {
+  :root {
+    --content: min(2200px, calc(100vw - 192px));
+    --gutter: max(96px, calc((100vw - 2200px) / 2));
+  }
+
+  body {
+    font-size: 18px;
+  }
+
+  .section {
+    padding-top: clamp(140px, 7vw, 220px);
+    padding-bottom: clamp(140px, 7vw, 220px);
+  }
+
+  .section-heading {
+    grid-template-columns: 80px minmax(0, 1fr) minmax(360px, 0.62fr);
+    gap: 48px;
+  }
+
+  .section-heading h2 {
+    max-width: 900px;
+    font-size: clamp(72px, 2.4vw, 92px);
+  }
+
+  .section-lede {
+    max-width: 52ch;
+    font-size: 20px;
   }
 }
 

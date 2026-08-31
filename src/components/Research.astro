@@ -39,10 +39,11 @@ const { feature, notes } = research;
       }
     </article>
 
-    <ol class="research-notes">
+    <ol class="research-notes" aria-label="Research proof registry">
       {
-        notes.map((note) => (
+        notes.map((note, index) => (
           <li class="research-note reveal">
+            <span class="proof-index" aria-hidden="true">P-{String(index + 1).padStart(2, '0')}</span>
             <p class="note-type mono-label">{note.type}</p>
             <h3>{note.title}</h3>
             <p class="note-meta">{note.meta}</p>
@@ -62,21 +63,19 @@ const { feature, notes } = research;
   .research-section {
     position: relative;
     overflow: hidden;
-    background: var(--ink);
+    background: #102420;
     color: var(--paper-bright);
   }
 
-  .research-section::after {
-    content: '';
+  .research-section::before {
+    content: 'VERIFIED SYSTEMS / PUBLIC RECORD';
     position: absolute;
-    top: -100px;
-    right: -80px;
-    width: 320px;
-    height: 320px;
-    border: 1px solid rgba(213, 239, 114, 0.22);
-    border-radius: 50%;
-    box-shadow: 0 0 0 42px rgba(213, 239, 114, 0.035),
-      0 0 0 84px rgba(213, 239, 114, 0.025);
+    top: 32px;
+    right: var(--gutter);
+    color: rgba(255, 255, 255, 0.36);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
   }
 
   .research-section .section-heading h2 {
@@ -95,14 +94,14 @@ const { feature, notes } = research;
     position: relative;
     z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
-    gap: clamp(44px, 8vw, 110px);
+    grid-template-columns: minmax(0, 0.9fr) minmax(380px, 1.1fr);
+    gap: clamp(44px, 7vw, 96px);
   }
 
   .feature-story {
-    padding: 40px;
-    border-left: 6px solid var(--acid);
-    background: var(--teal-dark);
+    align-self: start;
+    padding: 30px 0 0;
+    border-top: 6px solid var(--acid);
   }
 
   .feature-story .story-label {
@@ -111,10 +110,10 @@ const { feature, notes } = research;
   }
 
   .feature-story h3 {
-    font-family: var(--serif);
-    font-size: clamp(26px, 3vw, 40px);
-    font-weight: 500;
-    line-height: 1.08;
+    font-family: var(--display);
+    font-size: clamp(30px, 3.3vw, 46px);
+    font-weight: 640;
+    line-height: 1;
     margin-bottom: 14px;
   }
 
@@ -141,33 +140,38 @@ const { feature, notes } = research;
 
   .research-note {
     position: relative;
-    padding: 26px 52px 26px 0;
+    display: grid;
+    grid-template-columns: 52px 1fr 42px;
+    column-gap: 14px;
+    padding: 20px 0;
     border-bottom: 1px solid #53605b;
   }
 
   .research-note .note-type {
+    grid-column: 2;
     margin-bottom: 8px;
     color: var(--coral);
   }
 
   .research-note h3 {
-    font-family: var(--serif);
-    font-size: 22px;
-    font-weight: 500;
+    grid-column: 2;
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 620;
     line-height: 1.18;
     margin-bottom: 6px;
   }
 
   .note-meta {
+    grid-column: 2;
     margin: 0;
     color: #9ca9a4;
     font-size: 13px;
   }
 
   .research-note a {
-    position: absolute;
-    top: 28px;
-    right: 0;
+    grid-column: 3;
+    grid-row: 1 / span 3;
     display: grid;
     place-items: center;
     width: 38px;
@@ -175,9 +179,40 @@ const { feature, notes } = research;
     border: 1px solid #53605b;
   }
 
+  .proof-index {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    color: var(--acid);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
   .research-note a:hover {
     background: var(--acid);
     color: var(--ink);
+  }
+
+  @media (min-width: 1800px) {
+    .research-section::before,
+    .proof-index {
+      font-size: 14px;
+    }
+
+    .feature-story h3 {
+      font-size: 56px;
+    }
+
+    .feature-story p:not(.story-label) {
+      font-size: 20px;
+    }
+
+    .research-note h3 {
+      font-size: 24px;
+    }
+
+    .note-meta {
+      font-size: 16px;
+    }
   }
 
   @media (max-width: 900px) {

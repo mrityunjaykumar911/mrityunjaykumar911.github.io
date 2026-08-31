@@ -15,25 +15,37 @@ const { signals } = Astro.props;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
-    min-height: 64px;
+    min-height: 88px;
     padding: 0 var(--gutter);
-    background: var(--acid);
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
+    background: var(--fog);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
   }
 
   .signal-strip p {
     margin: 0;
     padding: 10px 24px;
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 14px;
+    font-weight: 600;
     text-align: center;
     text-transform: uppercase;
-    color: var(--ink);
+    color: inherit;
   }
 
   .signal-strip p + p {
-    border-left: 1px solid var(--ink);
+    border-left: 1px solid var(--line);
+  }
+
+  @media (min-width: 1800px) {
+    .signal-strip {
+      min-height: 108px;
+    }
+
+    .signal-strip p {
+      font-size: 16px;
+    }
   }
 
   @media (max-width: 900px) {
@@ -44,7 +56,7 @@ const { signals } = Astro.props;
 
     .signal-strip p + p {
       border-left: 0;
-      border-top: 1px solid var(--ink);
+      border-top: 1px solid var(--line);
     }
   }
 </style>

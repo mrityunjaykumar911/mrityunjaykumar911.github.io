@@ -25,7 +25,7 @@ const { id, paragraphs, capabilities } = Astro.props;
       {paragraphs.map((p) => <p set:html={inlineMarkup(p)} />)}
     </div>
 
-    <dl class="capabilities reveal">
+    <dl class="capabilities reveal" role="group" aria-label="Core capability matrix">
       {
         capabilities.map((cap) => (
           <div class="capability">
@@ -47,9 +47,10 @@ const { id, paragraphs, capabilities } = Astro.props;
   }
 
   .about-copy {
-    font-family: var(--serif);
-    font-size: clamp(24px, 3vw, 36px);
-    line-height: 1.24;
+    font-family: var(--display);
+    font-size: clamp(25px, 3vw, 38px);
+    font-weight: 560;
+    line-height: 1.14;
   }
 
   .about-copy p {
@@ -63,27 +64,47 @@ const { id, paragraphs, capabilities } = Astro.props;
 
   .capabilities {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     border-top: 1px solid var(--line);
-    border-left: 1px solid var(--line);
     margin: 0;
   }
 
   .capability {
-    min-height: 170px;
-    padding: 26px;
-    border-right: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: minmax(120px, 0.35fr) 1fr;
+    gap: 24px;
+    min-height: 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--line);
   }
 
   .capability dt {
-    margin-bottom: 14px;
+    margin: 0;
     color: var(--coral);
   }
 
   .capability dd {
     margin: 0;
     font-size: 15px;
+  }
+
+  @media (min-width: 1800px) {
+    .about-copy {
+      font-size: 48px;
+    }
+
+    .capability {
+      grid-template-columns: minmax(180px, 0.35fr) 1fr;
+      padding: 26px 0;
+    }
+
+    .capability dt {
+      font-size: 14px;
+    }
+
+    .capability dd {
+      font-size: 18px;
+    }
   }
 
   @media (max-width: 900px) {
@@ -93,12 +114,9 @@ const { id, paragraphs, capabilities } = Astro.props;
   }
 
   @media (max-width: 620px) {
-    .capabilities {
-      grid-template-columns: 1fr;
-    }
-
     .capability {
-      min-height: 0;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
   }
 </style>

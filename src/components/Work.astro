@@ -25,7 +25,7 @@ const { id, roles } = Astro.props;
 
   <ol class="experience-list">
     {
-      roles.map((role, i) => (
+      roles.map((role) => (
         <li class="experience reveal">
           <div class="experience-meta">
             <p class="company">{role.company}</p>
@@ -36,14 +36,18 @@ const { id, roles } = Astro.props;
 
           <div class="experience-body">
             <h3>{role.role}</h3>
+            <p class="evidence-label">Summary</p>
             <p class="experience-summary prose" set:html={inlineMarkup(role.summary)} />
 
             {role.lead.length > 0 && (
-              <ul class="experience-lead prose">
-                {role.lead.map((b) => (
-                  <li set:html={inlineMarkup(b)} />
-                ))}
-              </ul>
+              <div class="experience-evidence">
+                <p class="evidence-label">Accomplishments</p>
+                <ul class="experience-lead prose">
+                  {role.lead.map((b) => (
+                    <li set:html={inlineMarkup(b)} />
+                  ))}
+                </ul>
+              </div>
             )}
 
             {role.detail.length > 0 && (
@@ -75,10 +79,6 @@ const { id, roles } = Astro.props;
               </ul>
             )}
           </div>
-
-          <span class="experience-number" aria-hidden="true">
-            {String(i + 1).padStart(2, '0')}
-          </span>
         </li>
       ))
     }
@@ -93,10 +93,14 @@ const { id, roles } = Astro.props;
   .experience {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(160px, 0.42fr) minmax(0, 1fr);
-    gap: clamp(28px, 6vw, 84px);
-    padding: 38px 72px 38px 0;
+    grid-template-columns: minmax(170px, 0.34fr) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 92px);
+    padding: 48px 0;
     border-top: 1px solid var(--line);
+  }
+
+  .experience:first-child {
+    border-top: 3px solid var(--ink);
   }
 
   .experience:last-child {
@@ -108,40 +112,58 @@ const { id, roles } = Astro.props;
   }
 
   .experience-meta .company {
-    margin-bottom: 5px;
-    font-weight: 700;
+    margin-bottom: 8px;
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 680;
   }
 
   .experience-meta p:last-child {
     color: var(--ink-soft);
     font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .experience-body h3 {
-    margin-bottom: 12px;
-    font-family: var(--serif);
-    font-size: clamp(26px, 3vw, 38px);
-    font-weight: 500;
-    line-height: 1.08;
+    margin-bottom: 26px;
+    font-family: var(--display);
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 650;
+    line-height: 1;
+  }
+
+  .evidence-label {
+    margin-bottom: 7px;
+    color: var(--teal);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .experience-summary {
-    max-width: 66ch;
+    max-width: 72ch;
     color: var(--ink-soft);
+    font-size: 17px;
+  }
+
+  .experience-evidence {
+    margin-top: 28px;
   }
 
   .experience-lead {
     list-style: none;
-    max-width: 66ch;
-    margin-top: 16px;
+    max-width: 76ch;
     display: grid;
-    gap: 8px;
+    gap: 0;
+    border-top: 1px solid var(--line);
   }
 
   .experience-lead li {
     position: relative;
-    padding-left: 18px;
+    padding: 13px 12px 13px 28px;
+    border-bottom: 1px solid var(--line);
     color: var(--ink-soft);
     font-size: 15px;
   }
@@ -149,11 +171,12 @@ const { id, roles } = Astro.props;
   .experience-lead li::before {
     content: '';
     position: absolute;
-    left: 0;
-    top: 0.62em;
-    width: 8px;
-    height: 1px;
-    background: var(--coral);
+    left: 7px;
+    top: 1.35em;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--coral);
+    border-radius: 50%;
   }
 
   .experience-more {
@@ -165,7 +188,7 @@ const { id, roles } = Astro.props;
     align-items: center;
     gap: 6px;
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--teal-dark);
@@ -242,20 +265,52 @@ const { id, roles } = Astro.props;
   }
 
   .tag-list li {
-    padding: 5px 11px;
-    border: 1px solid var(--line);
+    position: relative;
+    padding: 0 0 0 12px;
     font-family: var(--mono);
-    font-size: 10px;
+    font-size: 12px;
     text-transform: uppercase;
   }
 
-  .experience-number {
+  .tag-list li::before {
+    content: '';
     position: absolute;
-    top: 34px;
-    right: 0;
-    color: var(--line);
-    font-family: var(--serif);
-    font-size: 36px;
+    top: 0.5em;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    background: var(--blue);
+  }
+
+  @media (min-width: 1800px) {
+    .experience {
+      grid-template-columns: minmax(260px, 0.34fr) minmax(0, 1fr);
+      padding: 72px 0;
+    }
+
+    .experience-meta .company {
+      font-size: 24px;
+    }
+
+    .experience-meta p:last-child,
+    .evidence-label,
+    .experience-more summary,
+    .tag-list li {
+      font-size: 14px;
+    }
+
+    .experience-body h3 {
+      font-size: 54px;
+    }
+
+    .experience-summary {
+      font-size: 20px;
+    }
+
+    .experience-lead li,
+    .experience-detail li {
+      font-size: 18px;
+    }
   }
 
   @media (max-width: 620px) {
@@ -265,9 +320,5 @@ const { id, roles } = Astro.props;
       padding: 30px 0 34px;
     }
 
-    .experience-number {
-      top: 22px;
-      font-size: 24px;
-    }
   }
 </style>

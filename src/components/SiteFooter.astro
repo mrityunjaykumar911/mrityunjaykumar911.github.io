@@ -22,10 +22,11 @@ const { name, year } = Astro.props;
     align-items: center;
     min-height: 92px;
     padding: 20px var(--gutter);
-    background: var(--ink);
-    color: #aeb9b4;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--teal-dark);
+    color: #d5e4df;
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
   }
 
@@ -47,6 +48,13 @@ const { name, year } = Astro.props;
     align-items: center;
     gap: 6px;
     justify-self: end;
+  }
+
+  @media (min-width: 1800px) {
+    .site-footer {
+      min-height: 110px;
+      font-size: 14px;
+    }
   }
 
   @media (max-width: 620px) {

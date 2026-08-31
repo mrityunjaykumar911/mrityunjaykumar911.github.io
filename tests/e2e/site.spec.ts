@@ -26,7 +26,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
   ).toBeVisible();
   for (const tag of [
     'ML systems',
-    'Agent infrastructure',
+    'Inference & serving infrastructure',
     'Model evaluation',
     'Fine-tuning & MLOps',
   ]) {
@@ -94,6 +94,163 @@ test('published page stays generic and exposes complete metadata', async ({ page
   expect(
     await portrait.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
   ).toBe(true);
+});
+
+test('landing viewport presents the reliability trace design system', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  const deliveryPath = page.getByRole('list', { name: 'Delivery path' });
+  await expect(deliveryPath).toBeVisible();
+  await expect(deliveryPath.getByRole('listitem')).toHaveText([
+    /01\s+Frame the problem/,
+    /02\s+Build the system/,
+    /03\s+Prove the signal/,
+    /04\s+Operate at scale/,
+  ]);
+
+  const heroHeading = page.getByRole('heading', { level: 1 });
+  expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
+    'Bricolage Grotesque'
+  );
+
+  const signalStrip = page.getByRole('region', { name: 'At a glance' });
+  const signalBox = await signalStrip.boundingBox();
+  expect(signalBox).not.toBeNull();
+  expect(signalBox!.y).toBeLessThan(900);
+
+  await expect(page.locator('.experience-number')).toHaveCount(0);
+});
+
+test('ultrawide view uses the available canvas without shrinking the portfolio', async ({ page }) => {
+  await page.setViewportSize({ width: 3840, height: 1600 });
+  await page.goto('/');
+
+  const hero = await page.locator('.hero').boundingBox();
+  const portrait = await page.locator('.hero-visual').boundingBox();
+  const headingSize = await page
+    .getByRole('heading', { level: 1 })
+    .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
+
+  expect(hero).not.toBeNull();
+  expect(portrait).not.toBeNull();
+  expect(hero!.width).toBeGreaterThanOrEqual(2000);
+  expect(portrait!.width).toBeGreaterThanOrEqual(440);
+  expect(headingSize).toBeGreaterThanOrEqual(96);
+
+  for (const [selector, minimum] of [
+    ['.site-nav', 14],
+    ['.signal-strip p', 16],
+    ['.experience-summary', 20],
+    ['.experience-lead li', 18],
+    ['.research-note h3', 22],
+    ['.capability dd', 18],
+    ['.site-footer', 14],
+  ] as const) {
+    const fontSize = await page.locator(selector).first().evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize)
+    );
+    expect(fontSize, selector).toBeGreaterThanOrEqual(minimum);
+  }
+});
+
+test('visual system stays readable and color-coherent', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  expect(
+    await page.locator('body').evaluate((element) => getComputedStyle(element, '::before').display)
+  ).toBe('none');
+
+  const signalStrip = page.getByRole('region', { name: 'At a glance' });
+  expect(await signalStrip.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+    'rgb(232, 238, 235)'
+  );
+  expect(
+    await signalStrip.locator('p').first().evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize)
+    )
+  ).toBeGreaterThanOrEqual(14);
+
+  const metadataSelectors = [
+    '.wordmark-role',
+    '.site-nav',
+    '.delivery-path',
+    '.evidence-label',
+    '.research-section::before',
+    '.contact-areas',
+    '.site-footer',
+  ];
+  for (const selector of metadataSelectors) {
+    const [baseSelector, pseudo] = selector.split('::');
+    const fontSize = await page.locator(baseSelector).first().evaluate(
+      (element, pseudoElement) =>
+        Number.parseFloat(getComputedStyle(element, pseudoElement ? `::${pseudoElement}` : null).fontSize),
+      pseudo
+    );
+    expect(fontSize, selector).toBeGreaterThanOrEqual(12);
+  }
+
+  const contact = page.locator('.contact-section');
+  const footer = page.locator('.site-footer');
+  expect(await contact.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+    'rgb(5, 91, 80)'
+  );
+  expect(await footer.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+    'rgb(5, 91, 80)'
+  );
+  expect(await contact.evaluate((element) => getComputedStyle(element, '::after').content)).toBe(
+    'none'
+  );
+});
+
+test('experience and research read as an evidence system', async ({ page }) => {
+  await page.goto('/');
+
+  const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
+  await expect(microsoftRole.getByText('Summary', { exact: true })).toBeVisible();
+  await expect(microsoftRole.getByText('Accomplishments', { exact: true })).toBeVisible();
+
+  const proofRegistry = page.getByRole('list', { name: 'Research proof registry' });
+  await expect(proofRegistry).toBeVisible();
+  await expect(proofRegistry.getByRole('listitem')).toHaveCount(9);
+
+  const capabilityMatrix = page.getByRole('group', { name: 'Core capability matrix' });
+  await expect(capabilityMatrix).toBeVisible();
+  expect(
+    await capabilityMatrix.evaluate((element) => getComputedStyle(element).borderLeftWidth)
+  ).toBe('0px');
+});
+
+test('delivery trace motion communicates progress and respects reduced motion', async ({ page }) => {
+  await page.goto('/');
+
+  const traceLine = page.locator('[data-trace-line]');
+  await expect(traceLine).toHaveAttribute('aria-hidden', 'true');
+  expect(await traceLine.evaluate((element) => getComputedStyle(element).animationName)).toContain(
+    'trace-draw'
+  );
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload();
+  expect(
+    await traceLine.evaluate((element) => element.getAnimations()[0]?.effect?.getComputedTiming().duration)
+  ).toBeLessThanOrEqual(0.01);
+});
+
+test('fast navigation never leaves content hidden', async ({ page }) => {
+  await page.goto('/');
+
+  for (const id of ['work', 'research', 'about']) {
+    await page.locator(`#${id}`).scrollIntoViewIfNeeded();
+  }
+  await page.locator('.contact-section').scrollIntoViewIfNeeded();
+
+  await expect
+    .poll(() =>
+      page.locator('.reveal:not(.is-visible)').evaluateAll((elements) => elements.length)
+    )
+    .toBe(0);
 });
 
 test('published HTML protects contact details and retires the stale CV route', async ({ request }) => {
