@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const MEASUREMENT_ID = 'G-EEGFTXJWGJ';
+const MEASUREMENT_ID = 'G-2JMPRPCPBP';
 
 /**
  * The first two checks are network-independent — they only look at the page
