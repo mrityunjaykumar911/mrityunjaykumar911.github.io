@@ -20,7 +20,7 @@ profile:
   role: Senior ML Engineer
   focus: ML Systems & Agent Infrastructure
   company: Microsoft
-  location: Palo Alto, California
+  location: San Francisco Bay Area, California
   email: mjay.cse@gmail.com
   avatar: /images/mrityunjay-portrait.jpg
   resumePdf: /cv/MrityunjayKumar-CV.pdf
@@ -133,7 +133,7 @@ experience:
   # Pre-Microsoft roles keep the full project-level record from the older CV.
   - company: Microsoft
     role: Senior ML Engineer
-    location: Palo Alto, CA
+    location: Mountain View, CA
     start: 2022-05
     end: null # null renders as "Present"
     summary: >-
@@ -199,8 +199,8 @@ experience:
       chatbots, and network analytics, applying ML to network-based problems.
     lead:
       - >-
-        Led **file-sync** tool development: a delta-sync service in C++ cut
-        sync-server load by **200%**; also a stateless updater, a multi-tenant
+        Led **file-sync** tool development: a delta-sync service in C++
+        substantially reduced sync-server load; also built a stateless updater, a multi-tenant
         client update framework, and a rate limiter that improved sync
         frequency **30%**.
       - >-
@@ -260,23 +260,22 @@ experience:
 
 research:
   feature:
-    label: Graduate research · Stony Brook University · Advisor Prof. Shuai Mu
+    label: Graduate Research Assistant · Stony Brook University · 2019–2020 · Advisor Prof. Shuai Mu
     title: Replicating multi-core transactions without giving up performance.
     body: >-
-      Asynchronous replication with multi-process Paxos to remove contention;
-      a header-only C++ logging library (~1200 LOC) with aligned allocators,
-      rotating logs, and auto-flush; an optimistic replay protocol for
-      serializability with a stream-verification pipeline; and evaluation
-      micro-benchmarks profiled with mutrace and gprof. Development and
-      early-stage evaluation contributions to Rolis (EuroSys 2022).
+      Co-authored Rolis (EuroSys 2022) and implemented core mechanisms for its
+      replicated multi-core transaction engine: asynchronous multi-process
+      Paxos, checkpoint log truncation, and serializable replay. Built a
+      header-only C++ logging library (~1200 LOC) and evaluation benchmarks
+      profiled with mutrace and gprof.
     link:
-      href: http://mpaxos.com/
+      href: https://mpaxos.com/
       text: Visit the research group
 
   notes:
     - type: Publication
       title: "Rolis: a software approach to efficiently replicating multi-core transactions"
-      meta: EuroSys 2022 · development & early-stage evaluation
+      meta: EuroSys 2022 · systems implementation & evaluation
       href: https://dl.acm.org/doi/10.1145/3492321.3519576
     - type: Patent
       title: Verification of metadata consistency across snapshot COW B+ tree logical maps
@@ -304,7 +303,6 @@ research:
     - type: Project
       title: Mood- and activity-based music recommendation
       meta: Data Visualization Lab
-      href: https://sbu-musicx.up.railway.app/user.html
 
 education:
   - school: Stony Brook University

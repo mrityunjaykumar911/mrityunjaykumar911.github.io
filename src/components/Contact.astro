@@ -11,6 +11,7 @@ interface Props {
 const { heading, areas, links } = Astro.props;
 const isExternal = (href: string) => href.startsWith('http');
 const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-up-right');
+const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').reverse().join('');
 ---
 
 <section class="contact-section" aria-labelledby="contact-title">
@@ -33,7 +34,8 @@ const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-u
     {
       links.map((link) => (
         <a
-          href={link.href}
+          href={link.icon === 'mail' ? '#contact-email' : link.href}
+          data-email-reversed={link.icon === 'mail' ? reverseEmail(link.href) : undefined}
           target={isExternal(link.href) ? '_blank' : undefined}
           rel={isExternal(link.href) ? 'noreferrer' : undefined}
         >
@@ -43,6 +45,15 @@ const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-u
     }
   </div>
 </section>
+
+<script>
+  const emailLink = document.querySelector<HTMLAnchorElement>('[data-email-reversed]');
+  const reversedEmail = emailLink?.dataset.emailReversed;
+
+  if (emailLink && reversedEmail) {
+    emailLink.href = `mailto:${[...reversedEmail].reverse().join('')}`;
+  }
+</script>
 
 <style>
   .contact-section {

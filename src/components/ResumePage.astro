@@ -55,7 +55,6 @@ const jsonLd = {
   name: profile.name,
   url: new URL(withBase('/'), Astro.site).href,
   image: new URL(profile.avatar, Astro.site).href,
-  email: `mailto:${profile.email}`,
   jobTitle: profile.role,
   description: stripMarkup(profile.summary),
   worksFor: { '@type': 'Organization', name: profile.company },

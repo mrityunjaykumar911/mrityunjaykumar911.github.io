@@ -61,18 +61,55 @@ test('published page stays generic and exposes complete metadata', async ({ page
     'content',
     /\/images\/mrityunjay-portrait\.jpg$/
   );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    'content',
+    'summary_large_image'
+  );
   const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
   expect(structuredData).toContain(
     'Maulana Azad National Institute of Technology, Bhopal'
   );
   expect(structuredData).toContain('LLM agent infrastructure');
   expect(structuredData).toContain('Azure Machine Learning');
+  expect(structuredData).not.toContain('"email"');
+
+  await expect(
+    page.getByText('Graduate Research Assistant · Stony Brook University · 2019–2020', {
+      exact: false,
+    })
+  ).toBeVisible();
+  await expect(page.getByText('Co-authored Rolis', { exact: false })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Visit the research group' })).toHaveAttribute(
+    'href',
+    'https://mpaxos.com/'
+  );
+  await expect(page.locator('a[href*="sbu-musicx"]')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Email' })).toHaveAttribute(
+    'href',
+    'mailto:mjay.cse@gmail.com'
+  );
 
   const portrait = page.getByRole('img', { name: 'Portrait of Mrityunjay Kumar' });
   await expect(portrait).toBeVisible();
   expect(
     await portrait.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)
   ).toBe(true);
+});
+
+test('published HTML protects contact details and retires the stale CV route', async ({ request }) => {
+  const publishedResponse = await request.get('/');
+  expect(publishedResponse.ok()).toBe(true);
+  const publishedHtml = await publishedResponse.text();
+  expect(publishedHtml).not.toContain('mjay.cse@gmail.com');
+  expect(publishedHtml).not.toContain('cut sync-server load by <strong>200%</strong>');
+  expect(publishedHtml).not.toContain('sbu-musicx.up.railway.app');
+
+  const legacyResponse = await request.get('/cv/cv/MrityunjayKumarCV.pdf.html');
+  expect(legacyResponse.ok()).toBe(true);
+  const legacyHtml = await legacyResponse.text();
+  expect(legacyHtml).toContain('noindex, nofollow');
+  expect(legacyHtml).toContain('../MrityunjayKumar-CV.pdf');
+  expect(legacyHtml).not.toMatch(/\+?\d[\d\s().-]{7,}\d/);
 });
 
 test('crawler resources expose professional context without contact PII', async ({ request }) => {
