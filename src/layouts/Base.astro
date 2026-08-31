@@ -22,6 +22,10 @@ const {
   canonicalPath,
 } = Astro.props;
 
+// Google Analytics 4. Override or disable via PUBLIC_GA_ID in the environment
+// (set it empty to ship no analytics at all).
+const gaId = import.meta.env.PUBLIC_GA_ID ?? 'G-EEGFTXJWGJ';
+
 const canonical = new URL(withBase(canonicalPath ?? Astro.url.pathname), Astro.site).href;
 const socialImage = new URL(withBase(image), Astro.site).href;
 const favicon = withBase('/favicon.ico');
@@ -111,6 +115,19 @@ const fontFaces = `
     {
       jsonLd && (
         <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      )
+    }
+
+    {/* Google Analytics (gtag.js). */}
+    {
+      gaId && (
+        <>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+          <script
+            is:inline
+            set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${gaId}');`}
+          />
+        </>
       )
     }
   </head>
