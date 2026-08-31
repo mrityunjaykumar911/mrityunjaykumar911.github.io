@@ -18,18 +18,18 @@ profile:
   name: Mrityunjay Kumar
   pronunciation: MRIT-yen-jay koo-MARR
   role: Senior ML Engineer
-  focus: Distributed Systems & Backend Infrastructure
+  focus: ML Systems & Agent Infrastructure
   company: Microsoft
   location: Palo Alto, California
   email: mjay.cse@gmail.com
   avatar: /images/mrityunjay-portrait.jpg
   resumePdf: /cv/MrityunjayKumar-CV.pdf
 
-  headline: I build systems that stay *reliable* when things get complicated.
+  headline: I build ML systems that stay *reliable* when things get complicated.
   intro: >-
     I'm Mrityunjay, a senior ML engineer in the San Francisco Bay Area. My work
-    spans distributed storage, backend services, data infrastructure, and the
-    careful engineering between them.
+    spans production ML systems, agent infrastructure, distributed services,
+    and the evaluation and data pipelines that connect them.
   signals:
     - 12+ years in software engineering
     - Microsoft · VMware · Talentica · MediaTek
@@ -47,13 +47,13 @@ profile:
 
   # <meta description> / OpenGraph / JSON-LD — plain text, no markup.
   tagline: >-
-    Software engineer focused on distributed systems, storage, and backend
-    infrastructure.
+    Senior ML engineer building production ML systems, agent infrastructure,
+    evaluation pipelines, and reliable distributed services.
   summary: >-
-    Software engineer with a decade across distributed systems and backend
-    infrastructure: distributed storage and crash consistency, cloud services,
-    and real-time data pipelines. Co-author **EuroSys 2022** (Rolis). Patent
-    holder in snapshot metadata verification.
+    Senior ML engineer with 12+ years across production ML systems, agent
+    infrastructure, distributed services, and storage. Builds model evaluation,
+    fine-tuning, data, and observability platforms for PowerPoint. Co-author
+    **EuroSys 2022** (Rolis). Patent holder in snapshot metadata verification.
 
 links:
   - label: GitHub
@@ -75,16 +75,24 @@ links:
 
 capabilities:
   - label: Languages
-    value: C++ · Python · C · Java · Go
-  - label: Systems
-    value: Distributed storage · Backend services · Data infrastructure
-  - label: Education
-    value: MS, Computer Science — Stony Brook University
-  - label: Foundations
-    value: Consensus · Replication · Reliability · Observability
+    value: Python · C# · C++ · C · Java · Go
+  - label: ML systems
+    value: Agent infrastructure · Model evaluation · Fine-tuning pipelines
+  - label: Distributed systems
+    value: Cloud services · Data infrastructure · Transactional storage
+  - label: Production
+    value: Azure · MLOps · Reliability · Observability
 
 # Not rendered — feeds JSON-LD `knowsAbout` for search engines.
 skills:
+  - group: ML Systems
+    items:
+      - Production ML systems
+      - LLM agent infrastructure
+      - Model evaluation
+      - Fine-tuning pipelines
+      - Synthetic data generation
+      - MLOps
   - group: Systems
     items:
       - Distributed systems
@@ -96,14 +104,20 @@ skills:
   - group: Platforms
     items:
       - Azure
+      - Azure Machine Learning
+      - Azure Container Instances
       - AWS
       - Docker
       - Redis
       - Kafka
       - gRPC
+      - OpenTelemetry
+      - Prometheus
+      - Grafana
   - group: Languages
     items:
       - Python
+      - C#
       - C++
       - C
       - Java
@@ -119,12 +133,27 @@ experience:
     start: 2022-05
     end: null # null renders as "Present"
     summary: >-
-      Building and operating backend services for PowerPoint, with an emphasis
-      on dependable service engineering at global product scale.
+      Building production ML and agent infrastructure for PowerPoint, spanning
+      model evaluation, fine-tuning pipelines, agentic workflows, and reliable
+      cloud services.
+    lead:
+      - >-
+        Pioneered PowerPoint's first fine-tuned-model workflow, spanning
+        synthetic-data generation, throttling-resistant batching, secure model
+        deployment, inference, and agent integration.
+      - >-
+        Built extensible agentic slide-generation and evaluation systems with
+        pluggable models and datasets, end-to-end telemetry, and a parallel
+        evaluation framework delivering **4.6x faster** processing.
+      - >-
+        Designed and operated PowerPoint cloud services across commercial and
+        government environments, adding automated validation, observability,
+        and incident-response tooling.
     tags:
-      - Backend systems
-      - Service reliability
-      - Cloud infrastructure
+      - ML systems
+      - Agent infrastructure
+      - Model evaluation
+      - Fine-tuning & MLOps
 
   - company: VMware
     role: Member of Technical Staff III
@@ -279,7 +308,7 @@ education:
     location: Stony Brook, NY
     start: 2019
     end: 2020
-  - school: NIT Bhopal (MANIT)
+  - school: Maulana Azad National Institute of Technology, Bhopal
     degree: B.Tech. in Computer Science & Engineering
     location: Bhopal, India
     start: 2010

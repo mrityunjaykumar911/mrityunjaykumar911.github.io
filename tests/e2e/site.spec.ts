@@ -1,16 +1,35 @@
 import { expect, test } from '@playwright/test';
 
 const privateMarker = '7,000 containers';
+const previewOnlyMarkers = [
+  privateMarker,
+  'corrupt reward signal',
+  'RL reward',
+  'PowerPoint Agent v1.1',
+];
 
 test('published page stays generic and exposes complete metadata', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveTitle('Mrityunjay Kumar | Senior ML Engineer');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I build systems that stay reliable'
+    'I build ML systems that stay reliable'
   );
   await expect(page.getByRole('status')).toHaveCount(0);
-  await expect(page.getByText(privateMarker, { exact: false })).toHaveCount(0);
+  for (const marker of previewOnlyMarkers) {
+    await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
+  }
+
+  const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
+  await expect(microsoftRole.getByText('4.6x faster', { exact: false })).toBeVisible();
+  for (const tag of [
+    'ML systems',
+    'Agent infrastructure',
+    'Model evaluation',
+    'Fine-tuning & MLOps',
+  ]) {
+    await expect(microsoftRole.getByText(tag, { exact: true })).toBeVisible();
+  }
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
@@ -20,6 +39,12 @@ test('published page stays generic and exposes complete metadata', async ({ page
     'content',
     /\/images\/mrityunjay-portrait\.jpg$/
   );
+  const structuredData = await page.locator('script[type="application/ld+json"]').textContent();
+  expect(structuredData).toContain(
+    'Maulana Azad National Institute of Technology, Bhopal'
+  );
+  expect(structuredData).toContain('LLM agent infrastructure');
+  expect(structuredData).toContain('Azure Machine Learning');
 
   const portrait = page.getByRole('img', { name: 'Portrait of Mrityunjay Kumar' });
   await expect(portrait).toBeVisible();
@@ -43,9 +68,11 @@ test('normal URL does not load the detailed resume', async ({ page }) => {
   await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '');
   await expect(page.getByRole('status')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I build systems that stay reliable'
+    'I build ML systems that stay reliable'
   );
-  await expect(page.getByText(privateMarker, { exact: false })).toHaveCount(0);
+  for (const marker of previewOnlyMarkers) {
+    await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
+  }
 });
 
 test('normal URL prints the console greeting and preview link', async ({ page }) => {
@@ -80,6 +107,16 @@ for (const query of ['?flags=latest', '?preview']) {
     await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === query);
     await expect(page.getByRole('status')).toContainText('Preview');
     await expect(page.getByText(privateMarker, { exact: false }).first()).toBeVisible();
+    await expect(
+      page.getByText('PowerPoint Agent v1.1', { exact: false }).first()
+    ).toBeVisible();
+
+    const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
+    await microsoftRole.getByText('Full detail').click();
+    await expect(
+      microsoftRole.getByText('100M+ documents', { exact: false })
+    ).toBeVisible();
+
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
       'RL Infrastructure and Applied AI'
     );

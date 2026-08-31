@@ -44,7 +44,25 @@ experienceOverrides:
       - >-
         **5.7x** platform throughput (0.70 → 4.01 files/s) by resolving a
         three-stage bottleneck chain.
+      - >-
+        Enabled the RL infrastructure behind a model shipped in **PowerPoint
+        Agent v1.1**, spanning evaluation, integration, rollout, and production
+        telemetry.
     detail:
+      - title: Shipped product & organizational adoption
+        bullets:
+          - >-
+            Owned review-model integration, deployment coordination, telemetry,
+            and production rollout for an RL-trained model shipped to PowerPoint
+            customers.
+          - >-
+            Built a PowerPoint-native execution platform adopted beyond the
+            immediate team to generate **100M+ documents** for model pre-training.
+          - >-
+            Migrated per-datapoint stateful VMs to stateless session pools:
+            valid-sample rate ≈40% → ≈99%, RL-loop time ≈7 days → 24–36 hours,
+            environment acquisition 2–5 min → ≈100 ms, and per-edit payload
+            ≈16 MB → ≈100 bytes.
       - title: RL reward signal & evaluation
         bullets:
           - Built *LLM-as-judge* reward grading for multi-turn agent trajectories.
@@ -84,11 +102,25 @@ experienceOverrides:
             Cleared two RL-scale blockers (platform throttling at 1.4M req/10
             min; VM-lifecycle leak blocking 20k-VM parallelism); end-to-end
             OpenTelemetry/Jaeger tracing, per-turn attributable.
-      - title: ML platform & fine-tuning data pipeline
+      - title: ML platform & fine-tuning
         bullets:
+          - >-
+            Pioneered PowerPoint's first fine-tuned-model workflow: synthetic
+            data generation, throttling-resistant batching, secure deployment,
+            inference, and integration into agent workflows.
           - >-
             Authored a model-first platform architecture (ingestion, grading,
             eval, observability) adopted as org blueprint.
           - >-
             Designed a multi-turn SFT data strategy: three-phase curation, full
             training schema, DAG execution cutting agent latency ≈100s → 37s.
+      - title: Technical leadership & team enablement
+        bullets:
+          - >-
+            Mentored five engineers and a summer intern through architecture
+            reviews, code reviews, and production debugging; the intern shipped
+            cloud-hosted grading and tagging tools.
+          - >-
+            Led service and ML-system design walkthroughs, documentation, and
+            engineering sessions that accelerated onboarding and distributed
+            operational knowledge across the team.
