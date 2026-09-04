@@ -22,9 +22,9 @@ test('published page stays generic and exposes complete metadata', async ({ page
   await page.goto('/');
 
   await expect(page).toHaveTitle('Mrityunjay Kumar | Senior ML Engineer');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I engineer production AI infrastructure across inference, evaluation, and post-training'
-  );
+  const thesis = 'I build distributed infrastructure that makes LLM agents reliable in production';
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(thesis);
+  await expect(page.getByText(thesis, { exact: false })).toHaveCount(1);
   await expect(page.getByRole('status')).toHaveCount(0);
   for (const marker of previewOnlyMarkers) {
     await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
@@ -44,7 +44,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
   }
   await expect(
     page.getByRole('heading', {
-      name: 'I build distributed infrastructure that makes LLM agents reliable in production.',
+      name: "Let's talk about production AI infrastructure.",
     })
   ).toBeVisible();
   const focusAreas = page.getByRole('list', { name: 'Areas of focus' });
@@ -88,7 +88,12 @@ test('published page stays generic and exposes complete metadata', async ({ page
       exact: false,
     })
   ).toBeVisible();
-  await expect(page.getByText('Co-authored Rolis', { exact: false })).toBeVisible();
+  const researchAssistantRole = page.locator('.experience').filter({
+    hasText: 'Graduate Research Assistant',
+  });
+  await expect(
+    researchAssistantRole.getByText('published at EuroSys 2022', { exact: false })
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Visit the research group' })).toHaveAttribute(
     'href',
     'https://mpaxos.com/'
@@ -120,16 +125,16 @@ test('email link degrades gracefully without JavaScript', async ({ browser }) =>
   await context.close();
 });
 
-test('landing viewport presents the reliability trace design system', async ({ page }) => {
+test('landing viewport presents a clear thesis and proof', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
   const heroHeading = page.getByRole('heading', { level: 1 });
   await expect(heroHeading).toContainText(
-    'production AI infrastructure across inference, evaluation, and post-training'
+    'distributed infrastructure that makes LLM agents reliable in production'
   );
   await expect(page.locator('.hero-intro')).toContainText(
-    'latency, throughput, and reliability'
+    'latency, throughput, and fault recovery'
   );
   await expect(page.getByRole('list', { name: 'Delivery path' })).toHaveCount(0);
   expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
@@ -137,6 +142,13 @@ test('landing viewport presents the reliability trace design system', async ({ p
   );
 
   const signalStrip = page.getByRole('region', { name: 'At a glance' });
+  for (const signal of [
+    'Thousands of concurrent containers',
+    '4.6x faster model evaluation',
+    'EuroSys 2022 · U.S. patent',
+  ]) {
+    await expect(signalStrip.getByText(signal, { exact: true })).toBeVisible();
+  }
   const signalBox = await signalStrip.boundingBox();
   expect(signalBox).not.toBeNull();
   expect(signalBox!.y).toBeLessThan(900);
@@ -314,7 +326,7 @@ test('normal URL does not load the detailed resume', async ({ page }) => {
   await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '');
   await expect(page.getByRole('status')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I engineer production AI infrastructure across inference, evaluation, and post-training'
+    'I build distributed infrastructure that makes LLM agents reliable in production'
   );
   for (const marker of previewOnlyMarkers) {
     await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
