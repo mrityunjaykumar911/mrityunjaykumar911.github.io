@@ -20,16 +20,16 @@ profile:
   role: Senior ML Engineer
   focus: ML Systems & Agent Infrastructure
   company: Microsoft
-  location: San Francisco Bay Area, California
+  location: San Francisco Bay Area
   email: mjay.cse@gmail.com
   avatar: /images/mrityunjay-portrait.jpg
   resumePdf: /cv/MrityunjayKumar-CV.pdf
 
-  headline: I build ML systems that stay *reliable* when things get complicated.
+  headline: I engineer *production AI infrastructure* across inference, evaluation, and post-training.
   intro: >-
-    I'm Mrityunjay, a senior ML engineer in the San Francisco Bay Area. My work
-    spans production ML systems, agent infrastructure, distributed services,
-    and the evaluation and data pipelines that connect them.
+    Senior ML systems engineer with 12+ years across distributed execution,
+    model serving, evaluation, and data infrastructure. I optimize the latency,
+    throughput, and reliability of agent and post-training workloads.
   signals:
     - 12+ years in software engineering
     - Microsoft · VMware · Talentica · MediaTek
@@ -147,7 +147,7 @@ experience:
     start: 2022-05
     end: null # null renders as "Present"
     summary: >-
-      Building production ML and agent infrastructure for PowerPoint — model
+      Building production ML and agent infrastructure for PowerPoint, spanning model
       evaluation, fine-tuning pipelines, and the distributed serving and
       execution systems that run these workloads at scale with low latency and
       high reliability.
@@ -185,7 +185,7 @@ experience:
     lead:
       - >-
         Conceptualized and built **distributed FSCK** for analyzing and
-        repairing storage metadata — cross-consistency matrices across B+
+        repairing storage metadata with cross-consistency matrices across B+
         trees, bitmaps, and segment usage tables, in online and offline modes
         via lazy evaluation.
       - >-
@@ -204,13 +204,24 @@ experience:
       - Metadata integrity
       - C++
 
+  - company: Stony Brook University
+    role: Graduate Research Assistant
+    location: Stony Brook, NY
+    start: 2019-08
+    end: 2020-06
+    summary: >-
+      Graduate research on replicated multi-core transactions (Rolis, EuroSys
+      2022); the full writeup appears in Research below.
+    tags:
+      - Distributed systems research
+
   - company: Talentica Software
     role: Senior Software Engineer
     location: Pune, India
     start: 2016-04
     end: 2019-01
     summary: >-
-      Data Science team — three years across search, ML pipelines, file sync,
+      Data Science team, with three years across search, ML pipelines, file sync,
       chatbots, and network analytics, applying ML to network-based problems.
     lead:
       - >-
@@ -219,7 +230,7 @@ experience:
         client update framework, and a rate limiter that improved sync
         frequency **30%**.
       - >-
-        Built a **financial-document search engine** — **+45%** search
+        Built a **financial-document search engine** with **+45%** search
         relevancy, **+30%** online ontology enhancer, with an NLP pipeline for
         clustering, keyword extraction, and text classification.
       - >-
@@ -235,17 +246,17 @@ experience:
       - title: More Talentica work
         bullets:
           - >-
-            Network traffic estimation — an ensembled regression model for
+            Network traffic estimation: an ensembled regression model for
             bandwidth prediction from SLA metrics and native Speedtest feedback.
           - >-
-            Network traffic identification — a multi-modal ML model (regression
+            Network traffic identification: a multi-modal ML model (regression
             ensemble + auto-encoders) classifying audio vs. video streams.
           - Real-time ML model deployment pipeline on Storm, Kafka, Python, Java.
           - >-
-            AWS Athena data-dump tool — an ad-hoc Storm-topology client feeding
+            AWS Athena data-dump tool: an ad-hoc Storm-topology client feeding
             a disk + batch pipeline (Java, Spark).
           - >-
-            Single-cell identity classification — an auto-encoder network, 83%
+            Single-cell identity classification: an auto-encoder network, 83%
             accuracy for cell-based print technology.
     tags:
       - Data platforms
@@ -259,7 +270,7 @@ experience:
     start: 2014-08
     end: 2016-04
     summary: >-
-      Multimedia team — audio-player development for feature phones; led
+      Multimedia team, focused on audio-player development for feature phones; led
       in-house stress-test tooling for Wi-Fi / Bluetooth / GPS.
     lead:
       - >-
@@ -301,7 +312,7 @@ research:
       meta: R. Guntur, M. Kumar · IEEE ICMLA 2018 · pp. 73–80
       href: https://ieeexplore.ieee.org/document/8614044
     - type: Teaching
-      title: "Teaching Assistant — Introduction to Data Science (CSE-351)"
+      title: "Teaching Assistant: Introduction to Data Science (CSE-351)"
       meta: Stony Brook University · with Prof. Martin Radfar · 2019
     - type: Systems project
       title: Sharded, replicated, fault-tolerant key-value store on Raft

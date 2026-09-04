@@ -51,11 +51,11 @@ const initials = name
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 72px;
+    height: 68px;
     padding: 0 var(--gutter);
     border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--paper-bright) 88%, transparent);
-    backdrop-filter: blur(18px);
+    background: color-mix(in srgb, var(--paper) 72%, transparent);
+    backdrop-filter: blur(20px) saturate(1.4);
   }
 
   .wordmark {
@@ -69,61 +69,69 @@ const initials = name
   .wordmark-mark {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--ink);
-    background: var(--paper-bright);
-    color: var(--ink);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: #fff;
     font-family: var(--mono);
     font-size: 13px;
+    font-weight: 600;
   }
 
   .wordmark-copy {
     display: grid;
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
   .wordmark-name {
     font-family: var(--display);
-    font-size: 16px;
-    font-weight: 650;
+    font-size: 15px;
+    font-weight: 620;
+    letter-spacing: -0.01em;
   }
 
   .wordmark-role {
-    margin-top: 4px;
-    color: var(--ink-soft);
-    font-family: var(--mono);
-    font-size: 12px;
+    margin-top: 2px;
+    color: var(--ink-faint);
+    font-family: var(--sans);
+    font-size: 13px;
     font-weight: 500;
-    text-transform: uppercase;
   }
 
   .site-nav {
     display: flex;
     align-items: center;
-    gap: 32px;
-    font-family: var(--mono);
-    font-size: 12px;
+    gap: 30px;
+    font-family: var(--sans);
+    font-size: 14px;
     font-weight: 500;
-    text-transform: uppercase;
   }
 
   .site-nav a {
     text-decoration: none;
+    color: var(--ink-soft);
+    transition: color 0.16s ease;
   }
 
   .site-nav a:not(.nav-resume) {
     position: relative;
   }
 
+  .site-nav a:not(.nav-resume):hover,
+  .site-nav a:not(.nav-resume)[aria-current='true'] {
+    color: var(--ink);
+  }
+
   .site-nav a:not(.nav-resume)::after {
     content: '';
     position: absolute;
     right: 0;
-    bottom: -5px;
+    bottom: -6px;
     left: 0;
     height: 2px;
-    background: var(--coral);
+    border-radius: 2px;
+    background: var(--accent);
     transform: scaleX(0);
     transform-origin: right;
     transition: transform 0.25s ease;
@@ -139,24 +147,28 @@ const initials = name
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 42px;
+    min-height: 38px;
     padding: 0 16px;
-    border: 1px solid var(--ink);
-    transition: background 0.2s ease, color 0.2s ease;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink);
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
   }
 
   .nav-resume:hover {
     background: var(--ink);
-    color: var(--paper-bright);
+    color: #fff;
+    border-color: var(--ink);
   }
 
   .menu-button {
     display: none;
     place-items: center;
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     padding: 0;
-    border: 1px solid var(--ink);
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
     background: transparent;
     cursor: pointer;
   }

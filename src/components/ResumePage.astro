@@ -19,12 +19,14 @@ interface Props {
   preview: PreviewState;
   redirectFlaggedRequests?: boolean;
   canonicalPath?: string;
+  indexable?: boolean;
 }
 
 const {
   preview,
   redirectFlaggedRequests = false,
   canonicalPath,
+  indexable = !preview.active,
 } = Astro.props;
 const resolved = resolveResume(preview);
 const profile = {
@@ -126,7 +128,7 @@ const consoleHint = `
   description={description}
   image={profile.avatar}
   jsonLd={jsonLd}
-  noindex={preview.active}
+  noindex={!indexable}
   canonicalPath={canonicalPath}
 >
   {

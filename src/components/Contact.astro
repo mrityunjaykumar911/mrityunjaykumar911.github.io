@@ -12,10 +12,19 @@ const { heading, areas, links } = Astro.props;
 const isExternal = (href: string) => href.startsWith('http');
 const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-up-right');
 const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').reverse().join('');
+const contactPriority = new Map([
+  ['mail', 0],
+  ['linkedin', 1],
+  ['github', 2],
+  ['file', 3],
+]);
+const orderedLinks = [...links].sort(
+  (a, b) => (contactPriority.get(a.icon) ?? 99) - (contactPriority.get(b.icon) ?? 99)
+);
 ---
 
 <section class="contact-section" aria-labelledby="contact-title">
-  <p class="eyebrow">Let's compare notes</p>
+  <p class="eyebrow">Contact</p>
   <div class="contact-pitch">
     <h2 id="contact-title">{heading}</h2>
     <ol class="contact-areas" aria-label="Areas of focus">
@@ -32,9 +41,10 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
 
   <div class="contact-links">
     {
-      links.map((link) => (
+      orderedLinks.map((link) => (
         <a
           href={link.icon === 'mail' ? '#contact-email' : link.href}
+          id={link.icon === 'mail' ? 'contact-email' : undefined}
           data-email-reversed={link.icon === 'mail' ? reverseEmail(link.href) : undefined}
           target={isExternal(link.href) ? '_blank' : undefined}
           rel={isExternal(link.href) ? 'noreferrer' : undefined}
@@ -43,6 +53,9 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
         </a>
       ))
     }
+    <noscript>
+      <p class="contact-noscript">Enable JavaScript to reveal my email address, or use the résumé PDF above.</p>
+    </noscript>
   </div>
 </section>
 
@@ -59,10 +72,10 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
   .contact-section {
     position: relative;
     overflow: hidden;
-    padding: clamp(76px, 11vw, 140px) var(--gutter);
-    border-top: 8px solid var(--coral);
-    background: var(--teal-dark);
-    color: #fff;
+    padding: clamp(72px, 9vw, 120px) var(--gutter);
+    border-top: 1px solid var(--line-strong);
+    background: var(--panel);
+    color: var(--ink);
   }
 
   .contact-section::after {
@@ -70,46 +83,55 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
   }
 
   .contact-section .eyebrow {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
+    color: var(--accent);
   }
 
   .contact-pitch {
     position: relative;
     z-index: 1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr);
-    gap: clamp(36px, 8vw, 120px);
-    align-items: end;
-    max-width: var(--content);
+    width: 100%;
   }
 
   .contact-section h2 {
-    max-width: 22ch;
+    max-width: 20ch;
     font-family: var(--display);
-    font-size: clamp(40px, 5vw, 68px);
-    font-weight: 650;
-    line-height: 0.96;
+    font-size: clamp(30px, 3.4vw, 46px);
+    font-weight: 660;
+    line-height: 1.1;
+    letter-spacing: -0.028em;
   }
 
   .contact-areas {
+    display: flex;
     list-style: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.5);
-    font-family: var(--mono);
+    width: 100%;
+    margin-top: 40px;
+    border-top: 1px solid var(--line-strong);
+    border-bottom: 1px solid var(--line-strong);
+    font-family: var(--sans);
     font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-weight: 500;
   }
 
   .contact-areas li {
-    display: grid;
-    grid-template-columns: 34px 1fr;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    padding: 16px 24px;
+    border-right: 1px solid var(--line-strong);
+  }
+
+  .contact-areas li:first-child {
+    padding-left: 0;
+  }
+
+  .contact-areas li:last-child {
+    border-right: 0;
   }
 
   .contact-areas span {
-    opacity: 0.62;
+    color: var(--accent);
   }
 
   .contact-links {
@@ -125,22 +147,37 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    min-height: 48px;
-    padding: 0 20px;
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    font-weight: 700;
+    min-height: 46px;
+    padding: 0 22px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-weight: 540;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  }
+
+  .contact-links #contact-email {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
   }
 
   .contact-links a:hover {
-    background: #fff;
-    color: var(--teal-dark);
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  .contact-noscript {
+    width: 100%;
+    margin-top: 8px;
+    color: var(--ink-soft);
+    font-size: 14px;
   }
 
   @media (min-width: 1800px) {
     .contact-section h2 {
-      font-size: 86px;
+      font-size: 60px;
     }
 
     .contact-areas {
@@ -149,13 +186,24 @@ const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').re
   }
 
   @media (max-width: 620px) {
-    .contact-pitch {
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-
     .contact-section h2 {
       max-width: none;
+    }
+
+    .contact-areas {
+      display: grid;
+      margin-top: 32px;
+    }
+
+    .contact-areas li,
+    .contact-areas li:first-child {
+      padding: 14px 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .contact-areas li:last-child {
+      border-bottom: 0;
     }
 
     .contact-links,

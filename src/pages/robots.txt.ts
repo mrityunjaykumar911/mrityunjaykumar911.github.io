@@ -12,7 +12,6 @@ export const GET: APIRoute = ({ site }) => {
     [
       `User-agent: *`,
       `Allow: ${allowedPath}`,
-      `Disallow: ${withBase('/latest.html')}`,
       ``,
       `Sitemap: ${sitemapUrl}`,
       ``,

@@ -13,9 +13,8 @@ const { id, paragraphs, capabilities } = Astro.props;
 
 <section class="section about-section" id={id} aria-labelledby={`${id}-title`}>
   <div class="section-heading reveal">
-    <p class="section-number">04</p>
-    <div>
-      <p class="eyebrow">About</p>
+    <p class="eyebrow">About</p>
+    <div class="heading-body">
       <h2 id={`${id}-title`}>Broad tools. One engineering mindset.</h2>
     </div>
   </div>
@@ -42,24 +41,31 @@ const { id, paragraphs, capabilities } = Astro.props;
   .about-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(360px, 0.85fr);
-    gap: clamp(48px, 10vw, 130px);
+    gap: var(--grid-gap);
     align-items: start;
   }
 
   .about-copy {
+    max-width: 60ch;
     font-family: var(--display);
-    font-size: clamp(25px, 3vw, 38px);
-    font-weight: 560;
-    line-height: 1.14;
+    font-size: clamp(20px, 1.7vw, 24px);
+    font-weight: 500;
+    line-height: 1.42;
+    letter-spacing: -0.016em;
+    color: var(--ink);
   }
 
   .about-copy p {
-    margin: 0 0 26px;
+    margin: 0 0 var(--s4);
   }
 
   .about-copy p:last-child {
     margin-bottom: 0;
-    color: var(--teal);
+  }
+
+  .about-copy strong {
+    color: var(--accent);
+    font-weight: 620;
   }
 
   .capabilities {
@@ -80,7 +86,12 @@ const { id, paragraphs, capabilities } = Astro.props;
 
   .capability dt {
     margin: 0;
-    color: var(--coral);
+    color: var(--ink-faint);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .capability dd {
@@ -90,7 +101,7 @@ const { id, paragraphs, capabilities } = Astro.props;
 
   @media (min-width: 1800px) {
     .about-copy {
-      font-size: 48px;
+      font-size: 28px;
     }
 
     .capability {

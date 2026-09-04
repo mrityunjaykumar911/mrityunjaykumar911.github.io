@@ -20,14 +20,13 @@ const { name, year } = Astro.props;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
-    min-height: 92px;
+    min-height: 88px;
     padding: 20px var(--gutter);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    background: var(--teal-dark);
-    color: #d5e4df;
-    font-family: var(--mono);
-    font-size: 12px;
-    text-transform: uppercase;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--ink-deep);
+    color: rgba(255, 255, 255, 0.62);
+    font-family: var(--sans);
+    font-size: 13px;
   }
 
   .site-footer p {
@@ -39,8 +38,13 @@ const { name, year } = Astro.props;
   }
 
   .site-footer a {
-    color: var(--paper-bright);
+    color: #fff;
     text-decoration: none;
+    transition: color 0.16s ease;
+  }
+
+  .site-footer a:hover {
+    color: var(--accent);
   }
 
   .site-footer .to-top {

@@ -46,6 +46,7 @@ export const GET: APIRoute = ({ site }) => {
     `## Canonical sources`,
     ``,
     `- [Professional profile](${canonicalUrl})`,
+    `- [Detailed profile: RL & evaluation infrastructure](${new URL(withBase('/latest.html'), siteUrl).href})`,
     `- [Source repository](https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io)`,
     ``,
     `## Privacy`,

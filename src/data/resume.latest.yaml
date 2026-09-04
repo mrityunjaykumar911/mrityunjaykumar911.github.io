@@ -10,7 +10,7 @@ profile:
   headline: I build the RL Infrastructure and Applied AI systems that keep RL *honest*.
   intro: >-
     I'm Mrityunjay, a core ML engineer in the San Francisco Bay Area. I work on
-    the RL Infrastructure and evaluation side of RL for tool-using agents — reward signal
+    the RL Infrastructure and evaluation side of RL for tool-using agents, including reward signal
     correctness, LLM-as-judge grading, multi-turn evaluation, and multimodal
     tool integration into live rollouts.
   tagline: >-
@@ -25,7 +25,7 @@ profile:
 
 experienceOverrides:
   Microsoft:
-    role: Senior ML Engineer — PowerPoint agent
+    role: Senior ML Engineer, PowerPoint agent
     summary: >-
       Reward correctness, multi-turn evaluation, and multimodal tool
       integration for the PowerPoint agent's live RL rollouts.
@@ -35,8 +35,8 @@ experienceOverrides:
       - Multimodal tool execution
     lead:
       - >-
-        Diagnosed a corrupt reward signal — single-turn eval was blind to
-        turn-level error propagation — and designed the multi-turn *simulation*
+        Diagnosed a corrupt reward signal: single-turn eval was blind to
+        turn-level error propagation; designed the multi-turn *simulation*
         methodology that replaced it.
       - >-
         Scaled the RL tool-execution stack to **7,000 containers** under SLO,
@@ -70,7 +70,7 @@ experienceOverrides:
             Built a document-render-to-image visual grading pipeline; `ETag`
             optimistic concurrency dedupes rewards across parallel graders.
           - >-
-            Drove an org-wide checkpoint pre-screening gate — RL candidates
+            Drove an org-wide checkpoint pre-screening gate; RL candidates
             simulated before end-to-end integration, cutting compute wasted on
             non-viable checkpoints.
           - >-

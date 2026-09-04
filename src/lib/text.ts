@@ -59,9 +59,9 @@ export function formatMonth(value: string): string {
   return `${MONTHS[Number(month) - 1]} ${year}`;
 }
 
-/** "May 2022 — Present" / "Jul 2020 — May 2022" */
+/** "May 2022 to Present" / "Jul 2020 to May 2022" */
 export function formatRange(start: string, end: string | null): string {
-  return `${formatMonth(start)} — ${end ? formatMonth(end) : 'Present'}`;
+  return `${formatMonth(start)} to ${end ? formatMonth(end) : 'Present'}`;
 }
 
 /** ISO 8601 value for <time datetime> and JSON-LD. */

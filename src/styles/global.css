@@ -1,27 +1,62 @@
 /* ===========================================================================
-   Reliability Trace — an operational, high-contrast visual system.
+   Monochrome premium — a restrained, Inter-based visual system.
    ========================================================================= */
 
 :root {
-  --paper: #f6f8f5;
+  --paper: #ffffff;
   --paper-bright: #ffffff;
-  --ink: #101715;
-  --ink-soft: #53615d;
-  --line: #c8d2ce;
-  --teal: #087f6d;
-  --teal-dark: #055b50;
-  --coral: #e44c2a;
-  --acid: #b8f06a;
-  --blue: #315ee8;
-  --fog: #e8eeeb;
+  --panel: #f6f7f8;
+  --panel-2: #f0f1f3;
+  --ink: #0b0c0e;
+  --ink-soft: #62666d;
+  --ink-faint: #8a8f98;
+  --line: rgba(11, 12, 14, 0.09);
+  --line-strong: rgba(11, 12, 14, 0.16);
 
-  --display: 'Bricolage Grotesque Variable', sans-serif;
-  --sans: 'Source Sans 3 Variable', sans-serif;
-  --mono: 'Azeret Mono Variable', monospace;
+  /* Single restrained accent. */
+  --accent: #5b5bd6;
+  --accent-strong: #4b4bc4;
+  --accent-tint: rgba(91, 91, 214, 0.1);
+
+  /* Dark surfaces (contact / footer). */
+  --ink-deep: #0b0c0e;
+
+  /* Back-compat aliases so component styles resolve to the new system. */
+  --teal: var(--accent);
+  --teal-dark: var(--ink-deep);
+  --coral: var(--accent);
+  --acid: var(--accent);
+  --blue: var(--accent);
+  --fog: var(--panel);
+
+  --display: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --serif: var(--display);
 
-  --content: min(1240px, calc(100vw - 72px));
-  --gutter: max(36px, calc((100vw - 1240px) / 2));
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --shadow-sm: 0 1px 2px rgba(11, 12, 14, 0.06), 0 1px 3px rgba(11, 12, 14, 0.05);
+  --shadow-md: 0 4px 12px rgba(11, 12, 14, 0.07), 0 2px 6px rgba(11, 12, 14, 0.05);
+  --shadow-lg: 0 20px 48px rgba(11, 12, 14, 0.12);
+
+  --content: min(1120px, calc(100vw - 80px));
+  --gutter: max(40px, calc((100vw - 1120px) / 2));
+
+  /* Shared 2-column grid: label/identity column + content column. */
+  --grid-col: 300px;
+  --grid-gap: 64px;
+
+  /* 8pt spacing scale. */
+  --s1: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 32px;
+  --s5: 48px;
+  --s6: 64px;
+  --s7: 96px;
+  --s8: 128px;
 
   color-scheme: light;
 }
@@ -46,11 +81,11 @@ body {
   margin: 0;
   color: var(--ink);
   background-color: var(--paper);
-  background-image: linear-gradient(135deg, rgba(49, 94, 232, 0.035), transparent 34%),
-    linear-gradient(315deg, rgba(8, 127, 109, 0.04), transparent 38%);
   font-family: var(--sans);
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.6;
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -64,10 +99,10 @@ h2,
 h3,
 h4 {
   margin: 0;
-  font-weight: 500;
-  line-height: 1.1;
+  font-weight: 640;
+  line-height: 1.08;
+  letter-spacing: -0.022em;
   text-wrap: balance;
-  letter-spacing: 0;
 }
 
 p {
@@ -97,8 +132,9 @@ ol {
 }
 
 :focus-visible {
-  outline: 3px solid var(--coral);
-  outline-offset: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -120,13 +156,12 @@ ol {
    ========================================================================= */
 
 .eyebrow,
-.section-number,
 .mono-label {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--sans);
   font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -159,38 +194,41 @@ ol {
   transform: translateY(0);
 }
 
-/* Section shell: generous vertical rhythm, gutter-aware horizontal padding. */
+/* Section shell: 8pt vertical rhythm, gutter-aware horizontal padding. */
 .section {
-  padding: clamp(80px, 11vw, 150px) var(--gutter);
+  padding: clamp(64px, 8vw, 96px) var(--gutter);
 }
 
+/* Section headings share one left edge (x = content-left) with the hero H1,
+   so every headline reads down a single spine. */
 .section-heading {
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) minmax(0, 0.7fr);
-  gap: 30px;
-  align-items: end;
-  margin-bottom: clamp(48px, 7vw, 84px);
+  margin-bottom: var(--s6);
 }
 
-.section-heading .section-number {
-  align-self: start;
-  color: var(--coral);
+.section-number {
+  display: none;
 }
 
 .section-heading .eyebrow {
-  margin-bottom: 12px;
-  color: var(--ink-soft);
+  margin: 0 0 var(--s2);
+  color: var(--accent);
+}
+
+.section-heading .heading-body {
+  max-width: 800px;
 }
 
 .section-heading h2 {
-  max-width: 720px;
   font-family: var(--display);
-  font-size: clamp(38px, 4.5vw, 64px);
-  font-weight: 650;
-  line-height: 0.98;
+  font-size: clamp(30px, 3.2vw, 44px);
+  font-weight: 660;
+  line-height: 1.08;
+  letter-spacing: -0.028em;
 }
 
 .section-lede {
+  margin-top: var(--s3);
+  max-width: 62ch;
   color: var(--ink-soft);
   font-size: 17px;
 }
@@ -198,12 +236,13 @@ ol {
 /* Inline markup emitted by inlineMarkup(). */
 .prose a {
   color: inherit;
-  text-decoration-color: var(--coral);
+  text-decoration-color: var(--accent);
   text-underline-offset: 4px;
 }
 
 .prose strong {
-  font-weight: 700;
+  font-weight: 660;
+  color: var(--ink);
 }
 
 .prose em {
@@ -213,8 +252,9 @@ ol {
 .prose code {
   font-family: var(--mono);
   font-size: 0.85em;
-  padding: 0.1em 0.35em;
-  background: rgba(23, 32, 29, 0.06);
+  padding: 0.12em 0.4em;
+  border-radius: 6px;
+  background: var(--panel-2);
 }
 
 /* Scroll-reveal is progressive enhancement: content is never hidden by motion. */
@@ -249,6 +289,8 @@ ol {
   :root {
     --content: min(2200px, calc(100vw - 192px));
     --gutter: max(96px, calc((100vw - 2200px) / 2));
+    --grid-col: 360px;
+    --grid-gap: 96px;
   }
 
   body {
@@ -256,22 +298,19 @@ ol {
   }
 
   .section {
-    padding-top: clamp(140px, 7vw, 220px);
-    padding-bottom: clamp(140px, 7vw, 220px);
+    padding-top: var(--s8);
+    padding-bottom: var(--s8);
   }
 
   .section-heading {
-    grid-template-columns: 80px minmax(0, 1fr) minmax(360px, 0.62fr);
-    gap: 48px;
+    margin-bottom: var(--s7);
   }
 
   .section-heading h2 {
-    max-width: 900px;
-    font-size: clamp(72px, 2.4vw, 92px);
+    font-size: clamp(52px, 2vw, 64px);
   }
 
   .section-lede {
-    max-width: 52ch;
     font-size: 20px;
   }
 }
@@ -283,23 +322,14 @@ ol {
   }
 
   .section-heading {
-    grid-template-columns: 45px 1fr;
-  }
-
-  .section-heading .section-lede {
-    grid-column: 2;
+    grid-template-columns: 1fr;
+    gap: var(--s3);
   }
 }
 
 @media (max-width: 620px) {
   .section-heading {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .section-heading .section-lede {
-    grid-column: 1;
-    margin-top: 18px;
+    gap: var(--s2);
   }
 }
 

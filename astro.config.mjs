@@ -22,11 +22,14 @@ export default defineConfig({
   trailingSlash: 'ignore',
   integrations: [
     sitemap({
-      // Neither the error page nor flag-gated detail is a search destination.
+      // Error and plain-text utility routes are not search destinations.
       filter: (page) =>
         !page.includes('/404') &&
-        !page.includes('/latest') &&
         !page.endsWith('.txt'),
+      serialize: (item) => ({
+        ...item,
+        url: item.url.endsWith('/latest') ? `${item.url}.html` : item.url,
+      }),
     }),
   ],
   build: {

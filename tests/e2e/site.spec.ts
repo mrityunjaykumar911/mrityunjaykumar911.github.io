@@ -8,12 +8,22 @@ const previewOnlyMarkers = [
   'PowerPoint Agent v1.1',
 ];
 
+test('published content does not use em dashes', async ({ page, request }) => {
+  for (const path of ['/', '/latest.html']) {
+    await page.goto(path);
+    expect(await page.locator('body').innerText(), path).not.toContain('—');
+  }
+
+  const crawlerContext = await request.get('/llms.txt');
+  expect(await crawlerContext.text(), '/llms.txt').not.toContain('—');
+});
+
 test('published page stays generic and exposes complete metadata', async ({ page }) => {
   await page.goto('/');
 
   await expect(page).toHaveTitle('Mrityunjay Kumar | Senior ML Engineer');
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I build ML systems that stay reliable'
+    'I engineer production AI infrastructure across inference, evaluation, and post-training'
   );
   await expect(page.getByRole('status')).toHaveCount(0);
   for (const marker of previewOnlyMarkers) {
@@ -96,22 +106,34 @@ test('published page stays generic and exposes complete metadata', async ({ page
   ).toBe(true);
 });
 
+test('email link degrades gracefully without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/');
+
+  const emailLink = page.getByRole('link', { name: 'Email' });
+  await expect(emailLink).toHaveAttribute('href', '#contact-email');
+  await expect(emailLink).toHaveAttribute('id', 'contact-email');
+  const noscriptText = await page.locator('.contact-links noscript').textContent();
+  expect(noscriptText).toContain('Enable JavaScript to reveal my email address');
+
+  await context.close();
+});
+
 test('landing viewport presents the reliability trace design system', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
-  const deliveryPath = page.getByRole('list', { name: 'Delivery path' });
-  await expect(deliveryPath).toBeVisible();
-  await expect(deliveryPath.getByRole('listitem')).toHaveText([
-    /01\s+Frame the problem/,
-    /02\s+Build the system/,
-    /03\s+Prove the signal/,
-    /04\s+Operate at scale/,
-  ]);
-
   const heroHeading = page.getByRole('heading', { level: 1 });
+  await expect(heroHeading).toContainText(
+    'production AI infrastructure across inference, evaluation, and post-training'
+  );
+  await expect(page.locator('.hero-intro')).toContainText(
+    'latency, throughput, and reliability'
+  );
+  await expect(page.getByRole('list', { name: 'Delivery path' })).toHaveCount(0);
   expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
-    'Bricolage Grotesque'
+    'Inter'
   );
 
   const signalStrip = page.getByRole('region', { name: 'At a glance' });
@@ -164,7 +186,7 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
 
   const signalStrip = page.getByRole('region', { name: 'At a glance' });
   expect(await signalStrip.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(232, 238, 235)'
+    'rgb(246, 247, 248)'
   );
   expect(
     await signalStrip.locator('p').first().evaluate((element) =>
@@ -175,9 +197,7 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   const metadataSelectors = [
     '.wordmark-role',
     '.site-nav',
-    '.delivery-path',
     '.evidence-label',
-    '.research-section::before',
     '.contact-areas',
     '.site-footer',
   ];
@@ -194,10 +214,10 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   const contact = page.locator('.contact-section');
   const footer = page.locator('.site-footer');
   expect(await contact.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(5, 91, 80)'
+    'rgb(246, 247, 248)'
   );
   expect(await footer.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(5, 91, 80)'
+    'rgb(11, 12, 14)'
   );
   expect(await contact.evaluate((element) => getComputedStyle(element, '::after').content)).toBe(
     'none'
@@ -208,8 +228,8 @@ test('experience and research read as an evidence system', async ({ page }) => {
   await page.goto('/');
 
   const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
-  await expect(microsoftRole.getByText('Summary', { exact: true })).toBeVisible();
   await expect(microsoftRole.getByText('Accomplishments', { exact: true })).toBeVisible();
+  await expect(microsoftRole.locator('.company-chip')).toHaveText('MI');
 
   const proofRegistry = page.getByRole('list', { name: 'Research proof registry' });
   await expect(proofRegistry).toBeVisible();
@@ -220,22 +240,6 @@ test('experience and research read as an evidence system', async ({ page }) => {
   expect(
     await capabilityMatrix.evaluate((element) => getComputedStyle(element).borderLeftWidth)
   ).toBe('0px');
-});
-
-test('delivery trace motion communicates progress and respects reduced motion', async ({ page }) => {
-  await page.goto('/');
-
-  const traceLine = page.locator('[data-trace-line]');
-  await expect(traceLine).toHaveAttribute('aria-hidden', 'true');
-  expect(await traceLine.evaluate((element) => getComputedStyle(element).animationName)).toContain(
-    'trace-draw'
-  );
-
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.reload();
-  expect(
-    await traceLine.evaluate((element) => element.getAnimations()[0]?.effect?.getComputedTiming().duration)
-  ).toBeLessThanOrEqual(0.01);
 });
 
 test('fast navigation never leaves content hidden', async ({ page }) => {
@@ -276,7 +280,7 @@ test('crawler resources expose professional context without contact PII', async 
   const robots = await robotsResponse.text();
   expect(robots).toContain('User-agent: *');
   expect(robots).toContain('Allow: /');
-  expect(robots).toContain('Disallow: /latest.html');
+  expect(robots).not.toContain('Disallow: /latest.html');
   expect(robots).toContain(
     'Sitemap: https://mrityunjaykumar911.github.io/sitemap-index.xml'
   );
@@ -310,7 +314,7 @@ test('normal URL does not load the detailed resume', async ({ page }) => {
   await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '');
   await expect(page.getByRole('status')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I build ML systems that stay reliable'
+    'I engineer production AI infrastructure across inference, evaluation, and post-training'
   );
   for (const marker of previewOnlyMarkers) {
     await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
@@ -368,10 +372,40 @@ for (const query of ['?flags=latest', '?preview']) {
     );
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      'https://mrityunjaykumar911.github.io/'
+      'https://mrityunjaykumar911.github.io/latest.html'
     );
   });
 }
+
+test('detailed resume is a shareable and indexable document', async ({
+  request,
+  page,
+}) => {
+  const response = await request.get('/latest.html');
+  expect(response.ok()).toBe(true);
+  expect(response.headers()['x-robots-tag']).toBeUndefined();
+
+  await page.goto('/latest.html');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://mrityunjaykumar911.github.io/latest.html'
+  );
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
+    'content',
+    'https://mrityunjaykumar911.github.io/latest.html'
+  );
+  await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  await expect(page.getByText(privateMarker, { exact: false }).first()).toBeVisible();
+
+  const llms = await (await request.get('/llms.txt')).text();
+  expect(llms).toContain('https://mrityunjaykumar911.github.io/latest.html');
+
+  const sitemapIndex = await (await request.get('/sitemap-index.xml')).text();
+  const sitemapPath = sitemapIndex.match(/<loc>([^<]+)<\/loc>/)?.[1];
+  expect(sitemapPath).toBeTruthy();
+  const sitemap = await (await request.get(new URL(sitemapPath!).pathname)).text();
+  expect(sitemap).toContain('https://mrityunjaykumar911.github.io/latest.html');
+});
 
 test('mobile navigation works without horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
@@ -392,18 +426,14 @@ test('mobile navigation works without horizontal overflow', async ({ page }) => 
   ).toBe(true);
 });
 
-test('portrait badge remains inside the photo and clear of its caption', async ({ page }) => {
+test('portrait sits above its caption without overlap', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 768 });
   await page.goto('/?flags=latest');
 
   const frame = await page.locator('.portrait-frame').boundingBox();
-  const badge = await page.locator('.systems-note').boundingBox();
   const caption = await page.locator('.portrait-note').boundingBox();
 
   expect(frame).not.toBeNull();
-  expect(badge).not.toBeNull();
   expect(caption).not.toBeNull();
-  expect(badge!.y).toBeGreaterThanOrEqual(frame!.y);
-  expect(badge!.y + badge!.height).toBeLessThanOrEqual(frame!.y + frame!.height);
-  expect(badge!.y + badge!.height).toBeLessThan(caption!.y);
+  expect(caption!.y).toBeGreaterThanOrEqual(frame!.y + frame!.height - 1);
 });
