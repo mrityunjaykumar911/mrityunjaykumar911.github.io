@@ -82,8 +82,16 @@ const flaggedResumeLoader = `
         cache: 'no-store'
       });
       if (!response.ok) return;
+      var parsed = new DOMParser().parseFromString(await response.text(), 'text/html');
+      var robots = parsed.querySelector('meta[name="robots"]');
+      if (!robots) {
+        robots = parsed.createElement('meta');
+        robots.setAttribute('name', 'robots');
+        parsed.head.appendChild(robots);
+      }
+      robots.setAttribute('content', 'noindex, follow');
       document.open();
-      document.write(await response.text());
+      document.write('<!doctype html>' + parsed.documentElement.outerHTML);
       document.close();
     } catch (error) {
       console.error('[preview] Could not load the detailed resume.', error);
