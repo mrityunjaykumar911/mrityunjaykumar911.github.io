@@ -141,17 +141,31 @@ test('landing viewport presents a clear thesis and proof', async ({ page }) => {
     'Inter'
   );
 
-  const signalStrip = page.getByRole('region', { name: 'At a glance' });
-  for (const signal of [
-    'Thousands of concurrent containers',
-    '4.6x faster model evaluation',
-    'EuroSys 2022 · U.S. patent',
+  const signalStrip = page.getByRole('region', { name: 'Selected evidence' });
+  for (const [value, label] of [
+    ['Millions-scale', 'request workloads'],
+    ['100M+', 'documents generated'],
+    ['100M DAU', 'product reach'],
+    ['Applied science', 'evaluation · ML · systems'],
   ]) {
-    await expect(signalStrip.getByText(signal, { exact: true })).toBeVisible();
+    const signal = signalStrip.locator('.signal').filter({ hasText: value });
+    await expect(signal.locator('strong')).toHaveText(value);
+    await expect(signal.locator('span')).toHaveText(label);
   }
   const signalBox = await signalStrip.boundingBox();
   expect(signalBox).not.toBeNull();
   expect(signalBox!.y).toBeLessThan(900);
+
+  const [headlineBox, introBox, firstSignalBox] = await Promise.all([
+    heroHeading.boundingBox(),
+    page.locator('.hero-intro').boundingBox(),
+    signalStrip.locator('.signal strong').first().boundingBox(),
+  ]);
+  expect(headlineBox).not.toBeNull();
+  expect(introBox).not.toBeNull();
+  expect(firstSignalBox).not.toBeNull();
+  expect(introBox!.x).toBeCloseTo(headlineBox!.x, 0);
+  expect(firstSignalBox!.x).toBeCloseTo(headlineBox!.x, 0);
 
   await expect(page.locator('.experience-number')).toHaveCount(0);
 });
@@ -174,7 +188,7 @@ test('ultrawide view uses the available canvas without shrinking the portfolio',
 
   for (const [selector, minimum] of [
     ['.site-nav', 14],
-    ['.signal-strip p', 16],
+    ['.signal strong', 32],
     ['.experience-summary', 20],
     ['.experience-lead li', 18],
     ['.research-note h3', 22],
@@ -196,15 +210,15 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
     await page.locator('body').evaluate((element) => getComputedStyle(element, '::before').display)
   ).toBe('none');
 
-  const signalStrip = page.getByRole('region', { name: 'At a glance' });
+  const signalStrip = page.getByRole('region', { name: 'Selected evidence' });
   expect(await signalStrip.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(246, 247, 248)'
+    'rgb(255, 255, 255)'
   );
   expect(
-    await signalStrip.locator('p').first().evaluate((element) =>
+    await signalStrip.locator('.signal span').first().evaluate((element) =>
       Number.parseFloat(getComputedStyle(element).fontSize)
     )
-  ).toBeGreaterThanOrEqual(14);
+  ).toBeGreaterThanOrEqual(13);
 
   const metadataSelectors = [
     '.wordmark-role',
@@ -241,11 +255,34 @@ test('experience and research read as an evidence system', async ({ page }) => {
 
   const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
   await expect(microsoftRole.getByText('Accomplishments', { exact: true })).toBeVisible();
-  await expect(microsoftRole.locator('.company-chip')).toHaveText('MI');
+  await expect(microsoftRole.locator('.experience-head .company')).toHaveText('Microsoft');
+  await expect(microsoftRole.locator('.experience-head .role')).toHaveText('Senior ML Engineer');
+  await expect(microsoftRole.locator('.experience-head .org')).toContainText(
+    'May 2022 to Present · Mountain View, CA'
+  );
 
   const proofRegistry = page.getByRole('list', { name: 'Research proof registry' });
   await expect(proofRegistry).toBeVisible();
   await expect(proofRegistry.getByRole('listitem')).toHaveCount(9);
+
+  await proofRegistry.scrollIntoViewIfNeeded();
+  const researchLink = page.locator('.site-nav a[href="#research"]');
+  await expect(researchLink).toHaveAttribute('aria-current', 'true');
+  await expect.poll(() => page.locator('.site-header').evaluate((element) =>
+    getComputedStyle(element).color
+  )).toBe('rgb(255, 255, 255)');
+  await expect.poll(() => page.locator('.site-header').evaluate((element) =>
+    getComputedStyle(element).backgroundColor
+  )).toBe('rgb(11, 12, 14)');
+
+  await researchLink.click();
+  await expect.poll(async () => {
+    const [headerBox, researchBox] = await Promise.all([
+      page.locator('.site-header').boundingBox(),
+      page.locator('#research').boundingBox(),
+    ]);
+    return Math.abs(researchBox!.y - (headerBox!.y + headerBox!.height));
+  }).toBeLessThanOrEqual(1);
 
   const capabilityMatrix = page.getByRole('group', { name: 'Core capability matrix' });
   await expect(capabilityMatrix).toBeVisible();

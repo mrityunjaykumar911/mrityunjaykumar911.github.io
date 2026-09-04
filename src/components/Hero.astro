@@ -22,7 +22,18 @@ const headlineHtml = escapeHtml(profile.headline).replace(
   <div class="hero-copy reveal">
     <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> {profile.role} at {profile.company}</p>
     <h1 id="hero-title" set:html={headlineHtml} />
-    <p class="hero-intro">{profile.intro}</p>
+    <div class="hero-intro-group">
+      <svg class="systems-flow" viewBox="0 0 42 56" aria-hidden="true" focusable="false">
+        <path d="M5 8h12c7 0 7 10 14 10h6M5 28h32M5 48h12c7 0 7-10 14-10h6" />
+        <circle cx="5" cy="8" r="2.5" />
+        <circle cx="5" cy="28" r="2.5" />
+        <circle cx="5" cy="48" r="2.5" />
+        <circle cx="37" cy="18" r="2.5" />
+        <circle cx="37" cy="28" r="2.5" />
+        <circle cx="37" cy="38" r="2.5" />
+      </svg>
+      <p class="hero-intro">{profile.intro}</p>
+    </div>
     <div class="hero-actions">
       <a class="button button-primary" href="#work">
         Explore my work <Icon name="arrow-down-right" size={16} />
@@ -102,9 +113,28 @@ const headlineHtml = escapeHtml(profile.headline).replace(
     color: var(--accent);
   }
 
-  .hero-intro {
+  .hero-intro-group {
+    position: relative;
     max-width: 62ch;
     margin-top: 20px;
+  }
+
+  .systems-flow {
+    position: absolute;
+    top: 50%;
+    left: -58px;
+    width: 42px;
+    height: 56px;
+    transform: translateY(-50%);
+    color: var(--accent);
+    fill: var(--paper);
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hero-intro {
     color: var(--ink-soft);
     font-size: clamp(16px, 1.4vw, 19px);
   }
@@ -218,9 +248,12 @@ const headlineHtml = escapeHtml(profile.headline).replace(
       font-size: clamp(96px, 3vw, 116px);
     }
 
-    .hero-intro {
+    .hero-intro-group {
       max-width: 66ch;
       margin-top: 30px;
+    }
+
+    .hero-intro {
       font-size: 22px;
     }
 
@@ -284,8 +317,19 @@ const headlineHtml = escapeHtml(profile.headline).replace(
       margin-bottom: 18px;
     }
 
-    .hero-intro {
+    .hero-intro-group {
       margin-top: 18px;
+    }
+
+    .systems-flow {
+      position: static;
+      width: 34px;
+      height: 48px;
+      margin-bottom: 10px;
+      transform: none;
+    }
+
+    .hero-intro {
       font-size: 16px;
       line-height: 1.55;
     }

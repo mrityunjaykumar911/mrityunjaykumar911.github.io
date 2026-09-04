@@ -31,9 +31,14 @@ profile:
     model serving, evaluation, and data platforms. I focus on latency,
     throughput, and fault recovery for agent and post-training workloads.
   signals:
-    - Thousands of concurrent containers
-    - 4.6x faster model evaluation
-    - EuroSys 2022 · U.S. patent
+    - value: Millions-scale
+      label: request workloads
+    - value: 100M+
+      label: documents generated
+    - value: 100M DAU
+      label: product reach
+    - value: Applied science
+      label: evaluation · ML · systems
   about:
     - >-
       I care about systems that remain understandable under pressure: explicit

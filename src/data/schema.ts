@@ -39,8 +39,11 @@ const profile = z.object({
   headline: z.string(),
   /** Paragraph under the hero headline. */
   intro: z.string(),
-  /** Exactly three short facts for the acid signal strip. */
-  signals: z.array(z.string()).length(3),
+  /** Evidence signals shown between the hero and experience. */
+  signals: z.array(z.object({
+    value: z.string(),
+    label: z.string(),
+  })).length(4),
   /** Paragraphs for the About section. */
   about: z.array(z.string()).min(1),
   /** Heading for the closing contact section. */

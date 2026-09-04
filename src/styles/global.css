@@ -13,10 +13,11 @@
   --line: rgba(11, 12, 14, 0.09);
   --line-strong: rgba(11, 12, 14, 0.16);
 
-  /* Single restrained accent. */
-  --accent: #5b5bd6;
-  --accent-strong: #4b4bc4;
-  --accent-tint: rgba(91, 91, 214, 0.1);
+  /* One green hue, tuned separately for light and dark surfaces. */
+  --accent: #087a55;
+  --accent-strong: #066747;
+  --accent-on-dark: #5bd5a5;
+  --accent-tint: rgba(8, 122, 85, 0.11);
 
   /* Dark surfaces (contact / footer). */
   --ink-deep: #0b0c0e;
@@ -74,7 +75,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 96px;
+  scroll-padding-top: 68px;
 }
 
 body {
@@ -92,6 +93,12 @@ body {
 
 body::before {
   display: none;
+}
+
+@media (min-width: 1800px) {
+  html {
+    scroll-padding-top: 84px;
+  }
 }
 
 h1,

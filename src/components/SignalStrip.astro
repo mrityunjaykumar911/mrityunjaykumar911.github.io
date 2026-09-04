@@ -1,59 +1,101 @@
 ---
+import type { Resume } from '../data/schema';
+
 interface Props {
-  signals: string[];
+  signals: Resume['profile']['signals'];
 }
 
 const { signals } = Astro.props;
 ---
 
-<section class="signal-strip" aria-label="At a glance">
-  {signals.map((s) => <p>{s}</p>)}
+<section class="signal-strip" aria-label="Selected evidence">
+  <div class="signal-inner">
+    {
+      signals.map((signal) => (
+        <p class="signal">
+          <strong>{signal.value}</strong>
+          <span>{signal.label}</span>
+        </p>
+      ))
+    }
+  </div>
 </section>
 
 <style>
   .signal-strip {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    align-items: center;
-    min-height: 84px;
     padding: 0 var(--gutter);
-    background: var(--panel);
+    background: var(--paper);
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
-    color: var(--ink-soft);
   }
 
-  .signal-strip p {
+  .signal-inner {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    width: var(--content);
+    margin: 0 auto;
+  }
+
+  .signal {
+    display: grid;
+    align-content: center;
+    gap: 2px;
+    min-height: 118px;
     margin: 0;
-    padding: 14px 24px;
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 500;
-    text-align: center;
-    color: inherit;
-  }
-
-  .signal-strip p + p {
+    padding: 22px 28px;
     border-left: 1px solid var(--line);
   }
 
+  .signal:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .signal strong {
+    color: var(--accent);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 650;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  .signal span {
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
   @media (min-width: 1800px) {
-    .signal-strip {
-      min-height: 108px;
+    .signal-inner {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .signal-strip p {
+    .signal {
+      min-height: 148px;
+      padding: 28px 40px;
+    }
+
+    .signal strong {
+      font-size: 36px;
+    }
+
+    .signal span {
       font-size: 16px;
     }
   }
 
   @media (max-width: 900px) {
-    .signal-strip {
+    .signal-inner {
       grid-template-columns: 1fr;
-      padding: 0;
     }
 
-    .signal-strip p + p {
+    .signal {
+      grid-template-columns: minmax(120px, 0.45fr) 1fr;
+      align-items: baseline;
+      gap: 18px;
+      min-height: 0;
+      padding: 18px 0;
       border-left: 0;
       border-top: 1px solid var(--line);
     }

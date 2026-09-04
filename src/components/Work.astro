@@ -8,11 +8,6 @@ interface Props {
 }
 
 const { id, roles } = Astro.props;
-
-const monogram = (name: string) => {
-  const words = name.split(/\s+/).filter(Boolean);
-  return (words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2)).toUpperCase();
-};
 ---
 
 <section class="section work-section" id={id} aria-labelledby={`${id}-title`}>
@@ -32,11 +27,9 @@ const monogram = (name: string) => {
       roles.map((role) => (
         <li class="experience reveal">
           <div class="experience-head">
-            <span class="company-chip" aria-hidden="true">{monogram(role.company)}</span>
+            <p class="company">{role.company}</p>
             <h3 class="role">{role.role}</h3>
             <p class="org">
-              <span class="company">{role.company}</span>
-              <span class="org-sep" aria-hidden="true">·</span>
               <time datetime={role.start}>{formatRange(role.start, role.end)}</time>
               <span class="org-sep" aria-hidden="true">·</span>
               <span>{role.location}</span>
@@ -120,18 +113,13 @@ const monogram = (name: string) => {
     top: 108px;
   }
 
-  .company-chip {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    margin-bottom: var(--s2);
-    border-radius: 12px;
-    background: var(--ink);
-    color: #fff;
+  .experience-head .company {
+    margin: 0 0 var(--s2);
+    color: var(--accent);
     font-size: 14px;
-    font-weight: 640;
-    letter-spacing: 0.02em;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .experience-head .role {
@@ -146,11 +134,6 @@ const monogram = (name: string) => {
     margin-top: var(--s1);
     color: var(--ink-soft);
     font-size: 15px;
-  }
-
-  .experience-head .company {
-    color: var(--ink);
-    font-weight: 560;
   }
 
   .experience-head .org-sep {

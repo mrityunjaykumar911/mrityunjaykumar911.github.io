@@ -56,6 +56,38 @@ const initials = name
     border-bottom: 1px solid var(--line);
     background: color-mix(in srgb, var(--paper) 72%, transparent);
     backdrop-filter: blur(20px) saturate(1.4);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) {
+    color: #fff;
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+    background: var(--ink-deep);
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .wordmark-mark {
+    background: #fff;
+    color: var(--ink);
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .wordmark-role,
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a {
+    color: rgba(255, 255, 255, 0.68);
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a:hover,
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a[aria-current='true'] {
+    color: #fff;
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .nav-resume {
+    border-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .nav-resume:hover {
+    background: #fff;
+    color: var(--ink);
+    border-color: #fff;
   }
 
   .wordmark {
