@@ -1,0 +1,46 @@
+{
+  "generatedAt": "2026-09-06T00:32:03.620Z",
+  "designSpace": {
+    "fullStates": 945,
+    "admissibleStates": 200,
+    "prunedUnsafeStates": 745,
+    "prunedFraction": 0.788
+  },
+  "objective": "declared weighted score over design tokens; not a measured perceptual outcome",
+  "seed": {
+    "body": 15,
+    "head": 40,
+    "fold": 100,
+    "space": 8,
+    "score": 0.8575
+  },
+  "algorithms": {
+    "exhaustive": {
+      "best": {
+        "body": 16,
+        "head": 40,
+        "fold": 80,
+        "space": 8
+      },
+      "score": 0.97,
+      "evaluations": 200
+    },
+    "greedy": {
+      "best": {
+        "body": 16,
+        "head": 40,
+        "fold": 80,
+        "space": 8
+      },
+      "score": 0.97,
+      "evaluations": 36,
+      "unsafeVisited": 0,
+      "steps": 2
+    }
+  },
+  "outcome": {
+    "scoreImprovementPercent": 13.1,
+    "greedyMatchesGlobalOptimum": true,
+    "unsafeVariantsSelected": 0
+  }
+}

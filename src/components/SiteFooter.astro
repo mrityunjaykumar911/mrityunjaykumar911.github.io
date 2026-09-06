@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import { withBase } from '../lib/url';
 
 interface Props {
   name: string;
@@ -7,11 +8,15 @@ interface Props {
 }
 
 const { name, year } = Astro.props;
+const methodHref = withBase('/method.html');
 ---
 
 <footer class="site-footer">
   <p>© {year} {name}</p>
-  <p>Built with Astro · <a href="https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io" target="_blank" rel="noreferrer">Source</a></p>
+  <p>
+    Built with Astro · <a href="https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io" target="_blank" rel="noreferrer">Source</a>
+    · <a href={methodHref}>Method</a>
+  </p>
   <a class="to-top" href="#top">Back to top <Icon name="arrow-up" size={14} /></a>
 </footer>
 

@@ -1,0 +1,23 @@
+flowchart TB
+    A[Legacy live page] --> C
+    B[Modern live page] --> C
+    C[Fresh Chromium context<br/>matched viewport] --> D[Wait for network idle<br/>and font readiness]
+    D --> E[Measure rendered DOM]
+    E --> F[Semantics]
+    E --> G[Typography and fold]
+    E --> H[Geometry and safety]
+    F --> I[Paired metrics]
+    G --> I
+    H --> I
+    E --> J[Redact text and imagery]
+    J --> K[X-ray boxes and<br/>attention path]
+    K --> L[Anonymized views]
+    I --> M[Triangulate with<br/>independent audit]
+    L --> M
+
+    classDef input fill:#f7f8fa,stroke:#4b5563,color:#111827,stroke-width:1.5px;
+    classDef process fill:#ffffff,stroke:#087a55,color:#10231c,stroke-width:2px;
+    classDef output fill:#e8f4ef,stroke:#087a55,color:#10231c,stroke-width:2px;
+    class A,B input;
+    class C,D,E,F,G,H,J,K process;
+    class I,L,M output;

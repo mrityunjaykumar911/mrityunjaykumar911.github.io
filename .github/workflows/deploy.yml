@@ -28,8 +28,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Set up Java for TLA+
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Install dependencies
         run: npm ci
+      - name: Check publication safety model
+        run: npm run test:tla
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run browser tests

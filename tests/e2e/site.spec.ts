@@ -9,7 +9,7 @@ const previewOnlyMarkers = [
 ];
 
 test('published content does not use em dashes', async ({ page, request }) => {
-  for (const path of ['/', '/latest.html']) {
+  for (const path of ['/', '/latest.html', '/method.html']) {
     await page.goto(path);
     expect(await page.locator('body').innerText(), path).not.toContain('—');
   }
@@ -485,4 +485,70 @@ test('portrait sits above its caption without overlap', async ({ page }) => {
   expect(frame).not.toBeNull();
   expect(caption).not.toBeNull();
   expect(caption!.y).toBeGreaterThanOrEqual(frame!.y + frame!.height - 1);
+});
+
+test('method page explains first-principles applied science with public evidence', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Method' })).toHaveAttribute(
+    'href',
+    '/method.html'
+  );
+
+  await page.goto('/method.html');
+
+  await expect(page).toHaveTitle('How I Work | First Principles, Intuition, and Execution');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    'https://mrityunjaykumar911.github.io/method.html'
+  );
+  await expect(page.getByRole('heading', {
+    level: 1,
+    name: 'First principles make intuition executable.',
+  })).toBeVisible();
+  await expect(page.getByText('Senior ML Engineer', { exact: true })).toBeVisible();
+  await expect(page.getByText('Intuition is compressed evidence.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('heading', {
+    name: 'Verify the protocol. Optimize the surface.',
+  })).toBeVisible();
+  await expect(page.getByText('30', { exact: true })).toBeVisible();
+  await expect(page.getByText('3/3', { exact: true })).toBeVisible();
+
+  const tlaSpec = page.getByRole('link', { name: 'Read the TLA+ model' });
+  await expect(tlaSpec).toHaveAttribute('href', '/research/ResumePublication.tla');
+  const tlaResponse = await request.get('/research/ResumePublication.tla');
+  expect(tlaResponse.ok()).toBe(true);
+  expect(await tlaResponse.text()).toContain('NoPrivateInProduction');
+
+  const selectiveOptimization = page.getByRole('img', {
+    name: /Flow from public claim invariants through TLA plus model checking/,
+  });
+  await selectiveOptimization.scrollIntoViewIfNeeded();
+  await expect.poll(() => selectiveOptimization.evaluate(
+    (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+  )).toBe(true);
+
+  const diagram = page.getByRole('img', {
+    name: /Flow from human intent through a bounded LLM edit/,
+  });
+  await expect(diagram).toBeVisible();
+  await diagram.scrollIntoViewIfNeeded();
+  await expect.poll(() => diagram.evaluate(
+    (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
+  )).toBe(true);
+
+  const paper = page.getByRole('link', { name: 'Read the paper' });
+  await expect(paper).toHaveAttribute(
+    'href',
+    '/research/executable-evidence-public-resumes.pdf'
+  );
+
+  const sitemapIndex = await request.get('/sitemap-index.xml');
+  const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];
+  expect(sitemapLocation).toBeTruthy();
+  const sitemap = await request.get(new URL(sitemapLocation!).pathname);
+  expect(await sitemap.text()).toContain('/method.html');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
 });

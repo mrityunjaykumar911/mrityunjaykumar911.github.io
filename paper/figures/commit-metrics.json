@@ -1,0 +1,227 @@
+{
+  "commitCount": 18,
+  "observations": [
+    {
+      "commit": "C1",
+      "filesChanged": 59,
+      "changedLines": {
+        "product": 2253,
+        "evidence": 42,
+        "content": 704,
+        "other": 7879
+      },
+      "declaredTests": 0,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C2",
+      "filesChanged": 4,
+      "changedLines": {
+        "product": 49,
+        "evidence": 0,
+        "content": 0,
+        "other": 74
+      },
+      "declaredTests": 0,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C3",
+      "filesChanged": 4,
+      "changedLines": {
+        "product": 79,
+        "evidence": 166,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 5,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C4",
+      "filesChanged": 2,
+      "changedLines": {
+        "product": 18,
+        "evidence": 25,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 6,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C5",
+      "filesChanged": 1,
+      "changedLines": {
+        "product": 0,
+        "evidence": 0,
+        "content": 0,
+        "other": 210
+      },
+      "declaredTests": 6,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C6",
+      "filesChanged": 1,
+      "changedLines": {
+        "product": 17,
+        "evidence": 0,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 6,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C7",
+      "filesChanged": 1,
+      "changedLines": {
+        "product": 0,
+        "evidence": 74,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 8,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C8",
+      "filesChanged": 3,
+      "changedLines": {
+        "product": 0,
+        "evidence": 45,
+        "content": 111,
+        "other": 0
+      },
+      "declaredTests": 8,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C9",
+      "filesChanged": 2,
+      "changedLines": {
+        "product": 2,
+        "evidence": 2,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 8,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C10",
+      "filesChanged": 3,
+      "changedLines": {
+        "product": 0,
+        "evidence": 4,
+        "content": 20,
+        "other": 0
+      },
+      "declaredTests": 8,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C11",
+      "filesChanged": 6,
+      "changedLines": {
+        "product": 64,
+        "evidence": 12,
+        "content": 14,
+        "other": 0
+      },
+      "declaredTests": 8,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C12",
+      "filesChanged": 5,
+      "changedLines": {
+        "product": 94,
+        "evidence": 34,
+        "content": 0,
+        "other": 5
+      },
+      "declaredTests": 9,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C13",
+      "filesChanged": 6,
+      "changedLines": {
+        "product": 29,
+        "evidence": 37,
+        "content": 26,
+        "other": 0
+      },
+      "declaredTests": 10,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C14",
+      "filesChanged": 15,
+      "changedLines": {
+        "product": 861,
+        "evidence": 159,
+        "content": 35,
+        "other": 33
+      },
+      "declaredTests": 16,
+      "visualBaselines": 0
+    },
+    {
+      "commit": "C15",
+      "filesChanged": 27,
+      "changedLines": {
+        "product": 978,
+        "evidence": 493,
+        "content": 51,
+        "other": 29
+      },
+      "declaredTests": 20,
+      "visualBaselines": 2
+    },
+    {
+      "commit": "C16",
+      "filesChanged": 1,
+      "changedLines": {
+        "product": 10,
+        "evidence": 0,
+        "content": 0,
+        "other": 0
+      },
+      "declaredTests": 20,
+      "visualBaselines": 2
+    },
+    {
+      "commit": "C17",
+      "filesChanged": 6,
+      "changedLines": {
+        "product": 8,
+        "evidence": 30,
+        "content": 20,
+        "other": 0
+      },
+      "declaredTests": 20,
+      "visualBaselines": 2
+    },
+    {
+      "commit": "C18",
+      "filesChanged": 12,
+      "changedLines": {
+        "product": 232,
+        "evidence": 61,
+        "content": 18,
+        "other": 0
+      },
+      "declaredTests": 20,
+      "visualBaselines": 2
+    }
+  ],
+  "totals": {
+    "product": 4694,
+    "evidence": 1184,
+    "content": 999,
+    "other": 8230
+  }
+}

@@ -28,7 +28,9 @@ export default defineConfig({
         !page.endsWith('.txt'),
       serialize: (item) => ({
         ...item,
-        url: item.url.endsWith('/latest') ? `${item.url}.html` : item.url,
+        url: ['/latest', '/method'].some((route) => item.url.endsWith(route))
+          ? `${item.url}.html`
+          : item.url,
       }),
     }),
   ],

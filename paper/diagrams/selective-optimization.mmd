@@ -1,0 +1,21 @@
+flowchart TB
+    A[Public claim<br/>invariants] --> B[TLA+ publication<br/>state machine]
+    B --> C[TLC exhaustive<br/>model checking]
+    C --> D[Verified protocol<br/>baseline]
+
+    D --> E{Reader-facing<br/>optimization needed?}
+    E -->|No| H[Static production<br/>artifact]
+    E -->|Yes| F[Selective manual<br/>Astro and CSS optimization]
+    F --> G[Playwright refinement checks:<br/>semantics, geometry, privacy, pixels]
+    G -->|fails| F
+    G -->|passes| H
+    H --> I[GitHub Pages<br/>deployment]
+
+    classDef formal fill:#e8f4ef,stroke:#087a55,color:#10231c,stroke-width:2px;
+    classDef manual fill:#fff7ed,stroke:#c2410c,color:#431407,stroke-width:2px;
+    classDef decision fill:#f4f1ff,stroke:#7c3aed,color:#25164a,stroke-width:2px;
+    classDef output fill:#f7f8fa,stroke:#374151,color:#111827,stroke-width:1.5px;
+    class A,B,C,D formal;
+    class F,G manual;
+    class E decision;
+    class H,I output;

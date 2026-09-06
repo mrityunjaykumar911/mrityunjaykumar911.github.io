@@ -4,6 +4,9 @@ dist/
 
 # dependencies
 node_modules/
+.tools/
+formal/states/
+states/
 
 # Playwright output
 playwright-report/
@@ -12,6 +15,25 @@ test-results/
 # local-only résumé overlay — current-employer detail that must NOT be
 # published or committed. Loaded only by `astro dev` with ?preview.
 src/data/resume.local.yaml
+
+# LaTeX build intermediates
+paper/*.aux
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+
+# raw, unredacted study screenshots (may contain identifiable resume content)
+paper/figures/legacy-desktop.png
+paper/figures/legacy-mobile.png
+paper/figures/modern-desktop.png
+paper/figures/modern-mobile.png
+
+# transient review/debug screenshots
+paper/review-*.png
+paper/reviewed-*.png
+paper/revised-*.png
+paper/tla-*.png
 
 # misc
 *.log

@@ -1,0 +1,18 @@
+flowchart TB
+    A[Human intent<br/>and approved evidence] --> B[Bounded LLM edit]
+    B --> C{Focused check}
+    C -->|fails| D[Failure evidence:<br/>trace, geometry, diff]
+    D --> B
+    C -->|passes| E[Full browser suite]
+    E -->|fails| D
+    E -->|passes| F[Static build and deploy]
+    F --> G[Live artifact verification]
+    G -->|drift or cache mismatch| D
+    G -->|matches| H[Executable intent retained]
+
+    classDef evidence fill:#e8f4ef,stroke:#087a55,color:#10231c,stroke-width:2px;
+    classDef action fill:#ffffff,stroke:#1f2937,color:#111827,stroke-width:1.5px;
+    classDef decision fill:#f4f1ff,stroke:#7c3aed,color:#25164a,stroke-width:2px;
+    class A,D,G,H evidence;
+    class B,E,F action;
+    class C decision;
