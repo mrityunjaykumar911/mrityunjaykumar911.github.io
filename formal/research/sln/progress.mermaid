@@ -1,0 +1,53 @@
+flowchart TB
+  subgraph HIST["Phase 1 — Direction search (5 kill checks, all occupied)"]
+    direction LR
+    K1["TLA+ for orchestration<br/>killed: TraceFix 2605.07935"]
+    K2["metrics miss off-viewport defects<br/>killed: WebCompat 2608.12518"]
+    K3["verification as RL reward<br/>killed: ReLook, WebRenderBench"]
+    K4["reward-hacking audit<br/>killed: crowded field"]
+    K5["renderer-in-loop RL infra<br/>killed: WEBSERV, WebGym"]
+    K1 --> K2 --> K3 --> K4 --> K5
+  end
+
+  HIST --> PIVOT["Pivot: design review of a<br/>compositional verification engine.<br/>Troika OOPSLA 2019 is the baseline"]
+
+  PIVOT --> MEAS
+
+  subgraph MEAS["Phase 2 — Measurement (done)"]
+    direction LR
+    M1["dataset gate PASSED<br/>styled/inline ratio 6.5"]
+    M2["flex: 1.1% decomposable<br/>97.5% coupled, 88% CSS default"]
+    M3["grid: ~70% coupled<br/>independent cases trivial"]
+    M1 --> M2 --> M3
+  end
+
+  MEAS --> PLAN
+
+  subgraph PLAN["Phase 3 — Formal probe (current)"]
+    direction TB
+    S0["0. decisions locked<br/>denominator, wrapping"]
+    S1a["1a. spec 9.7 captured verbatim"]
+    S1b["1b. model + simplification table"]
+    S2a["2a. flexmodel.py, exact rationals"]
+    S2b["2b. 8/8 hand-computed tests"]
+    S2c["2c. validate vs 535k real bboxes"]
+    S2d["2d. across-interval clamp rate"]
+    GATE{"GATE<br/>is the rate large?"}
+    S3["3. SMT proof, loop unrolled n rounds<br/>TLC only for exploration"]
+    S4["4. bound sensitivity"]
+    S5["5. recompute, report delta"]
+    STOP["STOP and write the negative result<br/>1.1% stands, engine summarises<br/>coupled containers"]
+    S0 --> S1a --> S1b --> S2a --> S2b --> S2c --> S2d --> GATE
+    GATE -->|"yes"| S3 --> S4 --> S5
+    GATE -->|"no, expected"| STOP
+  end
+
+  classDef done fill:#1f7a3d,stroke:#0d3d1e,color:#fff
+  classDef cur fill:#b8860b,stroke:#5c4405,color:#fff
+  classDef todo fill:#3a3f4a,stroke:#20242b,color:#cfd4dc
+  classDef killed fill:#7a1f2b,stroke:#3d0f15,color:#fff
+  class K1,K2,K3,K4,K5 killed
+  class M1,M2,M3,S0,S1a,S1b,S2a,S2b done
+  class S2c cur
+  class S2d,GATE,S3,S4,S5,STOP todo
+  class PIVOT done

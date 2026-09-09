@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "studyId": "C1-artifact-quality",
+  "recordedOn": "2026-09-09",
+  "status": "closed_negative_feasibility",
+  "liveRun": {
+    "runId": "quality-v6-1267-T-first",
+    "protocol": "quality-evidence-v6",
+    "taskId": 1267,
+    "provider": "xAI",
+    "model": "grok-4.6",
+    "elapsedSeconds": 2985.2,
+    "requests": 13,
+    "retries": 0,
+    "inputTokens": 188933,
+    "outputTokens": 161035,
+    "totalTokens": 349968,
+    "generatedContracts": 3,
+    "selectedContracts": 2,
+    "excludedContract": "automatic reminder",
+    "modelPreparationCalls": 5,
+    "modelPreparationTokens": 175378,
+    "initialArtifactScore": 58,
+    "formalScore": null,
+    "formalStatus": "blocked",
+    "htmlRepairsGenerated": 0,
+    "sourceModelSha256": "1e2bf473c7f2c86d3ac62b4aab00219b3997e6f4bbeee2405cf38317e2544676",
+    "selectedModelSha256": "3062f6157da8305d4d5fa206c93e97fb64488436562ef741bc2f4242fb9f2971",
+    "executedSubsetSha256": "df548fdcbf4d7edfeedcd7c2a81337223add36c73a34f7c6ecdb7eb03476e7a6",
+    "initialArtifactSha256": "6e084244e4010f8a47d19330ec128a2a7a7c6cb493c3988f3e10f2e4781ba95f",
+    "blockers": [
+      "category control was intercepted by an open to-do modal",
+      "date setting and commit were split across actions unsupported by the v6 executor"
+    ],
+    "claimBoundary": "The score 58 belongs only to the fresh baseline. There is no formal-arm score or measured score delta, and the local xAI evaluator is not the official benchmark judge."
+  },
+  "offlineClosure": {
+    "protocol": "quality-evidence-v7",
+    "providerCalls": 0,
+    "paidArtifactsChanged": false,
+    "manualBindingAnnotationsPromoted": false,
+    "fixes": [
+      "cross-action setting commit references and pending receipts",
+      "operation-level modal interception diagnostics",
+      "observation-preserving UI context routing",
+      "completion blocked by uncommitted settings"
+    ],
+    "fullOfflineSuite": {
+      "tests": 198,
+      "passed": 198,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "incrementalValueControl": {
+    "origin": "hand-constructed synthetic counter with a seeded cap at 10",
+    "knownTarget": 12,
+    "shallowSearchDepth": 8,
+    "tlcBrowserActions": 12,
+    "ordinarySearchDepth": 12,
+    "ordinaryBrowserActions": 12,
+    "sameActionSequence": true,
+    "sameFirstFailureStep": 11,
+    "repairedFixturePassedBoth": true,
+    "claimBoundary": "This demonstrates deeper state exploration, not an incremental TLA+ defect-detection advantage or blind discovery."
+  },
+  "conclusion": "No artifact-quality gain or incremental TLA+ detection benefit was demonstrated. No further paid run is authorized."
+}

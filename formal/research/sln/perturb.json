@@ -1,0 +1,31 @@
+{
+  "pages_attempted": 250,
+  "widths": [
+    320,
+    480,
+    768,
+    1024,
+    1280,
+    1920
+  ],
+  "probe_px": 300,
+  "errors": 0,
+  "unclean_reverts": 27,
+  "wrapped_containers_skipped": 1275,
+  "per_width_independent_pct": {
+    "320": 79.25,
+    "480": 78.85,
+    "768": 82.66,
+    "1024": 85.11,
+    "1280": 88.14,
+    "1920": 88.58
+  },
+  "containers_measured_all_widths": 519,
+  "items_total": 1309,
+  "items_independent_across_interval": 959,
+  "ACROSS_INTERVAL_INDEPENDENT_PCT": 73.26,
+  "grow_only_probe_would_say_pct": 75.63,
+  "containers_fully_decomposable": 280,
+  "containers_fully_decomposable_pct": 53.95,
+  "independent_items_that_had_slack_at_all_widths": 288
+}

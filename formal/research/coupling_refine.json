@@ -1,0 +1,102 @@
+{
+  "pages": 4608,
+  "flex_containers_measured": 5940,
+  "actively_coupled": 2866,
+  "actively_coupled_pct": 48.2,
+  "slack_not_active": 3074,
+  "slack_pct": 51.8,
+  "degenerate_skipped": 0,
+  "slack_histogram": {
+    "-1.0": 389,
+    "-0.9": 23,
+    "-0.8": 7,
+    "-0.7": 20,
+    "-0.6": 21,
+    "-0.5": 44,
+    "-0.4": 11,
+    "-0.3": 29,
+    "-0.2": 33,
+    "-0.1": 96,
+    "0.0": 2192,
+    "0.1": 838,
+    "0.2": 342,
+    "0.3": 248,
+    "0.4": 283,
+    "0.5": 239,
+    "0.6": 241,
+    "0.7": 286,
+    "0.8": 355,
+    "0.9": 220,
+    "1.0": 23
+  },
+  "grid_containers": 464,
+  "grid_classification": {
+    "independent": 102,
+    "coupled": 237,
+    "none": 125
+  },
+  "grid_coupled_pct": 69.9,
+  "grid_no_tracks_declared": 125,
+  "top_grid_track_values": [
+    [
+      "1fr",
+      70
+    ],
+    [
+      "100%",
+      59
+    ],
+    [
+      "816px 42px 300px",
+      21
+    ],
+    [
+      "auto 1fr",
+      18
+    ],
+    [
+      "1fr 1fr",
+      16
+    ],
+    [
+      "repeat(12, 1fr)",
+      15
+    ],
+    [
+      "1fr 1.5fr",
+      12
+    ],
+    [
+      "repeat(2, 1fr)",
+      10
+    ],
+    [
+      "repeat(3, 1fr)",
+      7
+    ],
+    [
+      "repeat(5, 1fr)",
+      6
+    ],
+    [
+      "repeat(3, minmax(0, 1fr))",
+      6
+    ],
+    [
+      "3em auto",
+      6
+    ],
+    [
+      "repeat(4, minmax(auto, 150px))",
+      5
+    ],
+    [
+      "35fr 65fr",
+      5
+    ],
+    [
+      "1fr 300px",
+      4
+    ]
+  ]
+}

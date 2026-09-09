@@ -1,0 +1,180 @@
+{
+  "pairs": 331776,
+  "independent": 141492,
+  "shapes_total": 48,
+  "shapes_always": 20,
+  "shapes_sometimes": 12,
+  "shapes_never": 16,
+  "ceiling_pairs": 138240,
+  "ceiling_pct_of_independent": 97.7,
+  "named_pairs": 138240,
+  "named_pct_of_independent": 97.7,
+  "named_unsound_admits": 0,
+  "gap_named_to_ceiling": 0,
+  "residue_pairs": 3252,
+  "residue_pct_of_independent": 2.3,
+  "always_shapes": [
+    {
+      "shape": "basis=0 grow=0 shrink=0 min=0 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=0 min=0 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=0 min=60 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=0 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=1 min=0 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=1 min=0 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=1 min=60 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=0 grow=0 shrink=1 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=0 min=0 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=0 min=0 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=0 min=60 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=0 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=1 min=60 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=1 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=0 min=0 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=0 min=0 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=0 min=60 max=inf",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=0 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=1 shrink=0 min=0 max=120",
+      "pairs": 6912,
+      "named": true
+    },
+    {
+      "shape": "basis=120 grow=1 shrink=0 min=60 max=120",
+      "pairs": 6912,
+      "named": true
+    }
+  ],
+  "sometimes_shapes": [
+    {
+      "shape": "basis=60 grow=0 shrink=1 min=0 max=inf",
+      "indep": 768,
+      "total": 6912
+    },
+    {
+      "shape": "basis=60 grow=0 shrink=1 min=0 max=120",
+      "indep": 768,
+      "total": 6912
+    },
+    {
+      "shape": "basis=0 grow=1 shrink=0 min=60 max=120",
+      "indep": 432,
+      "total": 6912
+    },
+    {
+      "shape": "basis=0 grow=1 shrink=1 min=60 max=120",
+      "indep": 432,
+      "total": 6912
+    },
+    {
+      "shape": "basis=0 grow=1 shrink=0 min=60 max=inf",
+      "indep": 192,
+      "total": 6912
+    },
+    {
+      "shape": "basis=0 grow=1 shrink=1 min=60 max=inf",
+      "indep": 192,
+      "total": 6912
+    },
+    {
+      "shape": "basis=60 grow=1 shrink=0 min=0 max=120",
+      "indep": 108,
+      "total": 6912
+    },
+    {
+      "shape": "basis=60 grow=1 shrink=0 min=60 max=120",
+      "indep": 108,
+      "total": 6912
+    },
+    {
+      "shape": "basis=60 grow=1 shrink=1 min=60 max=120",
+      "indep": 108,
+      "total": 6912
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=1 min=60 max=inf",
+      "indep": 48,
+      "total": 6912
+    },
+    {
+      "shape": "basis=120 grow=0 shrink=1 min=60 max=120",
+      "indep": 48,
+      "total": 6912
+    },
+    {
+      "shape": "basis=120 grow=1 shrink=1 min=60 max=120",
+      "indep": 48,
+      "total": 6912
+    }
+  ]
+}

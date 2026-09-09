@@ -43,5 +43,8 @@ export default defineConfig({
     // Lets `import resume from './resume.yaml'` work as a plain module import,
     // so the data file stays human-editable YAML rather than JSON or TS.
     plugins: [yaml()],
+    server: {
+      allowedHosts: env.DEV_ALLOWED_HOST ? [env.DEV_ALLOWED_HOST] : [],
+    },
   },
 });

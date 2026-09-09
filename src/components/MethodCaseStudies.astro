@@ -1,0 +1,332 @@
+---
+import Icon from './Icon.astro';
+import { withBase } from '../lib/url';
+
+const redesignPaperHref = withBase('/research/executable-evidence-public-resumes.pdf');
+const researchPaperHref = withBase('/research/verifiable-web-artifacts.pdf');
+const flexModelHref = withBase('/research/FlexFacets.tla');
+---
+
+<section id="case-studies" class="case-studies" aria-labelledby="case-studies-title">
+  <div class="case-intro">
+    <p class="eyebrow">05 / Case studies</p>
+    <h2 id="case-studies-title">The method, tested in practice.</h2>
+    <p>
+      These public projects show the reasoning in context: one turns a design problem into
+      an engineering loop; the other tests the limits of the guarantees that loop can offer.
+      They are examples of how I work, not claims about every system I build.
+    </p>
+  </div>
+
+  <article id="case-redesign" class="case-study" aria-labelledby="redesign-title">
+    <header class="case-heading">
+      <p class="mono-label">Case 01 · Engineering</p>
+      <h3 id="redesign-title">Turn a subjective redesign into testable decisions.</h3>
+      <p class="case-context">A public website redesign, studied across 18 commits.</p>
+      <a class="study-link" href={redesignPaperHref} target="_blank" rel="noreferrer">
+        Read the redesign case study <Icon name="file" size={16} />
+      </a>
+    </header>
+
+    <dl class="case-story">
+      <div>
+        <dt>Challenge</dt>
+        <dd>A legacy résumé site needed a clearer reading order without losing approved
+          information. “Make it look better” was too vague to guide or evaluate changes.</dd>
+      </div>
+      <div>
+        <dt>Approach</dt>
+        <dd>I separated the content from its presentation, turned alignment and readability
+          feedback into browser checks, and used focused edits followed by build and
+          deployment verification.</dd>
+      </div>
+      <div>
+        <dt>Finding</dt>
+        <dd>In the original matched desktop study, first-fold words fell from
+          <strong>262 to 91</strong>, and text elements smaller than 13px fell from
+          <strong>27 to 0</strong>. These are historical presentation measurements,
+          not a live score for this page or a measurement of hiring outcomes.</dd>
+      </div>
+      <div class="case-lesson">
+        <dt>Lesson</dt>
+        <dd>Make intent concrete enough to test. A browser check can preserve a design
+          decision, but passing tests does not replace reading the page as a person.</dd>
+      </div>
+    </dl>
+  </article>
+
+  <article id="case-verification" class="case-study" aria-labelledby="research-title">
+    <header class="case-heading">
+      <p class="mono-label">Case 02 · Bounded research result</p>
+      <h3 id="research-title">Find where a verification claim stops.</h3>
+      <p class="case-context">A follow-up manuscript on layout independence and disclosure auditing.</p>
+      <a class="study-link" href={researchPaperHref} target="_blank" rel="noreferrer">
+        Read the research manuscript <Icon name="file" size={16} />
+      </a>
+    </header>
+
+    <div class="research-body">
+      <dl class="case-story">
+        <div>
+          <dt>Challenge</dt>
+          <dd>A passing test is not the same as a general guarantee. I wanted to understand
+            which layout and publication properties the available checks actually establish.</dd>
+        </div>
+        <div>
+          <dt>Approach</dt>
+          <dd>I compared a finite layout model with exact calculations and browser probes,
+            then checked one repository’s emitted content against an explicit disclosure policy.
+            I also tested whether the instruments themselves could fail.</dd>
+        </div>
+        <div>
+          <dt>Finding</dt>
+          <dd>The layout predicate covered fewer containers than the probes found apparently
+            independent. The disclosure case exposed audit gaps. A generated-artifact
+            feasibility run produced no scored formal result or quality gain, and ordinary
+            deeper search matched the synthetic TLC witness.</dd>
+        </div>
+        <div class="case-lesson">
+          <dt>Lesson</dt>
+          <dd>When review reveals that a conclusion goes beyond its evidence, narrow the
+            conclusion. These studies do not establish a cost-effectiveness ranking or an
+            artifact-quality benefit from formal feedback.</dd>
+        </div>
+      </dl>
+
+      <details class="research-evidence">
+        <summary>Evidence and limitations</summary>
+        <div class="evidence-content">
+          <p class="evidence-scope">Layout study · 1,200 pages · 2,255 eligible containers · six measured widths</p>
+          <dl class="evidence-values">
+            <div><dt>Containers with no coupling detected by finite probes</dt><dd>45.76%</dd></div>
+            <div><dt>Containers whose items all satisfy the local predicate</dt><dd>28.07%</dd></div>
+          </dl>
+          <p>
+            The predicate is maximal on eight checked finite domains covering 3.5M
+            configuration-item pairs, not proved maximal for arbitrary CSS. The browser
+            figures depend on finite probes and pages rendered without external assets.
+          </p>
+          <p>
+            The disclosure result is one self-audited repository with hand-assigned labels
+            and flows; human authoring and maintenance time were not measured. A richer
+            layout-information ladder, causal attribution, a disclosure mutation campaign,
+            and independent replication remain research work, not completed findings.
+          </p>
+          <p>
+            Study C tested one paid generated-artifact task. Its baseline received 58/100,
+            while the formal arm blocked before repair and remained unscored after 13 provider
+            requests. Offline harness fixes and synthetic traces are not benchmark results.
+          </p>
+          <a class="study-link" href={flexModelHref} target="_blank" rel="noreferrer">
+            Read the flexbox TLA+ model <Icon name="file" size={16} />
+          </a>
+        </div>
+      </details>
+    </div>
+  </article>
+
+  <p class="case-closing">
+    <strong>The common thread:</strong> turn a challenge into a clear question, make a testable
+    move, and let the result, not attachment to the original idea, determine what happens next.
+  </p>
+</section>
+
+<style>
+  .case-studies {
+    padding: clamp(64px, 7vw, 96px) var(--gutter);
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    scroll-margin-top: 24px;
+  }
+
+  .case-intro {
+    max-width: 760px;
+    margin-bottom: 48px;
+  }
+
+  .case-intro .eyebrow {
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: clamp(30px, 3.3vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+
+  .case-intro > p:last-child {
+    margin-top: 22px;
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+
+  .case-study {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(32px, 5vw, 72px);
+    padding: clamp(24px, 3vw, 40px);
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    scroll-margin-top: 24px;
+  }
+
+  .case-study + .case-study {
+    margin-top: 32px;
+  }
+
+  .case-heading .mono-label {
+    margin-bottom: 18px;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  .case-context {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .study-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin-top: 22px;
+    color: var(--accent-strong);
+    font-size: 14px;
+    font-weight: 600;
+    text-underline-offset: 4px;
+  }
+
+  .study-link :global(svg) {
+    flex-shrink: 0;
+  }
+
+  .case-story {
+    margin: 0;
+  }
+
+  .case-story > div {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 18px;
+    padding-block: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .case-story > div:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .case-story dt {
+    font-size: 13px;
+    font-weight: 650;
+    padding-top: 2px;
+  }
+
+  .case-story dd {
+    margin: 0;
+    color: var(--ink-soft);
+    overflow-wrap: break-word;
+  }
+
+  .case-story strong,
+  .case-lesson dt {
+    color: var(--ink);
+  }
+
+  .case-story .case-lesson {
+    border-top-color: var(--accent);
+    padding-bottom: 0;
+  }
+
+  .case-lesson dd {
+    color: var(--ink);
+  }
+
+  .research-evidence {
+    margin-top: 28px;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  summary {
+    padding-block: 16px;
+    cursor: pointer;
+    color: var(--accent-strong);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .evidence-content {
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+
+  .evidence-content > p + p {
+    margin-top: 16px;
+  }
+
+  .evidence-scope {
+    color: var(--ink);
+  }
+
+  .evidence-values {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-block: 24px;
+  }
+
+  .evidence-values > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .evidence-values dd {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.1;
+    color: var(--accent);
+    font-weight: 650;
+  }
+
+  .case-closing {
+    margin-top: 40px;
+    max-width: 86ch;
+    color: var(--ink-soft);
+  }
+
+  .case-closing strong {
+    color: var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    .case-study {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .case-study {
+      padding: 24px 20px;
+    }
+
+    .case-story > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .evidence-values {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

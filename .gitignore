@@ -6,7 +6,15 @@ dist/
 node_modules/
 .tools/
 formal/states/
+formal/**/states/
 states/
+
+# local interpreter/editor state
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/settings.json
+.vscode/tasks.json
 
 # Playwright output
 playwright-report/
@@ -22,12 +30,17 @@ paper/*.out
 paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
+paper/*.toc
 
 # raw, unredacted study screenshots (may contain identifiable resume content)
 paper/figures/legacy-desktop.png
 paper/figures/legacy-mobile.png
 paper/figures/modern-desktop.png
 paper/figures/modern-mobile.png
+
+# local WebCode2M corpus extracts; retain only aggregate research results
+formal/research/sln/pages.json
+formal/research/sln/containers.json
 
 # transient review/debug screenshots
 paper/review-*.png

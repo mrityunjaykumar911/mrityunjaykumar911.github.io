@@ -1,0 +1,7 @@
+{
+  "scoreA": "#score0",
+  "scoreB": "#score1",
+  "pointA": "#score0",
+  "pointB": "#score1",
+  "reset": ["#resetBtn", "#confirmYes"]
+}

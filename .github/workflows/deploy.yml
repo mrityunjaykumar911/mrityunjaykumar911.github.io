@@ -39,6 +39,8 @@ jobs:
         run: npm run test:tla
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Run Study C offline tests
+        run: npm run test:study-c:offline
       - name: Run browser tests
         run: npm run test:e2e
       - name: Upload Playwright report

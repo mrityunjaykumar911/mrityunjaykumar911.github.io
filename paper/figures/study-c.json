@@ -1,0 +1,923 @@
+{
+  "schemaVersion": 1,
+  "experiment": "Study C: seeded release-protocol replay pilot",
+  "generatedAt": "2026-09-07T23:19:15.013Z",
+  "scope": {
+    "modelCalls": 0,
+    "weightUpdates": 0,
+    "rlUpdates": 0,
+    "schedules": 20,
+    "conditions": 3,
+    "actualConcurrency": false,
+    "domain": "One destination; revision/policy/attempt IDs bounded to 2; max two commits.",
+    "claim": "Finite model checks and fixed replay fixtures, not agent performance or an ArtifactsBench score.",
+    "limitations": [
+      "Shared simulator and fact extractor; conformance to TLA+ is tested, not formally proved.",
+      "The catalog and handwritten stateful conjunction are equivalent by construction.",
+      "Replay timing is a single in-process observation, not a latency or parallel-speedup benchmark.",
+      "No real publication, distributed atomicity, ABA/hash handling, or liveness proof.",
+      "No model-generated schedules, independent replication, or human-effort measurements."
+    ]
+  },
+  "verification": {
+    "catalogSha256": "e7fea47c02a225c656474ebf71446f3946fedb5702cef0d5a6df95655f05e2ff",
+    "generatedAt": "2026-09-07T23:10:22.017Z",
+    "catalogStates": 256,
+    "allowedKeys": [
+      "11111111"
+    ],
+    "modelChecks": [
+      {
+        "name": "catalog",
+        "expectedInvariant": "CatalogWellTyped",
+        "passed": true,
+        "distinctStates": 256,
+        "elapsedMs": 5870,
+        "expectedOutcome": "invariant holds in checked domain"
+      },
+      {
+        "name": "safe",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 1285,
+        "elapsedMs": 4782,
+        "expectedOutcome": "invariant holds in checked domain"
+      },
+      {
+        "name": "mutant-artifact",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 458,
+        "elapsedMs": 4467,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-policy",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 490,
+        "elapsedMs": 4363,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-attempt",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 562,
+        "elapsedMs": 6005,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-inventory",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 260,
+        "elapsedMs": 4045,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-cancellation",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 565,
+        "elapsedMs": 4730,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-duplicate",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 576,
+        "elapsedMs": 4481,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      },
+      {
+        "name": "mutant-ticket",
+        "expectedInvariant": "ReleaseSafe",
+        "passed": true,
+        "distinctStates": 911,
+        "elapsedMs": 5105,
+        "expectedOutcome": "ReleaseSafe counterexample found"
+      }
+    ],
+    "sourceHashes": {
+      "formal/agent/GateCatalog.tla": "f53c6f487d5cd6edc9c486b01b47adad9d2a833a30dfb2695d8ceb1b81cb9dff",
+      "formal/agent/ReleaseGate.tla": "09b0828b9389460e232a4392c12130a813e661d18caf2e362924588e576b7bb8",
+      "formal/agent/catalog.cfg": "be253de0c576ad63e64d8d6d623f4f1787f1392e6222a22fcb98d46735ff24f9",
+      "formal/agent/safe.cfg": "81976a3212e3e5e04e04909366d47b12b49401645be4cf42b6225e94058ba336",
+      "formal/agent/mutant-artifact.cfg": "c1c5975bf2c0f29be590c7154f1c6419b880c62f73adfc130263fdab819c6324",
+      "formal/agent/mutant-policy.cfg": "06ae579a3077ab41b865b32b663877825e35d7b27e23736dd0d661135d7587aa",
+      "formal/agent/mutant-attempt.cfg": "6992fc53fd11fe8382af5f79dd4da56f4cb1526e86ea50f15f7f3edf3451c5fc",
+      "formal/agent/mutant-inventory.cfg": "3b431f24103a9c907d19caac8f9eb6589fdc613667bf8c7019574ee426333f2d",
+      "formal/agent/mutant-cancellation.cfg": "ef1e2e14ea18ed2665d589ffaa372f28e6db301978932b0366ca609c6aafe113",
+      "formal/agent/mutant-duplicate.cfg": "5e98bd51f87ad40737d1ed7ca146b0d0b6d499ef8291881488a141708d880ee3",
+      "formal/agent/mutant-ticket.cfg": "2802e1d97ae3fed0e7c9c88cd46ce5c45de3eb4cdb1b61563cf096ea539ee577",
+      "scripts/study-c/tlc.mjs": "5dad75a238f1590953625694583f20255d4afcbba38242edc8c5276f8da03ec3"
+    },
+    "tools": {
+      "tlcSha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88",
+      "javaVersion": "openjdk version \"21.0.12.1\" 2026-08-18 LTS"
+    }
+  },
+  "replaySourceHashes": {
+    "scripts/study-c/gate.mjs": "378e8d946b5a25febf905af0f4a24821818640416a887850bd140385c782e22c",
+    "scripts/study-c/replay.mjs": "211c5581cf48e0942d104becff656a26e359e14165298b5e07a5188f7b46770c",
+    "scripts/study-c/schedules.mjs": "33fe2f674e89a2605328211784d7eb245dd4e340dea1cda7572cdd88772bda32",
+    "scripts/study-c/run.mjs": "b944b48562f6146a370373b1e94dc2c6d657f0559f6fad58547bea66bde62665",
+    "scripts/study-c/harness.test.mjs": "fb9e7e4ff45eb4738e53ae8defd679a682ccb788f4084a4e3a40d49874652dfd"
+  },
+  "scheduleSha256": "59e2bfe5eeedfb15b7a8c13839966f98328557c83949f64e2152e1dc041b1931",
+  "traces": {
+    "path": ".tools/study-c/replay-traces.json",
+    "sha256": "3b8fe1a8c1fe0d7bbbd032260c191b7659e944506217df6f875a4c1c604115aa"
+  },
+  "nodeVersion": "v22.23.2",
+  "statefulAndCatalogTracesIdentical": true,
+  "results": [
+    {
+      "condition": "result-only",
+      "scenarios": 20,
+      "satisfiedScenarios": 8,
+      "unsafeScenarios": 12,
+      "unsafePublications": 12,
+      "safePublications": 5,
+      "expectedReleaseScenarios": 6,
+      "missedExpectedReleaseScenarios": 1,
+      "replayElapsedMs": 18.491,
+      "cases": [
+        {
+          "id": "valid-release",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "edit-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "policy-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "old-result-then-latest-result",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "recovery-after-blocked-stale-prepare",
+          "category": "recovery",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": true,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-artifact",
+            "superseded-attempt"
+          ]
+        },
+        {
+          "id": "stale-artifact-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-artifact"
+          ]
+        },
+        {
+          "id": "stale-policy-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-policy"
+          ]
+        },
+        {
+          "id": "late-superseded-result",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "superseded-attempt"
+          ]
+        },
+        {
+          "id": "missing-inventory",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "inventory-incomplete"
+          ]
+        },
+        {
+          "id": "failed-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "unknown-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "pending-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "cancel-before-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "cancelled"
+          ]
+        },
+        {
+          "id": "cancel-after-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "cancelled"
+          ]
+        },
+        {
+          "id": "edit-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-artifact"
+          ]
+        },
+        {
+          "id": "policy-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-policy"
+          ]
+        },
+        {
+          "id": "attempt-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "superseded-attempt"
+          ]
+        },
+        {
+          "id": "old-ticket-after-fresh-evidence",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 1,
+          "safePublications": 0,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "stale-artifact",
+            "superseded-attempt"
+          ]
+        },
+        {
+          "id": "failed-recheck-after-prepare",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "duplicate-commit",
+          "category": "duplicate",
+          "expectedSafePublications": 1,
+          "publications": 2,
+          "safePublications": 1,
+          "unsafePublications": 1,
+          "satisfied": false,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": [
+            "duplicate-release"
+          ]
+        }
+      ]
+    },
+    {
+      "condition": "stateful-guard",
+      "scenarios": 20,
+      "satisfiedScenarios": 20,
+      "unsafeScenarios": 0,
+      "unsafePublications": 0,
+      "safePublications": 6,
+      "expectedReleaseScenarios": 6,
+      "missedExpectedReleaseScenarios": 0,
+      "replayElapsedMs": 7.497,
+      "cases": [
+        {
+          "id": "valid-release",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "edit-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "policy-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "old-result-then-latest-result",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "recovery-after-blocked-stale-prepare",
+          "category": "recovery",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "stale-artifact-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "stale-policy-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "late-superseded-result",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "missing-inventory",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "failed-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "unknown-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "pending-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "cancel-before-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "cancel-after-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "edit-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "policy-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "attempt-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "old-ticket-after-fresh-evidence",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "failed-recheck-after-prepare",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "duplicate-commit",
+          "category": "duplicate",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        }
+      ]
+    },
+    {
+      "condition": "tlc-catalog",
+      "scenarios": 20,
+      "satisfiedScenarios": 20,
+      "unsafeScenarios": 0,
+      "unsafePublications": 0,
+      "safePublications": 6,
+      "expectedReleaseScenarios": 6,
+      "missedExpectedReleaseScenarios": 0,
+      "replayElapsedMs": 11.622,
+      "cases": [
+        {
+          "id": "valid-release",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "edit-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "policy-before-fresh-check",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "old-result-then-latest-result",
+          "category": "valid",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 0,
+          "violationKinds": []
+        },
+        {
+          "id": "recovery-after-blocked-stale-prepare",
+          "category": "recovery",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "stale-artifact-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "stale-policy-at-prepare",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "late-superseded-result",
+          "category": "freshness",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "missing-inventory",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "failed-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "unknown-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "pending-check",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "cancel-before-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "cancel-after-prepare",
+          "category": "cancellation",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "edit-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "policy-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "attempt-after-prepare",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "old-ticket-after-fresh-evidence",
+          "category": "commit-race",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "failed-recheck-after-prepare",
+          "category": "evidence",
+          "expectedSafePublications": 0,
+          "publications": 0,
+          "safePublications": 0,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        },
+        {
+          "id": "duplicate-commit",
+          "category": "duplicate",
+          "expectedSafePublications": 1,
+          "publications": 1,
+          "safePublications": 1,
+          "unsafePublications": 0,
+          "satisfied": true,
+          "missedExpectedRelease": false,
+          "blockedActions": 1,
+          "violationKinds": []
+        }
+      ]
+    }
+  ]
+}
