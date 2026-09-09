@@ -487,7 +487,7 @@ test('portrait sits above its caption without overlap', async ({ page }) => {
   expect(caption!.y).toBeGreaterThanOrEqual(frame!.y + frame!.height - 1);
 });
 
-test('method page explains first-principles applied science with public evidence', async ({ page, request }) => {
+test('method page presents staff-level ML systems judgment with bounded research evidence', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Method' })).toHaveAttribute(
     'href',
@@ -496,67 +496,71 @@ test('method page explains first-principles applied science with public evidence
 
   await page.goto('/method.html');
 
-  await expect(page).toHaveTitle('How I Work | First Principles, Intuition, and Execution');
+  await expect(page).toHaveTitle('How I Build ML Systems | Mrityunjay Kumar');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
     'https://mrityunjaykumar911.github.io/method.html'
   );
   await expect(page.getByRole('heading', {
     level: 1,
-    name: 'First principles make intuition executable.',
+    name: 'Mrityunjay Kumar',
   })).toBeVisible();
-  await expect(page.getByText('Senior ML Engineer', { exact: true })).toBeVisible();
-  await expect(page.getByText('Intuition is compressed evidence.', { exact: false })).toBeVisible();
+  await expect(page.getByText('I build ML systems that remain useful after the demo.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('figure', { name: "Mrityunjay's operating model for production ML systems" })).toContainText('Team leverage');
+  await expect(page.locator('.hero-portrait')).toHaveCount(0);
+  await expect(page.locator('.operating-brief')).toHaveCount(0);
 
-  const chapterIds = ['principles', 'think', 'act', 'respond', 'case-studies'];
+  const chapterIds = ['mandate', 'judgment', 'development', 'scale', 'case-studies'];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
   await expect(page.locator('main h2')).toHaveText([
-    'Start with what must be true.',
-    'Frame the challenge before choosing the tool.',
-    'Make one deliberate move. Close the loop.',
-    'When the evidence changes, change the plan.',
-    'The method, tested in practice.',
+    'Capability matters. Durable value matters more.',
+    'Make the system legible before making it larger.',
+    'Move from uncertain capability to an operable system.',
+    'Scale the learning system, not only the inference fleet.',
+    'Evidence changed the conclusion each time.',
   ]);
   const chapters = page.getByRole('navigation', { name: 'Method chapters' });
   expect(await chapters.getByRole('link').evaluateAll(
     (links) => links.map((link) => link.getAttribute('href'))
   )).toEqual(chapterIds.map((id) => `#${id}`));
   await expect(page.locator('.method-hero')).not.toContainText('28.07%');
-  await expect(page.locator('#act .action-list > li')).toHaveCount(4);
-  await expect(page.locator('#respond .response-grid > article')).toHaveCount(3);
+  await expect(page.locator('#mandate .mandate-list > li')).toHaveCount(4);
+  await expect(page.locator('#judgment .reasoning-chain > li')).toHaveCount(5);
+  await expect(page.locator('#judgment .judgment-notes > article')).toHaveCount(3);
+  await expect(page.locator('#development .delivery-rail > li')).toHaveCount(5);
+  await expect(page.locator('#scale .scale-map > div')).toHaveCount(5);
+  await expect(page.locator('#scale')).toContainText('From owning components to improving how teams make technical decisions.');
 
-  await chapters.getByRole('link', { name: 'Case studies', exact: true }).click();
+  await chapters.getByRole('link', { name: 'Three studies', exact: true }).click();
   await expect(page).toHaveURL(/#case-studies$/);
-  await expect(page.locator('#case-studies > article')).toHaveCount(2);
-  for (const id of ['case-redesign', 'case-verification']) {
+  await expect(page.locator('#case-studies > article')).toHaveCount(3);
+  for (const id of ['study-a', 'study-b', 'study-c']) {
     await expect(page.locator(`#${id} .case-story dt`)).toHaveText([
-      'Challenge', 'Approach', 'Finding', 'Lesson',
+      'Decision', 'Finding', 'Staff lesson',
     ]);
   }
-  await expect(page.locator('#case-redesign')).toContainText('262 to 91');
-  const research = page.locator('#case-verification');
-  await expect(research).toContainText('Bounded research result');
-  await expect(research.locator('.case-lesson')).toContainText(
-    'These studies do not establish a cost-effectiveness ranking or an artifact-quality benefit'
-  );
-  const evidence = research.locator('details');
-  await expect(evidence).not.toHaveAttribute('open', '');
-  await evidence.locator('summary').click();
-  await expect(evidence).toHaveAttribute('open', '');
-  await expect(evidence.getByText('45.76%', { exact: true })).toBeVisible();
-  await expect(evidence.getByText('28.07%', { exact: true })).toBeVisible();
-  await expect(evidence).toContainText('maximal on eight checked finite domains');
-  await expect(evidence).toContainText('human authoring and maintenance time were not measured');
-  await expect(evidence).toContainText('formal arm blocked before repair and remained unscored');
+  const studyA = page.locator('#study-a');
+  await expect(studyA).toContainText('Bounded positive result');
+  await expect(studyA.getByText('45.76%', { exact: true })).toBeVisible();
+  await expect(studyA.getByText('28.07%', { exact: true })).toBeVisible();
+  await expect(studyA).toContainText('maximal on eight checked finite domains');
+  const studyB = page.locator('#study-b');
+  await expect(studyB).toContainText('Single-repository finding');
+  await expect(studyB).toContainText('The case establishes existence, not prevalence.');
+  const studyC = page.locator('#study-c');
+  await expect(studyC).toContainText('Negative feasibility result');
+  await expect(studyC.getByText('349,968', { exact: true })).toBeVisible();
+  await expect(studyC).toContainText('T remained unscored');
+  await expect(studyC.locator('.case-lesson')).toContainText('Stop an expensive direction');
 
-  const tlaSpec = page.getByRole('link', { name: 'Read the flexbox TLA+ model' });
+  const tlaSpec = page.getByRole('link', { name: 'Inspect the TLA+ model' });
   await expect(tlaSpec).toHaveAttribute('href', '/research/FlexFacets.tla');
   const tlaResponse = await request.get('/research/FlexFacets.tla');
   expect(tlaResponse.ok()).toBe(true);
   expect(await tlaResponse.text()).toContain('Immobile(cfg, i)');
-  const paper = page.getByRole('link', { name: 'Read the research manuscript' });
+  const paper = page.getByRole('link', { name: 'Read the combined research manuscript' });
   await expect(paper).toHaveAttribute(
     'href',
     '/research/verifiable-web-artifacts.pdf'
@@ -564,11 +568,6 @@ test('method page explains first-principles applied science with public evidence
   const paperResponse = await request.get('/research/verifiable-web-artifacts.pdf');
   expect(paperResponse.ok()).toBe(true);
   expect((await paperResponse.body()).subarray(0, 4).toString()).toBe('%PDF');
-  const redesignPaper = page.getByRole('link', { name: 'Read the redesign case study' });
-  await expect(redesignPaper).toHaveAttribute('href', '/research/executable-evidence-public-resumes.pdf');
-  const redesignResponse = await request.get('/research/executable-evidence-public-resumes.pdf');
-  expect(redesignResponse.ok()).toBe(true);
-  expect((await redesignResponse.body()).subarray(0, 4).toString()).toBe('%PDF');
 
   const sitemapIndex = await request.get('/sitemap-index.xml');
   const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];
@@ -580,8 +579,6 @@ test('method page explains first-principles applied science with public evidence
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth), `${width}px`).toBe(width);
   }
-  await evidence.locator('summary').click();
-  await expect(evidence).not.toHaveAttribute('open', '');
-  await chapters.getByRole('link', { name: 'Think', exact: true }).click();
-  await expect(page).toHaveURL(/#think$/);
+  await chapters.getByRole('link', { name: 'How I think', exact: true }).click();
+  await expect(page).toHaveURL(/#judgment$/);
 });
