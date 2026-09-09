@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""
+Step 3d. Emit MAXIMALITY WITNESSES as a TLA+ literal.
+
+Soundness says the condition never admits a coupled item. Maximality says nothing weaker is
+sound. The second is the one a reviewer will press on, and it needs a certificate.
+
+Because a locally-evaluable condition sees only the item's own shape, admitting a shape means
+admitting EVERY (cfg, item) pair carrying that shape. So for each shape the condition rejects,
+a single config in which an item of that shape is COUPLED is a complete proof that no sound
+local condition may admit it. One counterexample per rejected shape certifies maximality.
+
+This script finds the smallest such witness per rejected shape and writes FlexWitness.tla,
+which TLC checks in a one-state model in under a second. TLC is then carrying the maximality
+argument mechanically, not just the soundness check.
+"""
+
+import itertools, argparse, sys
+from fractions import Fraction as F
+from flexmodel import Item, resolve
+
+_cache = {}
+
+
+def used(cfg, C):
+    k = (cfg, C)
+    r = _cache.get(k)
+    if r is None:
+        r = tuple(resolve(C, [Item(basis=b, grow=g, shrink=s, minS=mn, maxS=mx, margin=F(0))
+                              for (b, g, s, mn, mx) in cfg]).used)
+        _cache[k] = r
+    return r
+
+
+B, G, S, MN, MX = 0, 1, 2, 3, 4
+
+from facets import immobile_tuple as immobile
+
+
+def find_witness(shape, per_item, widths, bases, n):
+    """A (cfg, i, C, j, b) where an item of this shape MOVES when sibling j changes basis."""
+    for cfg_rest in itertools.product(per_item, repeat=n - 1):
+        cfg = (shape,) + cfg_rest
+        for C in widths:
+            mine = used(cfg, C)[0]
+            for j in range(1, n):
+                for b in bases:
+                    if b == cfg[j][0]:
+                        continue
+                    alt = list(cfg)
+                    alt[j] = (b,) + cfg[j][1:]
+                    got = used(tuple(alt), C)[0]
+                    if got != mine:
+                        return {"cfg": cfg, "item": 0, "width": C, "sib": j,
+                                "newbasis": b, "before": mine, "after": got}
+    return None
+
+
+def tla_item(it, inf):
+    mx = inf if it[MX] is None else it[MX]
+    return (f"[basis |-> {it[B]}, grow |-> {it[G]}, shrink |-> {it[S]}, "
+            f"min |-> {it[MN]}, max |-> {mx}]")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default="FlexWitness.tla")
+    ap.add_argument("--n", type=int, default=3)
+    a = ap.parse_args()
+
+    BASES = [F(0), F(60), F(120)]
+    GROWS = [F(0), F(1)]
+    SHRINKS = [F(0), F(1)]
+    MINS = [F(0), F(60)]
+    MAXES = [None, F(120)]
+    WIDTHS = [F(120), F(240), F(360)]
+    INF = 1000000
+
+    per_item = list(itertools.product(BASES, GROWS, SHRINKS, MINS, MAXES))
+    rejected = [sh for sh in per_item if not immobile(sh)]
+    print(f"shapes {len(per_item)}, admitted {len(per_item)-len(rejected)}, "
+          f"rejected {len(rejected)}")
+
+    wits, unwitnessed = [], []
+    for sh in rejected:
+        w = find_witness(sh, per_item, WIDTHS, BASES, a.n)
+        if w is None:
+            unwitnessed.append(sh)
+            print(f"  NO WITNESS for {sh}  <-- condition may be too strong here",
+                  file=sys.stderr)
+        else:
+            wits.append((sh, w))
+
+    print(f"witnessed {len(wits)}/{len(rejected)} rejected shapes")
+    if unwitnessed:
+        print(f"UNWITNESSED {len(unwitnessed)} -> NOT maximal; these shapes are always "
+              f"independent and the condition should be weakened:")
+        for sh in unwitnessed:
+            print("   ", sh)
+    else:
+        print("every rejected shape has a coupling witness => the condition is MAXIMAL "
+              "among locally-evaluable conditions on this domain.")
+
+    lines = []
+    lines.append("---------------------------- MODULE FlexWitness ----------------------------")
+    lines.append("(***************************************************************************)")
+    lines.append("(* MAXIMALITY CERTIFICATE for the Immobile condition in FlexFacets.        *)")
+    lines.append("(*                                                                         *)")
+    lines.append("(* A locally-evaluable condition sees only an item's own shape, so it must  *)")
+    lines.append("(* treat every context carrying that shape alike. Therefore one config in   *)")
+    lines.append("(* which an item of shape s is COUPLED proves that no sound local condition *)")
+    lines.append("(* may admit s. Below is one such config for EVERY shape Immobile rejects.  *)")
+    lines.append("(*                                                                         *)")
+    lines.append("(* If Maximal holds, Immobile is the weakest sound locally-evaluable        *)")
+    lines.append("(* condition on this domain: nothing weaker is sound, nothing stronger is   *)")
+    lines.append("(* necessary. Generated by sln/gen_witnesses.py; do not hand edit.          *)")
+    lines.append("(***************************************************************************)")
+    lines.append("EXTENDS Integers, FiniteSets")
+    lines.append("")
+    lines.append(f"N   == {a.n}")
+    lines.append(f"INF == {INF}")
+    lines.append("Bases   == {" + ", ".join(str(b) for b in BASES) + "}")
+    lines.append("Factors == {" + ", ".join(str(x) for x in GROWS + [s for s in SHRINKS
+                                                                    if s not in GROWS]) + "}")
+    lines.append("Mins    == {" + ", ".join(str(x) for x in MINS) + "}")
+    lines.append("Maxes   == {" + ", ".join(str(INF if x is None else x) for x in MAXES) + "}")
+    lines.append("Widths  == {" + ", ".join(str(w) for w in WIDTHS) + "}")
+    lines.append("")
+    lines.append("(* FlexFacets carries an exploration harness with VARIABLES cfg and item.   *)")
+    lines.append("(* This module uses only its SEMANTICS (Used, Immobile), which do not touch *)")
+    lines.append("(* those variables, so the instantiation substitutes an inert placeholder.  *)")
+    lines.append("Placeholder == << " + ", ".join(
+        ["[basis |-> 0, grow |-> 0, shrink |-> 0, min |-> 0, max |-> INF]"] * a.n) + " >>")
+    lines.append("F == INSTANCE FlexFacets WITH cfg <- Placeholder, item <- 1")
+    lines.append("")
+    lines.append("(* Each witness: a config, the item under test, the width, and the sibling  *)")
+    lines.append("(* edit that moves it. Used(base)[item] # Used(perturbed)[item].            *)")
+    lines.append("Witnesses == {")
+    body = []
+    for sh, w in wits:
+        cfg_s = ", ".join(tla_item(it, INF) for it in w["cfg"])
+        alt = list(w["cfg"])
+        alt[w["sib"]] = (w["newbasis"],) + w["cfg"][w["sib"]][1:]
+        alt_s = ", ".join(tla_item(it, INF) for it in alt)
+        body.append(f"  [ base |-> << {cfg_s} >>,\n"
+                    f"    pert |-> << {alt_s} >>,\n"
+                    f"    item |-> {w['item']+1}, width |-> {w['width']} ]")
+    lines.append(",\n".join(body))
+    lines.append("}")
+    lines.append("")
+    lines.append("(* Every rejected shape really is coupled somewhere. *)")
+    lines.append("Maximal ==")
+    lines.append("    \\A w \\in Witnesses :")
+    lines.append("        F!Used(w.base, w.width)[w.item] # F!Used(w.pert, w.width)[w.item]")
+    lines.append("")
+    lines.append("(* And none of these witnessed shapes is admitted, i.e. we stay sound. *)")
+    lines.append("WitnessesRejected ==")
+    lines.append("    \\A w \\in Witnesses : ~F!Immobile(w.base, w.item)")
+    lines.append("")
+    lines.append("VARIABLE tick")
+    lines.append("Init == tick = 0")
+    lines.append("Next == UNCHANGED tick")
+    lines.append("Spec == Init /\\ [][Next]_tick")
+    lines.append("=" * 77)
+    open(a.out, "w").write("\n".join(lines) + "\n")
+
+    cfgname = a.out.replace(".tla", ".cfg")
+    open(cfgname, "w").write(
+        "SPECIFICATION Spec\nINVARIANT Maximal\nINVARIANT WitnessesRejected\n")
+    print(f"\nwrote {a.out} ({len(wits)} witnesses) and {cfgname}")
+    print("check with:  java -cp tla2tools.jar tlc2.TLC -config FlexWitness.cfg FlexWitness")
+
+
+if __name__ == "__main__":
+    main()

@@ -487,7 +487,7 @@ test('portrait sits above its caption without overlap', async ({ page }) => {
   expect(caption!.y).toBeGreaterThanOrEqual(frame!.y + frame!.height - 1);
 });
 
-test('method page explains first-principles applied science with public evidence', async ({ page, request }) => {
+test('method page presents staff-level ML systems judgment with bounded research evidence', async ({ page, request }) => {
   await page.goto('/');
   await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Method' })).toHaveAttribute(
     'href',
@@ -496,51 +496,78 @@ test('method page explains first-principles applied science with public evidence
 
   await page.goto('/method.html');
 
-  await expect(page).toHaveTitle('How I Work | First Principles, Intuition, and Execution');
+  await expect(page).toHaveTitle('How I Build ML Systems | Mrityunjay Kumar');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
     'https://mrityunjaykumar911.github.io/method.html'
   );
   await expect(page.getByRole('heading', {
     level: 1,
-    name: 'First principles make intuition executable.',
+    name: 'Mrityunjay Kumar',
   })).toBeVisible();
-  await expect(page.getByText('Senior ML Engineer', { exact: true })).toBeVisible();
-  await expect(page.getByText('Intuition is compressed evidence.', { exact: false })).toBeVisible();
-  await expect(page.getByRole('heading', {
-    name: 'Verify the protocol. Optimize the surface.',
-  })).toBeVisible();
-  await expect(page.getByText('30', { exact: true })).toBeVisible();
-  await expect(page.getByText('3/3', { exact: true })).toBeVisible();
+  await expect(page.getByText('I build ML systems that remain useful after the demo.', { exact: true })).toBeVisible();
+  await expect(page.getByRole('figure', { name: "Mrityunjay's operating model for production ML systems" })).toContainText('Team leverage');
+  await expect(page.locator('.hero-portrait')).toHaveCount(0);
+  await expect(page.locator('.operating-brief')).toHaveCount(0);
 
-  const tlaSpec = page.getByRole('link', { name: 'Read the TLA+ model' });
-  await expect(tlaSpec).toHaveAttribute('href', '/research/ResumePublication.tla');
-  const tlaResponse = await request.get('/research/ResumePublication.tla');
+  const chapterIds = ['mandate', 'judgment', 'development', 'scale', 'case-studies'];
+  expect(await page.locator('main > section[id]').evaluateAll(
+    (sections) => sections.map((section) => section.id)
+  )).toEqual(chapterIds);
+  await expect(page.locator('main h2')).toHaveText([
+    'Capability matters. Durable value matters more.',
+    'Make the system legible before making it larger.',
+    'Move from uncertain capability to an operable system.',
+    'Scale the learning system, not only the inference fleet.',
+    'Evidence changed the conclusion each time.',
+  ]);
+  const chapters = page.getByRole('navigation', { name: 'Method chapters' });
+  expect(await chapters.getByRole('link').evaluateAll(
+    (links) => links.map((link) => link.getAttribute('href'))
+  )).toEqual(chapterIds.map((id) => `#${id}`));
+  await expect(page.locator('.method-hero')).not.toContainText('28.07%');
+  await expect(page.locator('#mandate .mandate-list > li')).toHaveCount(4);
+  await expect(page.locator('#judgment .reasoning-chain > li')).toHaveCount(5);
+  await expect(page.locator('#judgment .judgment-notes > article')).toHaveCount(3);
+  await expect(page.locator('#development .delivery-rail > li')).toHaveCount(5);
+  await expect(page.locator('#scale .scale-map > div')).toHaveCount(5);
+  await expect(page.locator('#scale')).toContainText('From owning components to improving how teams make technical decisions.');
+
+  await chapters.getByRole('link', { name: 'Three studies', exact: true }).click();
+  await expect(page).toHaveURL(/#case-studies$/);
+  await expect(page.locator('#case-studies > article')).toHaveCount(3);
+  for (const id of ['study-a', 'study-b', 'study-c']) {
+    await expect(page.locator(`#${id} .case-story dt`)).toHaveText([
+      'Decision', 'Finding', 'Staff lesson',
+    ]);
+  }
+  const studyA = page.locator('#study-a');
+  await expect(studyA).toContainText('Bounded positive result');
+  await expect(studyA.getByText('45.76%', { exact: true })).toBeVisible();
+  await expect(studyA.getByText('28.07%', { exact: true })).toBeVisible();
+  await expect(studyA).toContainText('maximal on eight checked finite domains');
+  const studyB = page.locator('#study-b');
+  await expect(studyB).toContainText('Single-repository finding');
+  await expect(studyB).toContainText('The case establishes existence, not prevalence.');
+  const studyC = page.locator('#study-c');
+  await expect(studyC).toContainText('Negative feasibility result');
+  await expect(studyC.getByText('349,968', { exact: true })).toBeVisible();
+  await expect(studyC).toContainText('T remained unscored');
+  await expect(studyC.locator('.case-lesson')).toContainText('Stop an expensive direction');
+
+  const tlaSpec = page.getByRole('link', { name: 'Inspect the TLA+ model' });
+  await expect(tlaSpec).toHaveAttribute('href', '/research/FlexFacets.tla');
+  const tlaResponse = await request.get('/research/FlexFacets.tla');
   expect(tlaResponse.ok()).toBe(true);
-  expect(await tlaResponse.text()).toContain('NoPrivateInProduction');
-
-  const selectiveOptimization = page.getByRole('img', {
-    name: /Flow from public claim invariants through TLA plus model checking/,
-  });
-  await selectiveOptimization.scrollIntoViewIfNeeded();
-  await expect.poll(() => selectiveOptimization.evaluate(
-    (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
-  )).toBe(true);
-
-  const diagram = page.getByRole('img', {
-    name: /Flow from human intent through a bounded LLM edit/,
-  });
-  await expect(diagram).toBeVisible();
-  await diagram.scrollIntoViewIfNeeded();
-  await expect.poll(() => diagram.evaluate(
-    (image: HTMLImageElement) => image.complete && image.naturalWidth > 0
-  )).toBe(true);
-
-  const paper = page.getByRole('link', { name: 'Read the paper' });
+  expect(await tlaResponse.text()).toContain('Immobile(cfg, i)');
+  const paper = page.getByRole('link', { name: 'Read the combined research manuscript' });
   await expect(paper).toHaveAttribute(
     'href',
-    '/research/executable-evidence-public-resumes.pdf'
+    '/research/verifiable-web-artifacts.pdf'
   );
+  const paperResponse = await request.get('/research/verifiable-web-artifacts.pdf');
+  expect(paperResponse.ok()).toBe(true);
+  expect((await paperResponse.body()).subarray(0, 4).toString()).toBe('%PDF');
 
   const sitemapIndex = await request.get('/sitemap-index.xml');
   const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];
@@ -548,7 +575,10 @@ test('method page explains first-principles applied science with public evidence
   const sitemap = await request.get(new URL(sitemapLocation!).pathname);
   expect(await sitemap.text()).toContain('/method.html');
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.reload();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  for (const width of [1440, 1024, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), `${width}px`).toBe(width);
+  }
+  await chapters.getByRole('link', { name: 'How I think', exact: true }).click();
+  await expect(page).toHaveURL(/#judgment$/);
 });

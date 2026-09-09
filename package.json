@@ -10,6 +10,15 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "test:tla": "node scripts/check-tla.mjs",
+    "study:c:verify": "node scripts/study-c/tlc.mjs",
+    "test:study-c": "node --test scripts/study-c/harness.test.mjs",
+    "study:c": "node scripts/study-c/run.mjs",
+    "study:c:prepare": "node scripts/study-c/prepare-smoke.mjs",
+    "study:c:budget": "node scripts/study-c/budget-preflight.mjs",
+    "test:study-c:budget": "node --test scripts/study-c/token-count.test.mjs",
+    "study:c:sanity:xai": "node scripts/study-c/xai-sanity.mjs",
+    "test:study-c:xai": "node --test scripts/study-c/xai-sanity.test.mjs",
+    "test:study-c:offline": "node scripts/study-c/test-offline.mjs",
     "optimize:visual": "node scripts/optimize-visual.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -29,6 +38,8 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1"
+    "@ai-sdk/xai": "4.0.50",
+    "@playwright/test": "^1.62.1",
+    "ai": "7.0.87"
   }
 }

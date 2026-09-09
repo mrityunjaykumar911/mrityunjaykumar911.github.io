@@ -1,0 +1,100 @@
+{
+  "pages": 4608,
+  "total_nodes": 535583,
+  "styled_nodes": 323550,
+  "inline_style_attrs": 49733,
+  "styled_to_inline_ratio": 6.51,
+  "gate_verdict": "SOUND: tree styles far exceed inline style attributes -> stylesheet rules ARE resolved into the tree",
+  "grid_containers": 464,
+  "flex_containers_2plus_children": 5940,
+  "excluded_escaping_descendants": 340,
+  "analyzed": 5600,
+  "decomposable": 59,
+  "conditional": 79,
+  "coupled": 5462,
+  "decomposable_pct": 1.1,
+  "conditional_pct": 1.4,
+  "coupled_pct": 97.5,
+  "escaping_pct_of_containers": 5.7,
+  "child_classification": {
+    "coupled": 14377,
+    "independent_if_width_set": 372,
+    "independent": 532
+  },
+  "reasons": {
+    "default_0_1_auto": 12608,
+    "grow_or_shrink_active": 1769,
+    "flex_none_width_unknown": 372,
+    "no_grow_no_shrink_definite_basis": 301,
+    "flex_none_with_definite_width": 218,
+    "zero_basis_min_width_zero": 13
+  },
+  "samples": [
+    {
+      "bbox": [
+        40,
+        1501,
+        1200,
+        74
+      ],
+      "style": "display: flex; flex-flow: row wrap; list-style: none; margin: 0; padding: 0; text-rendering: optimizespeed",
+      "n_children": 3,
+      "verdict": "decomposable"
+    },
+    {
+      "bbox": [
+        100,
+        1410,
+        91,
+        25
+      ],
+      "style": "display: flex; justify-content: space-between; width: 91px; margin-bottom: 4px; box-sizing: border-box",
+      "n_children": 3,
+      "verdict": "decomposable"
+    },
+    {
+      "bbox": [
+        137,
+        1317,
+        1005,
+        43
+      ],
+      "style": "box-sizing: border-box; position: relative; padding: 0; display: flex; flex-wrap: wrap; align-items: flex-start; margin:",
+      "n_children": 3,
+      "verdict": "decomposable"
+    },
+    {
+      "bbox": [
+        16,
+        1235,
+        1280,
+        388
+      ],
+      "style": "display: flex; flex-wrap: wrap; margin-left: calc(var(--bs-gutter-x) * -0.5); margin-right: calc(var(--bs-gutter-x) * -0",
+      "n_children": 3,
+      "verdict": "decomposable"
+    },
+    {
+      "bbox": [
+        0,
+        638,
+        1280,
+        436
+      ],
+      "style": "display: flex; flex-wrap: wrap; margin-left: calc(var(--bs-gutter-x) * -0.5); margin-right: calc(var(--bs-gutter-x) * -0",
+      "n_children": 2,
+      "verdict": "decomposable"
+    },
+    {
+      "bbox": [
+        0,
+        795,
+        1280,
+        224
+      ],
+      "style": "display: flex; flex-wrap: wrap; margin-left: calc(var(--bs-gutter-x) * -0.5); margin-right: calc(var(--bs-gutter-x) * -0",
+      "n_children": 2,
+      "verdict": "decomposable"
+    }
+  ]
+}

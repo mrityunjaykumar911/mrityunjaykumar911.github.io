@@ -1,0 +1,450 @@
+{
+  "pages": 200,
+  "nodes": 22851,
+  "nodes_with_valid_bbox": 22851,
+  "pages_with_flex_or_grid_container": 51,
+  "top_50_style_properties": [
+    [
+      "padding",
+      7608
+    ],
+    [
+      "margin",
+      7099
+    ],
+    [
+      "color",
+      6124
+    ],
+    [
+      "font-size",
+      5693
+    ],
+    [
+      "box-sizing",
+      3839
+    ],
+    [
+      "border",
+      3312
+    ],
+    [
+      "display",
+      3142
+    ],
+    [
+      "vertical-align",
+      2865
+    ],
+    [
+      "text-decoration",
+      2779
+    ],
+    [
+      "background",
+      2726
+    ],
+    [
+      "outline",
+      2199
+    ],
+    [
+      "font-family",
+      1894
+    ],
+    [
+      "font-weight",
+      1879
+    ],
+    [
+      "line-height",
+      1822
+    ],
+    [
+      "width",
+      1776
+    ],
+    [
+      "background-color",
+      1550
+    ],
+    [
+      "position",
+      1276
+    ],
+    [
+      "height",
+      1271
+    ],
+    [
+      "text-align",
+      1069
+    ],
+    [
+      "margin-bottom",
+      941
+    ],
+    [
+      "max-width",
+      737
+    ],
+    [
+      "font",
+      708
+    ],
+    [
+      "padding-bottom",
+      675
+    ],
+    [
+      "border-bottom",
+      648
+    ],
+    [
+      "padding-left",
+      648
+    ],
+    [
+      "margin-left",
+      639
+    ],
+    [
+      "margin-top",
+      632
+    ],
+    [
+      "float",
+      601
+    ],
+    [
+      "list-style",
+      506
+    ],
+    [
+      "transition",
+      498
+    ],
+    [
+      "overflow",
+      484
+    ],
+    [
+      "border-radius",
+      450
+    ],
+    [
+      "letter-spacing",
+      428
+    ],
+    [
+      "margin-right",
+      414
+    ],
+    [
+      "align-items",
+      398
+    ],
+    [
+      "cursor",
+      385
+    ],
+    [
+      "padding-top",
+      336
+    ],
+    [
+      "text-transform",
+      321
+    ],
+    [
+      "font-style",
+      315
+    ],
+    [
+      "padding-right",
+      313
+    ],
+    [
+      "white-space",
+      272
+    ],
+    [
+      "justify-content",
+      252
+    ],
+    [
+      "top",
+      237
+    ],
+    [
+      "word-wrap",
+      227
+    ],
+    [
+      "border-color",
+      220
+    ],
+    [
+      "box-shadow",
+      215
+    ],
+    [
+      "border-top",
+      208
+    ],
+    [
+      "z-index",
+      198
+    ],
+    [
+      "flex-direction",
+      166
+    ],
+    [
+      "flex-wrap",
+      159
+    ]
+  ],
+  "layout_props_present": {
+    "align-items": 398,
+    "display": 3142,
+    "flex": 95,
+    "flex-basis": 29,
+    "flex-direction": 166,
+    "flex-grow": 54,
+    "flex-shrink": 26,
+    "flex-wrap": 159,
+    "float": 601,
+    "gap": 40,
+    "grid-area": 3,
+    "grid-column": 6,
+    "grid-row": 0,
+    "grid-template-columns": 10,
+    "grid-template-rows": 3,
+    "height": 1271,
+    "justify-content": 252,
+    "max-width": 737,
+    "min-width": 158,
+    "position": 1276,
+    "width": 1776
+  },
+  "display_values": [
+    [
+      "block",
+      1207
+    ],
+    [
+      "inline-block",
+      672
+    ],
+    [
+      "flex",
+      404
+    ],
+    [
+      "inline",
+      116
+    ],
+    [
+      "inline-flex",
+      75
+    ],
+    [
+      "-webkit-box",
+      63
+    ],
+    [
+      "-ms-flexbox",
+      31
+    ],
+    [
+      "none",
+      25
+    ],
+    [
+      "-moz-flex",
+      17
+    ],
+    [
+      "table",
+      14
+    ],
+    [
+      "table-cell",
+      11
+    ],
+    [
+      "block !important",
+      7
+    ],
+    [
+      "grid",
+      6
+    ],
+    [
+      "-ms-flexbox !important",
+      4
+    ],
+    [
+      "-webkit-inline-box",
+      4
+    ],
+    [
+      "-ms-inline-flexbox",
+      4
+    ],
+    [
+      "inline-block!important",
+      2
+    ],
+    [
+      "-ms-grid",
+      1
+    ],
+    [
+      "inline-table",
+      1
+    ],
+    [
+      "table !important",
+      1
+    ]
+  ],
+  "flexlike_prop_counts": {
+    "grid-template-columns": 9,
+    "min-width": 131,
+    "flex-grow": 45,
+    "flex-basis": 24,
+    "flex": 90
+  },
+  "node_types_top": [
+    [
+      "div",
+      5259
+    ],
+    [
+      "a",
+      4926
+    ],
+    [
+      "li",
+      2231
+    ],
+    [
+      "span",
+      1708
+    ],
+    [
+      "p",
+      1287
+    ],
+    [
+      "td",
+      1215
+    ],
+    [
+      "tr",
+      555
+    ],
+    [
+      "img",
+      512
+    ],
+    [
+      "strong",
+      443
+    ],
+    [
+      "ul",
+      440
+    ],
+    [
+      "input",
+      430
+    ],
+    [
+      "option",
+      259
+    ],
+    [
+      "h2",
+      258
+    ],
+    [
+      "table",
+      256
+    ],
+    [
+      "tbody",
+      256
+    ]
+  ],
+  "examples": [
+    {
+      "container_type": "a",
+      "container_style": "display: inline-flex; color: #06F; text-decoration: none; padding: 2px",
+      "container_bbox": [
+        638,
+        1889,
+        4,
+        4
+      ],
+      "children": [
+        [
+          "div",
+          "position: fixed; bottom: 10px; right: 10px; background: #004dff; color: #fff; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 10px",
+          [
+            1108,
+            636,
+            161,
+            74
+          ]
+        ]
+      ]
+    },
+    {
+      "container_type": "a",
+      "container_style": "display: inline-flex; color: #06F; text-decoration: none; padding: 2px",
+      "container_bbox": [
+        1068,
+        1717,
+        21,
+        22
+      ],
+      "children": []
+    },
+    {
+      "container_type": "a",
+      "container_style": "display: inline-flex; color: #06F; text-decoration: none; padding: 2px",
+      "container_bbox": [
+        996,
+        1714,
+        68,
+        25
+      ],
+      "children": []
+    },
+    {
+      "container_type": "a",
+      "container_style": "display: inline-flex; color: #06F; text-decoration: none; padding: 2px",
+      "container_bbox": [
+        923,
+        1714,
+        68,
+        25
+      ],
+      "children": []
+    },
+    {
+      "container_type": "a",
+      "container_style": "display: inline-flex; color: #06F; text-decoration: none; padding: 2px",
+      "container_bbox": [
+        867,
+        1714,
+        52,
+        25
+      ],
+      "children": []
+    }
+  ]
+}

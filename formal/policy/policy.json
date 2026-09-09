@@ -1,0 +1,210 @@
+{
+  "_comment": [
+    "Disclosure policy for mrityunjaykumar911.github.io.",
+    "",
+    "One source of truth, read by two things that must agree:",
+    "  gen_policy_tla.py  -> Policy*.tla, the abstract model TLC checks",
+    "  check_artifacts.py -> the concrete check over the bytes in dist/",
+    "",
+    "'current' is the repository as it stands and is EXPECTED TO FAIL, on the two",
+    "defects the check found (F1, F2 in DESIGN.md). 'fixed' is the same policy after",
+    "the two remediations and is expected to pass. Keeping both means the model",
+    "demonstrates the defects rather than describing them.",
+    "",
+    "audience lattice: public < flagged < local.  pii is orthogonal."
+  ],
+  "sources": {
+    "resume_public": {
+      "aud": "public",
+      "pii": false,
+      "from": "src/data/resume.yaml (minus profile.email)"
+    },
+    "profile_email": {
+      "aud": "public",
+      "pii": true,
+      "from": "src/data/resume.yaml profile.email"
+    },
+    "profile_phone": {
+      "aud": "public",
+      "pii": true,
+      "from": "phone number embedded in the CV PDF"
+    },
+    "resume_latest": {
+      "aud": "flagged",
+      "pii": false,
+      "from": "src/data/resume.latest.yaml"
+    },
+    "resume_local": {
+      "aud": "local",
+      "pii": false,
+      "from": "src/data/resume.local.yaml (git-ignored)"
+    }
+  },
+  "sinks": {
+    "index_html": {
+      "path": "dist/index.html",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": [
+        "resume_public",
+        "profile_email"
+      ]
+    },
+    "latest_html": {
+      "path": "dist/latest.html",
+      "clearance": "flagged",
+      "allows_pii": false,
+      "flows": [
+        "resume_public",
+        "profile_email",
+        "resume_latest"
+      ]
+    },
+    "llms_txt": {
+      "path": "dist/llms.txt",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": [
+        "resume_public"
+      ]
+    },
+    "robots_txt": {
+      "path": "dist/robots.txt",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "sitemap_index": {
+      "path": "dist/sitemap-index.xml",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "sitemap_0": {
+      "path": "dist/sitemap-0.xml",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "notfound_html": {
+      "path": "dist/404.html",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "method_html": {
+      "path": "dist/method.html",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": [
+        "resume_public"
+      ]
+    },
+    "spec_tla": {
+      "path": "dist/research/ResumePublication.tla",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "legacy_cv_html": {
+      "path": "dist/cv/cv/MrityunjayKumarCV.pdf.html",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": []
+    },
+    "cv_pdf": {
+      "path": "dist/cv/MrityunjayKumar-CV.pdf",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": [
+        "resume_public",
+        "profile_email",
+        "profile_phone"
+      ]
+    },
+    "paper_pdf": {
+      "path": "dist/research/executable-evidence-public-resumes.pdf",
+      "clearance": "public",
+      "allows_pii": false,
+      "flows": [
+        "resume_public"
+      ]
+    }
+  },
+  "declassified": {
+    "_comment": "sink -> sources treated as public/non-PII on the path to that sink. A declared SET, never inferred from a transformation. An encoding is not a declassifier.",
+    "current": {},
+    "fixed": {
+      "index_html": [
+        "profile_email"
+      ],
+      "latest_html": [
+        "profile_email"
+      ]
+    }
+  },
+  "audited": {
+    "_comment": "sinks some executable check actually opens. 'current' is what the existing Playwright suite asserts on; the two PDFs are absent, which is defect F2.",
+    "current": [
+      "index_html",
+      "latest_html",
+      "llms_txt",
+      "robots_txt",
+      "sitemap_index",
+      "sitemap_0",
+      "notfound_html",
+      "method_html",
+      "spec_tla",
+      "legacy_cv_html"
+    ],
+    "fixed": [
+      "index_html",
+      "latest_html",
+      "llms_txt",
+      "robots_txt",
+      "sitemap_index",
+      "sitemap_0",
+      "notfound_html",
+      "method_html",
+      "spec_tla",
+      "legacy_cv_html",
+      "cv_pdf",
+      "paper_pdf"
+    ]
+  },
+  "overrides": {
+    "_comment": "deliberate, documented exceptions in the fixed policy. A CV is expected to carry contact details; the point is that this becomes an explicit decision instead of an unexamined one.",
+    "fixed": {
+      "cv_pdf": {
+        "allows_pii": true,
+        "why": "a CV is contact material by definition; recorded so it is a decision, not an oversight"
+      }
+    }
+  },
+  "detectors": {
+    "_comment": "how check_artifacts.py recognises each PII source in emitted bytes. Encodings are listed because the information survives them; matching only the literal form is defect F1.",
+    "profile_email": {
+      "kind": "email",
+      "encodings": [
+        "literal",
+        "reversed",
+        "base64",
+        "html_entities",
+        "percent"
+      ]
+    },
+    "profile_phone": {
+      "kind": "phone",
+      "encodings": [
+        "literal",
+        "reversed",
+        "spaced"
+      ]
+    }
+  },
+  "strips_local": {
+    "_comment": "does the production build drop local-labelled sources, i.e. is the `import.meta.env.DEV &&` guard in src/data/resume.ts present. The mutant deletes it.",
+    "current": true,
+    "fixed": true
+  }
+}

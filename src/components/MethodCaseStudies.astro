@@ -1,0 +1,323 @@
+---
+import Icon from './Icon.astro';
+import { withBase } from '../lib/url';
+
+const researchPaperHref = withBase('/research/verifiable-web-artifacts.pdf');
+const flexModelHref = withBase('/research/FlexFacets.tla');
+---
+
+<section id="case-studies" class="case-studies" aria-labelledby="case-studies-title">
+  <div class="case-intro">
+    <div>
+      <p class="eyebrow">05 / Three studies</p>
+      <h2 id="case-studies-title">Evidence changed the conclusion each time.</h2>
+    </div>
+    <div>
+      <p>
+        The studies are useful together because they do not tell one convenient story.
+        One establishes a bounded condition, one exposes an audit boundary, and one shows
+        when an expensive technical direction has not earned another run.
+      </p>
+      <a class="study-link" href={researchPaperHref} target="_blank" rel="noreferrer">
+        Read the combined research manuscript <Icon name="file" size={16} />
+      </a>
+    </div>
+  </div>
+
+  <article id="study-a" class="case-study study-a" aria-labelledby="study-a-title">
+    <header class="case-heading">
+      <p class="mono-label">Study A · Geometric contracts</p>
+      <p class="study-verdict">Bounded positive result</p>
+      <h3 id="study-a-title">What can an item-local rule actually certify about flexbox?</h3>
+      <p class="case-context">Finite models, exact arithmetic, and browser perturbation across real pages.</p>
+      <a class="study-link" href={flexModelHref} target="_blank" rel="noreferrer">
+        Inspect the TLA+ model <Icon name="file" size={16} />
+      </a>
+    </header>
+    <div class="study-body">
+      <dl class="study-metrics" aria-label="Study A measurements">
+        <div><dt>Corpus</dt><dd>1,200</dd><span>rendered pages</span></div>
+        <div><dt>Observed ceiling</dt><dd>45.76%</dd><span>no coupling detected</span></div>
+        <div><dt>Certified</dt><dd>28.07%</dd><span>by the local predicate</span></div>
+      </dl>
+      <dl class="case-story">
+        <div><dt>Decision</dt><dd>Separate what finite probes observed from what the predicate can establish.</dd></div>
+        <div><dt>Finding</dt><dd>The predicate is sound and maximal on eight checked finite domains, not for arbitrary CSS. The 17.69-point corpus gap remains an open information-boundary question.</dd></div>
+        <div class="case-lesson"><dt>Staff lesson</dt><dd>Choose the abstraction boundary explicitly. A precise bounded claim is more useful than a broad guarantee the evidence cannot carry.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <article id="study-b" class="case-study study-b" aria-labelledby="study-b-title">
+    <header class="case-heading">
+      <p class="mono-label">Study B · Disclosure contracts</p>
+      <p class="study-verdict">Single-repository finding</p>
+      <h3 id="study-b-title">Can a policy account for what a build actually publishes?</h3>
+      <p class="case-context">An abstract disclosure model paired with inspection of emitted files.</p>
+    </header>
+    <div class="study-body">
+      <dl class="study-metrics" aria-label="Study B measurements">
+        <div><dt>Sinks</dt><dd>12</dd><span>declared outputs</span></div>
+        <div><dt>Flows</dt><dd>11</dd><span>source-to-sink edges</span></div>
+        <div><dt>Gaps</dt><dd>2</dd><span>audit defects exposed</span></div>
+      </dl>
+      <dl class="case-story">
+        <div><dt>Decision</dt><dd>Check both policy coherence and emitted bytes; neither side alone establishes publication safety.</dd></div>
+        <div><dt>Finding</dt><dd>A reversible representation bypassed a literal check, and two published PDFs sat outside the prior audit set. The case establishes existence, not prevalence.</dd></div>
+        <div class="case-lesson"><dt>Staff lesson</dt><dd>System boundaries fail where ownership and inventories drift. Build the handoff between abstractions into the operating path.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <article id="study-c" class="case-study study-c" aria-labelledby="study-c-title">
+    <header class="case-heading">
+      <p class="mono-label">Study C · Generated formal feedback</p>
+      <p class="study-verdict">Negative feasibility result</p>
+      <h3 id="study-c-title">Does TLA+-guided repair improve an LLM-generated web artifact?</h3>
+      <p class="case-context">One paid task, generated behavioral contracts, browser replay, and bounded repair.</p>
+    </header>
+    <div class="study-body">
+      <dl class="study-metrics" aria-label="Study C measurements">
+        <div><dt>Provider requests</dt><dd>13</dd><span>no retries</span></div>
+        <div><dt>Recorded tokens</dt><dd>349,968</dd><span>input plus output</span></div>
+        <div><dt>Formal score</dt><dd>None</dd><span>blocked before repair</span></div>
+      </dl>
+      <dl class="case-story">
+        <div><dt>Decision</dt><dd>Compare the formal path with a serious non-formal search before spending on another generated run.</dd></div>
+        <div><dt>Finding</dt><dd>The fresh baseline received 58/100, while T remained unscored. Offline, ordinary depth-12 search matched the synthetic TLC witness with the same 12 browser actions.</dd></div>
+        <div class="case-lesson"><dt>Staff lesson</dt><dd>Complexity must earn its place. Stop an expensive direction when its incremental value remains unestablished, and preserve the negative result.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <div class="case-closing">
+    <p class="eyebrow">What changed in how I operate</p>
+    <p><strong>From model quality to system quality.</strong> From passing checks to understanding their coverage. From implementing the next idea to deciding whether it deserves organizational scale.</p>
+  </div>
+</section>
+
+<style>
+  .case-studies {
+    padding: clamp(64px, 7vw, 96px) var(--gutter);
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    scroll-margin-top: 24px;
+  }
+
+  .case-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(32px, 6vw, 88px);
+    margin-bottom: 48px;
+  }
+
+  .case-intro .eyebrow {
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: clamp(30px, 3.3vw, 44px);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+
+  .case-intro > div:last-child > p {
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+
+  .case-study {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(32px, 5vw, 72px);
+    padding: clamp(24px, 3vw, 40px);
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    border-top: 4px solid var(--study-accent);
+    border-radius: 6px;
+    scroll-margin-top: 24px;
+  }
+
+  .study-a { --study-accent: var(--accent); }
+  .study-b { --study-accent: #16708a; }
+  .study-c { --study-accent: #ad4b36; }
+
+  .case-study + .case-study {
+    margin-top: 32px;
+  }
+
+  .case-heading .mono-label {
+    margin-bottom: 18px;
+    color: var(--study-accent);
+  }
+
+  .study-verdict {
+    margin-bottom: 12px;
+    color: var(--ink-faint);
+    font-size: 13px;
+    font-weight: 650;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-size: clamp(24px, 2.6vw, 32px);
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  .case-context {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+
+  .study-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    margin-top: 22px;
+    color: var(--accent-strong);
+    font-size: 14px;
+    font-weight: 600;
+    text-underline-offset: 4px;
+  }
+
+  .study-body {
+    min-width: 0;
+  }
+
+  .study-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 28px;
+    border-block: 1px solid var(--line-strong);
+  }
+
+  .study-metrics > div {
+    min-width: 0;
+    padding: 18px 14px 20px 0;
+  }
+
+  .study-metrics > div + div {
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+  }
+
+  .study-metrics dt,
+  .study-metrics span {
+    display: block;
+    color: var(--ink-faint);
+    font-size: 11px;
+    font-weight: 650;
+    text-transform: uppercase;
+  }
+
+  .study-metrics dd {
+    margin: 8px 0 5px;
+    color: var(--study-accent);
+    font-family: var(--display);
+    font-size: clamp(24px, 2.3vw, 32px);
+    font-weight: 680;
+    line-height: 1;
+    overflow-wrap: anywhere;
+  }
+
+  .study-link :global(svg) {
+    flex-shrink: 0;
+  }
+
+  .case-story {
+    margin: 0;
+  }
+
+  .case-story > div {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 18px;
+    padding-block: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .case-story > div:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .case-story dt {
+    font-size: 13px;
+    font-weight: 650;
+    padding-top: 2px;
+  }
+
+  .case-story dd {
+    margin: 0;
+    color: var(--ink-soft);
+    overflow-wrap: break-word;
+  }
+
+  .case-story strong,
+  .case-lesson dt {
+    color: var(--ink);
+  }
+
+  .case-story .case-lesson {
+    border-top-color: var(--accent);
+    padding-bottom: 0;
+  }
+
+  .case-lesson dd {
+    color: var(--ink);
+  }
+
+  .case-closing {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1.65fr);
+    gap: 32px;
+    margin-top: 48px;
+    padding-block: 32px;
+    border-block: 1px solid var(--line-strong);
+  }
+
+  .case-closing .eyebrow {
+    color: var(--accent);
+  }
+
+  .case-closing > p:last-child {
+    max-width: 54ch;
+    color: var(--ink);
+    font-family: var(--display);
+    font-size: clamp(21px, 2.3vw, 29px);
+    line-height: 1.3;
+  }
+
+  @media (max-width: 900px) {
+    .case-intro,
+    .case-study,
+    .case-closing {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 620px) {
+    .case-study {
+      padding: 24px 20px;
+    }
+
+    .case-story > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .study-metrics {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .study-metrics > div + div {
+      padding-left: 0;
+      border-top: 1px solid var(--line);
+      border-left: 0;
+    }
+  }
+</style>
