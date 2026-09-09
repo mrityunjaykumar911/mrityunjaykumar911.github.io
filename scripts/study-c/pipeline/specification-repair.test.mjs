@@ -133,7 +133,7 @@ test('real TLC feeds deadlock traces to the repair loop and checks the proposed 
   const client = fakeClient([candidate(source)]);
   const root = await directory(context);
   const result = await runSpecificationRepair({ task, source, client, directory: root, maxRounds: 1,
-    validate: (args) => validateSpec({ ...args, java: path.resolve('.tools/java/jdk-21.0.12.1+1-jre/bin/java.exe') }) });
+    validate: validateSpec });
   assert.equal(result.status, 'model-admitted', JSON.stringify(result));
   const input = JSON.parse(client.requests[0].prompt);
   assert.ok(input.feedback.contracts.every((item) => item.validation.detail === 'model_deadlock'));

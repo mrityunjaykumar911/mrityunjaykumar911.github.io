@@ -36,7 +36,7 @@ async function directory(context) {
 test('exact selected combination requires real browser observations and TLC before HTML repair guidance', async (context) => {
   const root = await directory(context);
   const args = inputs();
-  const validate = (input) => validateSpec({ ...input, java: path.resolve('.tools/java/jdk-21.0.12.1+1-jre/bin/java.exe') });
+  const validate = (input) => validateSpec(input);
   const working = await verifySelectedSpecification({ ...args, html: html(true), directory: path.join(root, 'working'), bind, validate });
   assert.equal(working.browserGate, 'verified', JSON.stringify(working));
   assert.equal(working.artifactRepairAuthorized, false);

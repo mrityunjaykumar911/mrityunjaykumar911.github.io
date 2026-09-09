@@ -41,8 +41,7 @@ test('latest evidence is invalidated by edit; useful early reload ordering remai
 test('real TLC agrees on evidence freshness and still rejects stale browser values after reload', async (context) => {
   const root = await mkdtemp(path.join(tmpdir(), 'semantic-evidence-'));
   context.after(() => rm(root, { recursive: true, force: true }));
-  const java = path.resolve('.tools/java/jdk-21.0.12.1+1-jre/bin/java.exe');
-  const check = (name, ...args) => validateSpec({ specDir: path.join(root, name), java, ...compileBehaviorContract(...args) });
+  const check = (name, ...args) => validateSpec({ specDir: path.join(root, name), ...compileBehaviorContract(...args) });
   const model = await check('model', contract);
   assert.equal(model.level, 'checked', JSON.stringify(model));
   const trace = { actions: ['Create', 'Reload', 'Edit', 'Reload'] };
@@ -73,7 +72,7 @@ test('saved date failure cannot claim completion with stale evidence; original b
   assert.equal(deriveSchedules(diagnostic).coverage.undeclaredDeadEnds, 1);
   const root = await mkdtemp(path.join(tmpdir(), 'saved-semantic-negative-'));
   context.after(() => rm(root, { recursive: true, force: true }));
-  const result = await validateSpec({ specDir: root, java: path.resolve('.tools/java/jdk-21.0.12.1+1-jre/bin/java.exe'), ...compileBehaviorContract(diagnostic) });
+  const result = await validateSpec({ specDir: root, ...compileBehaviorContract(diagnostic) });
   assert.equal(result.detail, 'model_deadlock', JSON.stringify(result));
   assert.equal(await readFile(sourceFile, 'utf8'), source);
 });

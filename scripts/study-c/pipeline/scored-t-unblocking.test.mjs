@@ -22,7 +22,7 @@ function sourceRecord() {
   return { model, modelHash: behaviorHash(model), promptHash: behaviorHash(prompt), semanticProtocol: SEMANTIC_PROTOCOL,
     grounding: { accepted: false, contracts: model.contracts.map((item) => ({ id: item.id, accepted: false, reason: 'Unsupported layout assumption' })) } };
 }
-const validate = (args) => validateSpec({ ...args, java: path.resolve('.tools/java/jdk-21.0.12.1+1-jre/bin/java.exe') });
+const validate = (args) => validateSpec(args);
 const html = (hidden) => `<html><body><button id="save" ${hidden ? 'hidden' : ''} onclick="document.querySelector('#count').textContent='1'">Save</button><span id="count">0</span></body></html>`;
 
 test('scored T repairs a reviewed inaccessible control and reaches held-out scoring only after real browser/TLC regression', async (context) => {

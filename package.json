@@ -18,6 +18,7 @@
     "test:study-c:budget": "node --test scripts/study-c/token-count.test.mjs",
     "study:c:sanity:xai": "node scripts/study-c/xai-sanity.mjs",
     "test:study-c:xai": "node --test scripts/study-c/xai-sanity.test.mjs",
+    "pretest:study-c:offline": "node scripts/study-c/tlc.mjs",
     "test:study-c:offline": "node scripts/study-c/test-offline.mjs",
     "optimize:visual": "node scripts/optimize-visual.mjs",
     "test:e2e": "playwright test",
