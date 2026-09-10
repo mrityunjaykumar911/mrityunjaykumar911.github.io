@@ -34,6 +34,7 @@ const favicon = withBase('/favicon.ico');
 const appleTouchIcon = withBase('/images/mrityunjay.jpg');
 const sitemap = withBase('/sitemap-index.xml');
 const llmsContext = withBase('/llms.txt');
+const markdownResume = withBase('/resume.md');
 ---
 
 <!doctype html>
@@ -47,6 +48,7 @@ const llmsContext = withBase('/llms.txt');
     <link rel="canonical" href={canonical} />
     <link rel="sitemap" type="application/xml" href={sitemap} />
     <link rel="alternate" type="text/plain" href={llmsContext} title="LLM context" />
+    <link rel="alternate" type="text/markdown" href={markdownResume} title="Machine-readable resume" />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     <link rel="icon" href={favicon} sizes="any" />

@@ -67,6 +67,10 @@ test('published page stays generic and exposes complete metadata', async ({ page
     'href',
     '/llms.txt'
   );
+  await expect(page.locator('link[rel="alternate"][type="text/markdown"]')).toHaveAttribute(
+    'href',
+    '/resume.md'
+  );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     'content',
     /\/images\/mrityunjay-portrait\.jpg$/
@@ -359,6 +363,22 @@ test('crawler resources expose professional context without contact PII', async 
   const contextWithoutUrls = context.replace(/https?:\/\/\S+/g, '');
   expect(contextWithoutUrls).not.toMatch(/\+?\d[\d\s().-]{7,}\d/);
   expect(context).not.toContain(privateMarker);
+
+  const markdownResponse = await request.get('/resume.md');
+  expect(markdownResponse.ok()).toBe(true);
+  expect(markdownResponse.headers()['content-type']).toContain('text/markdown');
+  const markdown = await markdownResponse.text();
+  for (const heading of ['# Mrityunjay Kumar - Resume', '## Key Facts', '## Experience',
+    '## Core Expertise', '## Research, Publications, and Intellectual Property', '## Education']) {
+    expect(markdown).toContain(heading);
+  }
+  expect(markdown).toContain('### Senior ML Engineer - Microsoft');
+  expect(markdown).toContain('### Member of Technical Staff III - VMware');
+  expect(markdown).toContain('[Engineering method](https://mrityunjaykumar911.github.io/method.html)');
+  expect(markdown).not.toMatch(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i);
+  expect(markdown).not.toMatch(/mailto:/i);
+  expect(markdown).not.toContain(privateMarker);
+  expect(markdown).not.toContain('—');
 });
 
 test('normal URL does not load the detailed resume', async ({ page }) => {
