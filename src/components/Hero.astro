@@ -1,6 +1,7 @@
 ---
 import Icon from './Icon.astro';
 import { escapeHtml } from '../lib/text';
+import { withBase } from '../lib/url';
 import type { Resume } from '../data/schema';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const { profile, linkedin } = Astro.props;
+const methodHref = withBase('/method.html');
 
 // The headline allows one emphasized phrase wrapped in asterisks.
 const headlineHtml = escapeHtml(profile.headline).replace(
@@ -20,6 +22,16 @@ const headlineHtml = escapeHtml(profile.headline).replace(
 
 <section class="hero" aria-labelledby="hero-title">
   <div class="hero-copy reveal">
+    <a class="method-signal" href={methodHref} aria-label="Read how I build reliable ML systems">
+      <span class="method-signal-badge">New</span>
+      <span class="method-signal-copy">
+        <strong>Engineering method</strong>
+        <span>How I build reliable ML systems</span>
+      </span>
+      <span class="method-signal-action" aria-hidden="true">
+        <Icon name="arrow-up-right" size={14} />
+      </span>
+    </a>
     <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> {profile.role} at {profile.company}</p>
     <h1 id="hero-title" set:html={headlineHtml} />
     <div class="hero-intro-group">
@@ -81,6 +93,83 @@ const headlineHtml = escapeHtml(profile.headline).replace(
   .hero-copy {
     grid-area: copy;
     padding-bottom: 12px;
+  }
+
+  .method-signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 48px;
+    margin-bottom: 24px;
+    padding: 5px 7px 5px 6px;
+    border: 1px solid rgba(11, 12, 14, 0.24);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 560;
+    line-height: 1.2;
+    text-decoration: none;
+    box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px rgba(11, 12, 14, 0.12);
+    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .method-signal:hover {
+    border-color: var(--accent);
+    background: var(--accent-tint);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px var(--accent);
+  }
+
+  .method-signal-badge {
+    flex: none;
+    padding: 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(194, 79, 0, 0.42);
+    background: rgba(255, 126, 0, 0.12);
+    color: #eb640a;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .method-signal-copy {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .method-signal-copy strong {
+    flex: none;
+    font-family: var(--display);
+    font-weight: 680;
+  }
+
+  .method-signal-copy > span {
+    overflow: hidden;
+    color: var(--ink-soft);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .method-signal-action {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .method-signal-action :global(svg) {
+    flex: none;
   }
 
   .hero .eyebrow {
@@ -243,6 +332,12 @@ const headlineHtml = escapeHtml(profile.headline).replace(
       font-size: 14px;
     }
 
+    .method-signal {
+      min-height: 52px;
+      margin-bottom: 28px;
+      font-size: 17px;
+    }
+
     .hero h1 {
       max-width: 15ch;
       font-size: clamp(96px, 3vw, 116px);
@@ -297,6 +392,21 @@ const headlineHtml = escapeHtml(profile.headline).replace(
   }
 
   @media (max-width: 620px) {
+    .method-signal {
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+
+    .method-signal-copy {
+      display: grid;
+      gap: 1px;
+    }
+
+    .method-signal-copy > span {
+      max-width: 22ch;
+      font-size: 13px;
+    }
+
     .hero {
       gap: 28px;
       padding-top: 40px;

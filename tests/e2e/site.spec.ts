@@ -136,6 +136,13 @@ test('landing viewport presents a clear thesis and proof', async ({ page }) => {
   await expect(page.locator('.hero-intro')).toContainText(
     'latency, throughput, and fault recovery'
   );
+  const methodSignal = page.getByRole('link', { name: 'Read how I build reliable ML systems' });
+  await expect(methodSignal).toBeVisible();
+  await expect(methodSignal).toHaveAttribute('href', '/method.html');
+  await expect(methodSignal.getByText('New', { exact: true })).toBeVisible();
+  await expect(methodSignal.getByText('New', { exact: true })).toHaveCSS('color', 'rgb(235, 100, 10)');
+  await expect(methodSignal.getByText('Engineering method', { exact: true })).toBeVisible();
+  await expect(methodSignal.getByText('How I build reliable ML systems', { exact: true })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Delivery path' })).toHaveCount(0);
   expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
     'Inter'
@@ -156,14 +163,20 @@ test('landing viewport presents a clear thesis and proof', async ({ page }) => {
   expect(signalBox).not.toBeNull();
   expect(signalBox!.y).toBeLessThan(900);
 
-  const [headlineBox, introBox, firstSignalBox] = await Promise.all([
+  const [methodSignalBox, headlineBox, introBox, firstSignalBox] = await Promise.all([
+    methodSignal.boundingBox(),
     heroHeading.boundingBox(),
     page.locator('.hero-intro').boundingBox(),
     signalStrip.locator('.signal strong').first().boundingBox(),
   ]);
+  expect(methodSignalBox).not.toBeNull();
   expect(headlineBox).not.toBeNull();
   expect(introBox).not.toBeNull();
   expect(firstSignalBox).not.toBeNull();
+  expect(methodSignalBox!.y + methodSignalBox!.height).toBeLessThan(headlineBox!.y);
+  expect(methodSignalBox!.width).toBeGreaterThanOrEqual(360);
+  expect(methodSignalBox!.height).toBeGreaterThanOrEqual(48);
+  expect(methodSignalBox!.y).toBeLessThan(900);
   expect(introBox!.x).toBeCloseTo(headlineBox!.x, 0);
   expect(firstSignalBox!.x).toBeCloseTo(headlineBox!.x, 0);
 
