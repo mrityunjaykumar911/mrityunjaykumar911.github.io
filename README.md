@@ -148,6 +148,22 @@ The suite builds and serves the production site, then verifies:
 
 Playwright uses a visible list reporter locally. Astro build and preview output is piped to the terminal so startup progress is never silent. On failure, screenshots, traces, and an HTML report are generated; CI uploads the report as an artifact.
 
+### Opt-in generative visual-quality test
+
+The method page has a separate multimodal VQA gate. It captures five actual Chromium views (`3440x1440`, `1920x768`, `1440x900`, `390x844`, and the studies section), records layout measurements, and submits them in one no-retry xAI request. The response must satisfy a strict JSON schema, review every view, score every criterion at least 4/5, and report no critical or major issue.
+
+This test is intentionally excluded from normal CI because it makes a potentially billable provider call. Supply the credential through an external file; the path and credential are not persisted in the report.
+
+```powershell
+$env:METHOD_VQA_KEY_FILE='C:\path\to\xai-key.txt'
+npm run test:method:vqa
+Remove-Item Env:METHOD_VQA_KEY_FILE
+```
+
+The command first runs offline parser and one-call safety tests. Screenshots, measurements, and structured evidence are written under `test-results/vqa-artifacts`; the HTML report is written under `test-results/vqa-report`. Raw model output is not persisted. Deterministic preflight blocks horizontal overflow, substantive text below 14px, and a mobile hero longer than 1.1 viewports before any provider call. A passing generative verdict is a fallible visual-review signal, not proof of usability or design quality.
+
+To validate browser capture without a provider call, set `METHOD_VQA_CAPTURE_ONLY=1` and run Playwright directly with `playwright.vqa.config.ts`. Capture-only mode attaches all four screenshots and measurements but does not produce a VQA verdict. It still fails when deterministic preflight finds a visual defect; that failure is evidence that the gate is working, not a provider error.
+
 ## CI and Deployment
 
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) runs on pushes and pull requests targeting `master`.

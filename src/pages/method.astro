@@ -4,6 +4,8 @@ import Icon from '../components/Icon.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import MethodCaseStudies from '../components/MethodCaseStudies.astro';
 import { withBase } from '../lib/url';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/source-sans-3';
 
 const homeHref = withBase('/');
 const year = new Date().getFullYear();
@@ -179,6 +181,26 @@ const chapters = [
 </Base>
 
 <style>
+  .method-page {
+    --display: 'Bricolage Grotesque Variable', sans-serif;
+    --sans: 'Source Sans 3 Variable', sans-serif;
+    --method-title-size: 80px;
+    --method-thesis-size: 34px;
+    --method-lede-size: 20px;
+    --method-body-size: 17px;
+    --method-small-size: 14px;
+    --method-system-title-size: 18px;
+    --method-system-copy-size: 15px;
+    --method-section-title-size: 40px;
+    --method-study-title-size: 32px;
+    --method-metric-size: 32px;
+    --method-definition-size: 30px;
+    --method-callout-size: 36px;
+    --method-closing-size: 29px;
+    font-family: var(--sans);
+    letter-spacing: 0;
+  }
+
   .method-header {
     position: sticky;
     top: 0;
@@ -188,7 +210,6 @@ const chapters = [
     justify-content: space-between;
     min-height: 68px;
     padding: 0 var(--gutter);
-    border-bottom: 1px solid var(--line);
     background: color-mix(in srgb, var(--paper) 88%, transparent);
     backdrop-filter: blur(18px) saturate(1.25);
   }
@@ -284,7 +305,6 @@ const chapters = [
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: 1px solid var(--line-strong);
   }
 
   .hero-system li {
@@ -314,12 +334,12 @@ const chapters = [
 
   .hero-system strong {
     font-family: var(--display);
-    font-size: 17px;
+    font-size: var(--method-system-title-size);
   }
 
   .hero-system small {
     color: var(--ink-soft);
-    font-size: 13px;
+    font-size: var(--method-system-copy-size);
     line-height: 1.35;
   }
 
@@ -359,7 +379,7 @@ const chapters = [
   }
 
   h1 {
-    font-size: clamp(48px, 7vw, 92px);
+    font-size: var(--method-title-size);
     font-weight: 680;
     line-height: 0.98;
   }
@@ -369,7 +389,7 @@ const chapters = [
     margin-top: 20px;
     color: var(--ink);
     font-family: var(--display);
-    font-size: clamp(24px, 3.2vw, 42px);
+    font-size: var(--method-thesis-size);
     font-weight: 560;
     line-height: 1.1;
   }
@@ -378,7 +398,7 @@ const chapters = [
     max-width: 54ch;
     margin-top: 28px;
     color: var(--ink-soft);
-    font-size: clamp(18px, 1.4vw, 21px);
+    font-size: var(--method-lede-size);
   }
 
   .text-link {
@@ -398,7 +418,7 @@ const chapters = [
   }
 
   .method-nav {
-    border-block: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     background: var(--panel);
   }
 
@@ -445,15 +465,15 @@ const chapters = [
 
   .section-intro h2 {
     max-width: 25ch;
-    font-size: clamp(30px, 3.3vw, 44px);
+    font-size: var(--method-section-title-size);
     line-height: 1.12;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
   }
 
   .section-intro > p:not(.eyebrow) {
     margin-top: 22px;
     color: var(--ink-soft);
-    font-size: 17px;
+    font-size: var(--method-body-size);
   }
 
   .mandate-section,
@@ -605,7 +625,7 @@ const chapters = [
   .definition-band p:last-child {
     max-width: 48ch;
     font-family: var(--display);
-    font-size: clamp(22px, 2.4vw, 30px);
+    font-size: var(--method-definition-size);
     font-weight: 590;
     line-height: 1.25;
   }
@@ -653,21 +673,73 @@ const chapters = [
   .staff-leverage h3 {
     max-width: 28ch;
     margin-top: 14px;
-    font-size: clamp(25px, 2.8vw, 36px);
+    font-size: var(--method-callout-size);
   }
 
   .staff-leverage > p {
     color: var(--ink-soft);
-    font-size: 17px;
+    font-size: var(--method-body-size);
   }
 
   @media (min-width: 1800px) {
+    .method-page {
+      --gutter: max(128px, calc((100vw - 2600px) / 2));
+      --method-title-size: 88px;
+      --method-thesis-size: 36px;
+      --method-lede-size: 21px;
+      --method-body-size: 20px;
+      --method-small-size: 16px;
+      --method-system-title-size: 20px;
+      --method-system-copy-size: 17px;
+      --method-section-title-size: 44px;
+      --method-study-title-size: 36px;
+      --method-metric-size: 36px;
+      --method-definition-size: 34px;
+      --method-callout-size: 42px;
+      --method-closing-size: 32px;
+    }
+
     .method-header {
       min-height: 84px;
+      padding-inline: max(128px, calc((100vw - 2600px) / 2));
+    }
+
+    .method-hero {
+      grid-template-columns: minmax(760px, 0.75fr) minmax(0, 1.25fr);
+      column-gap: 96px;
+    }
+
+    .hero-copy {
+      max-width: 940px;
+    }
+
+    .hero-lede {
+      max-width: 64ch;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .method-page {
+      --method-title-size: 68px;
+      --method-thesis-size: 30px;
+      --method-lede-size: 19px;
+      --method-section-title-size: 40px;
+      --method-study-title-size: 30px;
+      --method-metric-size: 28px;
+      --method-definition-size: 27px;
+      --method-callout-size: 32px;
+      --method-closing-size: 26px;
     }
   }
 
   @media (max-width: 900px) {
+    .method-page {
+      --method-title-size: 56px;
+      --method-thesis-size: 29px;
+      --method-section-title-size: 36px;
+      --method-study-title-size: 29px;
+    }
+
     .method-hero {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto auto auto;
@@ -735,6 +807,18 @@ const chapters = [
   }
 
   @media (max-width: 620px) {
+    .method-page {
+      --method-title-size: 44px;
+      --method-thesis-size: 26px;
+      --method-lede-size: 18px;
+      --method-section-title-size: 34px;
+      --method-study-title-size: 27px;
+      --method-metric-size: 28px;
+      --method-definition-size: 25px;
+      --method-callout-size: 29px;
+      --method-closing-size: 24px;
+    }
+
     .method-wordmark > span:last-child {
       display: none;
     }
@@ -748,12 +832,64 @@ const chapters = [
     }
 
     .method-hero {
-      padding-top: 56px;
+      padding-top: 24px;
+    }
+
+    .hero-copy {
+      padding-bottom: 16px;
+    }
+
+    .hero-thesis {
+      margin-top: 14px;
+    }
+
+    .hero-lede {
+      margin-top: 20px;
+    }
+
+    .text-link {
+      margin-top: 18px;
+    }
+
+    .hero-system {
+      padding-bottom: 16px;
+    }
+
+    .hero-system figcaption {
+      margin-block: 14px 8px;
+    }
+
+    .hero-system ol {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero-system li {
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 6px;
+      padding-block: 9px;
+    }
+
+    .hero-system li:nth-child(odd) {
+      padding-right: 10px;
+      border-right: 1px solid var(--line-strong);
+    }
+
+    .hero-system li:nth-child(even) {
+      padding-left: 10px;
     }
 
     .hero-system li div {
       grid-template-columns: minmax(0, 1fr);
       gap: 3px;
+    }
+
+    .hero-system small {
+      display: none;
+    }
+
+    .hero-system > p {
+      display: none;
     }
 
     .reasoning-chain,

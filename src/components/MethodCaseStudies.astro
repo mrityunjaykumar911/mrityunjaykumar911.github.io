@@ -117,14 +117,14 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
   }
 
   h2 {
-    font-size: clamp(30px, 3.3vw, 44px);
+    font-size: var(--method-section-title-size);
     line-height: 1.12;
-    letter-spacing: -0.035em;
+    letter-spacing: 0;
   }
 
   .case-intro > div:last-child > p {
     color: var(--ink-soft);
-    font-size: 17px;
+    font-size: var(--method-body-size);
   }
 
   .case-study {
@@ -161,7 +161,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
   }
 
   h3 {
-    font-size: clamp(24px, 2.6vw, 32px);
+    font-size: var(--method-study-title-size);
     line-height: 1.15;
     overflow-wrap: break-word;
   }
@@ -169,7 +169,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
   .case-context {
     margin-top: 18px;
     color: var(--ink-soft);
-    font-size: 15px;
+    font-size: var(--method-small-size);
   }
 
   .study-link {
@@ -179,7 +179,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
     min-height: 44px;
     margin-top: 22px;
     color: var(--accent-strong);
-    font-size: 14px;
+    font-size: var(--method-small-size);
     font-weight: 600;
     text-underline-offset: 4px;
   }
@@ -218,7 +218,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
     margin: 8px 0 5px;
     color: var(--study-accent);
     font-family: var(--display);
-    font-size: clamp(24px, 2.3vw, 32px);
+    font-size: var(--method-metric-size);
     font-weight: 680;
     line-height: 1;
     overflow-wrap: anywhere;
@@ -288,7 +288,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
     max-width: 54ch;
     color: var(--ink);
     font-family: var(--display);
-    font-size: clamp(21px, 2.3vw, 29px);
+    font-size: var(--method-closing-size);
     line-height: 1.3;
   }
 

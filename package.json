@@ -23,6 +23,8 @@
     "optimize:visual": "node scripts/optimize-visual.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "pretest:method:vqa": "node --test scripts/visual-vqa.test.mjs",
+    "test:method:vqa": "playwright test --config playwright.vqa.config.ts",
     "astro": "astro"
   },
   "dependencies": {
