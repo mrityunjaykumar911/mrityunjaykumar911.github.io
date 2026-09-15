@@ -37,8 +37,8 @@ const initials = name
 
   <nav class="site-nav" id="site-nav" aria-label="Primary" data-site-nav>
     {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-    <a class="nav-resume" href={resumePdf} target="_blank" rel="noreferrer">
-      Résumé <Icon name="arrow-up-right" size={15} />
+    <a class="nav-resume" href={resumePdf} download target="_blank" rel="noreferrer">
+      Résumé <Icon name="download" size={15} />
     </a>
   </nav>
 </header>
