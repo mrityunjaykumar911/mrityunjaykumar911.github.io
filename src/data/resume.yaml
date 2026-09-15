@@ -34,9 +34,7 @@ profile:
     - value: Millions-scale
       label: request workloads
     - value: 100M+
-      label: documents generated
-    - value: 100M DAU
-      label: product reach
+      label: Weekly documents generated
     - value: Applied science
       label: evaluation · ML · systems
   about:
@@ -213,8 +211,8 @@ experience:
   - company: Stony Brook University
     role: Graduate Research Assistant
     location: Stony Brook, NY
-    start: 2019-08
-    end: 2020-06
+    start: 2020-01
+    end: 2020-05
     summary: >-
       Led early-stage development and evaluation of Rolis (EuroSys 2022);
       implemented core mechanisms for replicated multi-core transactions.
@@ -292,7 +290,7 @@ experience:
 
 research:
   feature:
-    label: Graduate Research Assistant · Stony Brook University · 2019–2020 · Advisor Prof. Shuai Mu
+    label: Graduate Research Assistant · Stony Brook University · 2020 · Advisor Prof. Shuai Mu
     title: Replicating multi-core transactions without giving up performance.
     body: >-
       Led early-stage development and evaluation of Rolis (EuroSys 2022),

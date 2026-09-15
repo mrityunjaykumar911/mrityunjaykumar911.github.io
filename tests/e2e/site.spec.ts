@@ -88,7 +88,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
   expect(structuredData).not.toContain('"email"');
 
   await expect(
-    page.getByText('Graduate Research Assistant · Stony Brook University · 2019–2020', {
+    page.getByText('Graduate Research Assistant · Stony Brook University · 2020', {
       exact: false,
     })
   ).toBeVisible();
@@ -155,8 +155,7 @@ test('landing viewport presents a clear thesis and proof', async ({ page }) => {
   const signalStrip = page.getByRole('region', { name: 'Selected evidence' });
   for (const [value, label] of [
     ['Millions-scale', 'request workloads'],
-    ['100M+', 'documents generated'],
-    ['100M DAU', 'product reach'],
+    ['100M+', 'Weekly documents generated'],
     ['Applied science', 'evaluation · ML · systems'],
   ]) {
     const signal = signalStrip.locator('.signal').filter({ hasText: value });
@@ -585,7 +584,7 @@ test('method page presents staff-level ML systems judgment with bounded research
   const studyC = page.locator('#study-c');
   await expect(studyC).toContainText('Negative feasibility result');
   await expect(studyC.getByText('349,968', { exact: true })).toBeVisible();
-  await expect(studyC).toContainText('T remained unscored');
+  await expect(studyC).toContainText('remained unscored');
   await expect(studyC.locator('.case-lesson')).toContainText('Stop an expensive direction');
 
   const tlaSpec = page.getByRole('link', { name: 'Inspect the TLA+ model' });
@@ -593,14 +592,6 @@ test('method page presents staff-level ML systems judgment with bounded research
   const tlaResponse = await request.get('/research/FlexFacets.tla');
   expect(tlaResponse.ok()).toBe(true);
   expect(await tlaResponse.text()).toContain('Immobile(cfg, i)');
-  const paper = page.getByRole('link', { name: 'Read the combined research manuscript' });
-  await expect(paper).toHaveAttribute(
-    'href',
-    '/research/verifiable-web-artifacts.pdf'
-  );
-  const paperResponse = await request.get('/research/verifiable-web-artifacts.pdf');
-  expect(paperResponse.ok()).toBe(true);
-  expect((await paperResponse.body()).subarray(0, 4).toString()).toBe('%PDF');
 
   const sitemapIndex = await request.get('/sitemap-index.xml');
   const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];

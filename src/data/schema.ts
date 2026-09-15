@@ -43,7 +43,7 @@ const profile = z.object({
   signals: z.array(z.object({
     value: z.string(),
     label: z.string(),
-  })).length(4),
+  })).length(3),
   /** Paragraphs for the About section. */
   about: z.array(z.string()).min(1),
   /** Heading for the closing contact section. */

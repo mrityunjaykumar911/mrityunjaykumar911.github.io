@@ -2,7 +2,6 @@
 import Icon from './Icon.astro';
 import { withBase } from '../lib/url';
 
-const researchPaperHref = withBase('/research/verifiable-web-artifacts.pdf');
 const flexModelHref = withBase('/research/FlexFacets.tla');
 ---
 
@@ -18,9 +17,6 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
         One establishes a bounded condition, one exposes an audit boundary, and one shows
         when an expensive technical direction has not earned another run.
       </p>
-      <a class="study-link" href={researchPaperHref} target="_blank" rel="noreferrer">
-        Read the combined research manuscript <Icon name="file" size={16} />
-      </a>
     </div>
   </div>
 
@@ -84,7 +80,7 @@ const flexModelHref = withBase('/research/FlexFacets.tla');
       </dl>
       <dl class="case-story">
         <div><dt>Decision</dt><dd>Compare the formal path with a serious non-formal search before spending on another generated run.</dd></div>
-        <div><dt>Finding</dt><dd>The fresh baseline received 58/100, while T remained unscored. Offline, ordinary depth-12 search matched the synthetic TLC witness with the same 12 browser actions.</dd></div>
+        <div><dt>Finding</dt><dd>The fresh baseline received 58/100, while the TLA+-guided run remained unscored. Offline, ordinary depth-12 search matched the synthetic TLC witness with the same 12 browser actions.</dd></div>
         <div class="case-lesson"><dt>Staff lesson</dt><dd>Complexity must earn its place. Stop an expensive direction when its incremental value remains unestablished, and preserve the negative result.</dd></div>
       </dl>
     </div>
