@@ -1,0 +1,223 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[2]{
+  \item\small{\textbf{#1}{ #2 \vspace{-2pt}}}
+}
+\newcommand{\resumeSubListItemWithoutDesc}[1]{
+  \vspace{2pt}\item\small{{ #1 \vspace{-2pt}}}
+}
+\newcommand{\resumeItemWithoutDesc}[1]{
+  \item\small{{ #1 \vspace{-2pt}}}
+}
+\newcommand{\resumeItemSubListHeading}[1]{
+  \vspace{1pt}\item\small{\textbf{#1}\vspace{-1pt}}
+}
+\newcommand{\resumeSubsectionheading}[4]{
+  \vspace{-1pt}\item[]
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-5pt}
+}
+\newcommand{\resumeSubsectionheadingSubtitle}[5]{
+  \vspace{-1pt}\item[]
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+       \textit{#3} & \textit{\small #4} \\
+       \textit{#5} & \textit{}
+    \end{tabular*}\vspace{-10pt}
+}
+\newcommand{\resumeSubheading}[2]{
+  \vspace{-1pt}\item[]
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+\newcommand{\resumeItemListHeading}[2]{
+    \vspace{3pt}
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textit{#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{1pt}
+}
+\newcommand{\resumeItemListHeadingMod}[3]{
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textit{#1} & #2 \\
+    \end{tabular*}\vspace{-5pt}
+}
+\newcommand{\resumeSubItem}[2]{\resumeItem{#1}{#2}\vspace{-4pt}}
+\renewcommand{\labelitemii}{$\circ$}
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=*]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemSubListStart}{\begin{itemize}}
+\newcommand{\resumeItemSubListEnd}{\end{itemize}\vspace{-5pt}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+\begin{document}
+
+%----------HEADING-----------------
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+  \textbf{\href{https://www.cs.stonybrook.edu/~mrkumar}{\Large Mrityunjay Kumar}} & Email : \href{mailto:mjay.cse@gmail.com}{mjay.cse@gmail.com}\vspace{0.5mm}\\
+  \href{https://www.linkedin.com/in/mrkumar20}{linkedin.com/in/mrkumar20} \href{https://github.com/mrityunjaykumar911}{github.com/mrityunjaykumar911} & Mobile : +1-631-710-1058 \\
+\end{tabular*}\\
+
+%-------SUMMARY------------
+\small{
+Core ML engineer focused on the reward and evaluation side of RL for tool-using agents: reward signal correctness, LLM-as-judge grading, multi-turn evaluation, and multimodal tool integration into live RL rollouts. Led early-stage development and evaluation of \textbf{Rolis} (EuroSys 2022). Patent holder in storage metadata verification.
+}
+
+%--------SKILLS------------
+\section{Skills}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Core ML:}
+    {RL reward \& evaluation infrastructure, RLVR/RLHF/SFT, LLM-as-judge reward design, multi-turn agentic evaluation, multimodal grading, RL environment \& tool integration, async rollout integration, LLM fine-tuning pipelines, prompt optimization}
+    \resumeSubItem{Distributed Systems \& Infra:}
+    {Distributed systems, consensus protocols (Paxos, Raft), transactional databases, container orchestration, cloud-native microservices, Redis, high-throughput pipeline design}
+    \resumeSubItem{Cloud \& DevOps:}
+    {Azure (ACI, Blob, ML, AAD), AWS, Docker, Prometheus, Grafana, OpenTelemetry/Jaeger, Nginx, gRPC, REST}
+    \resumeSubItem{Languages:}
+    {Python, C\#, C++, C, Java $\cdot$ PyTorch, Git}
+  \resumeSubHeadingListEnd
+
+%--------EXPERIENCE------------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    %-------- MICROSOFT --------
+    \resumeSubheading{Microsoft}{05/2022 -- Present}\\
+    \vspace*{4pt}
+    \resumeItemListHeading{Senior ML Engineer, RL Reward \& Evaluation Infrastructure $\cdot$ PowerPoint document agent}{Mountain View, CA}
+
+    \resumeItemListStart
+      \resumeItemSubListHeading{RL Reward Signal \& Evaluation Methodology}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Diagnosed a corrupt reward signal in the document agent's RL training loop: single-turn evaluation was structurally blind to turn-level error propagation, tool-call convergence failure, and stale-context degradation. Designed a multi-turn \textit{simulation} methodology to fix it, replaying real agent trajectories against live tool execution in a controlled environment to validate reward-signal quality before it enters training.}
+          \resumeSubListItemWithoutDesc{Built \textit{LLM-as-judge} reward grading for multi-turn agent trajectories.}
+          \resumeSubListItemWithoutDesc{Built a document-render-to-image visual grading pipeline; \texttt{ETag}/\texttt{IfNotModified} optimistic concurrency across parallel graders eliminates duplicate rewards at trajectory scale.}
+          \resumeSubListItemWithoutDesc{Drove an org-wide checkpoint pre-screening gate: RL candidates simulated before end-to-end integration, eliminating wasted compute on non-viable checkpoints; simulation-grounded comparisons directly informed which checkpoints advanced to full RL training.}
+          \resumeSubListItemWithoutDesc{Established the first quantified per-slide latency profile (33 to 75s/slide) by isolating LLM reasoning (7--30s) from tool execution (5--8s/turn) under a 5-turn cap, enabling model-versus-tool regression attribution invisible to end-to-end metrics.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    \resumeItemListStart
+      \resumeItemSubListHeading{Multimodal RL Environment \& Tool Execution}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Integrated an image-generation engine as an agent-callable tool in the RL rollout, extending the document agent's action space to a new modality.}
+          \resumeSubListItemWithoutDesc{Owned the full tool-execution stack for RL training on the document agent: client-to-daemon architecture, per-trajectory VM provisioning, and an asynchronous multimodal pipeline. Scaled to 7,000 containers while holding SLOs (P50 under 60s, P95 under 120s, P99 under 180s), unblocking concurrent RL pipelines across teams.}
+          \resumeSubListItemWithoutDesc{Unified Anthropic Claude, Azure OpenAI (incl.\ O-series reasoning models), and internal production serving endpoints behind a common provider-adapter interface for the rollout/eval loop.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    \resumeItemListStart
+      \resumeItemSubListHeading{Production Platform, Scale \& Observability}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Engineered the platform running the simulation at scale: nginx-balanced Python orchestration tier over a .NET/COM PowerPoint execution tier, Redis metadata store + distributed queue, artifact storage, and a cluster management UI/API; deployed as a 20+ container system on ACI with per-service health checks.}
+          \resumeSubListItemWithoutDesc{Achieved \textbf{5.7x throughput} (0.70 to 4.01 files/s) and \textbf{7.8x worker utilization} (12\% to 94\%) by resolving a three-stage bottleneck chain: base64 upload elimination (+73\%), COM-pool redistribution (util 17\% to 72\%), and CPU quotas to prevent cache thrashing (+24\%). 200-file batch 285s to 49.8s. Fleet projection: 100 VMs at 301 files/s, approx.\ 1M files/hr.}
+          \resumeSubListItemWithoutDesc{Resolved two RL-scale blockers (platform throttling at 1.4M+ requests/10 min; VM-lifecycle resource leak blocking 20k-VM training+grading parallelism); instrumented end-to-end with OpenTelemetry/Jaeger tracing that makes multi-turn eval trajectories attributable per turn (queue wait, worker execution, and artifact emission), alongside Prometheus + Grafana.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    \resumeItemListStart
+      \resumeItemSubListHeading{ML Platform \& Fine-Tuning Data Pipeline}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Authored a model-first platform architecture (ingestion, grading/tagging, eval, observability) adopted as org blueprint; adjacent teams directed to use rather than rebuild.}
+          \resumeSubListItemWithoutDesc{Designed a multi-turn SFT data strategy: three-phase curation (programmatic tagging to expert audit to automation), full training schema, DAG execution optimization cutting agent latency from approx.\ 100s to 37s.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    %-------- VMWARE --------
+    \resumeSubheading{VMware Inc.}{07/2020 -- 05/2022}\\
+    \vspace*{4pt}
+    \resumeItemListHeading{Member of Technical Staff III}{Palo Alto, CA}
+    \resumeItemListStart
+      \resumeItemSubListHeading{Distributed File System: Storage Layer}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Designed and implemented distributed FSCK for post-crash metadata repair: cross-consistency matrices across B+ trees, bitmaps, and segment usage tables.}
+          \resumeSubListItemWithoutDesc{Built cloud-native microservice for on-demand/scheduled integrity validation of the file system k-v store; extended to snapshot, unmap, and segment-cleaning checks.}
+          \resumeSubListItemWithoutDesc{Implemented aggregated snapshot capacity statistics collection from scratch; p99 latency 30ms.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    %-------- STONY BROOK --------
+    \resumeSubheading{Distributed Systems Lab, Stony Brook University}{06/2019 -- 05/2020}\\
+    \vspace*{4pt}
+    \resumeItemListHeading{Graduate Research Assistant, \href{http://mpaxos.com/}{\textcolor{blue}{Prof.\ Shuai Mu}}}{EuroSys 2022}
+    \resumeItemListStart
+      \resumeItemSubListHeading{Rolis: Replicated Multi-core Transactional Database Engine}
+        \resumeItemSubListStart
+          \resumeSubListItemWithoutDesc{Implemented core engine mechanisms (see Publications): async multi-process Paxos replication and multi-core log truncation for checkpointing. Profiled CPU/heap/memory via gperftools and mutrace; built a header-only C++ logging library with aligned allocators and auto-flush.}
+        \resumeItemSubListEnd
+    \resumeItemListEnd
+
+    %-------- TALENTICA --------
+    \resumeSubheading{Talentica Software}{04/2016 -- 01/2019}\\
+    \vspace*{4pt}
+    \resumeItemListHeading{Senior Software Engineer}{Pune, India}
+    \resumeItemListStart
+        \resumeSubListItemWithoutDesc{Built real-time ML inference pipeline (Apache Storm, Kafka, Cassandra, AWS) for BLE indoor location prediction; feedback loop improved accuracy by 95\% and a live calibration portal improved site correctness by 70\%.}
+    \resumeItemListEnd
+
+    %-------- MEDIATEK --------
+    \resumeSubheading{MediaTek}{08/2014 -- 04/2016}\\
+    \vspace*{4pt}
+    \resumeItemListHeading{Software Engineer}{Noida, India}
+    \resumeItemListStart
+      \resumeSubListItemWithoutDesc{Audio module (C/C++): reduced playlist overload by 25\%, integrated BT stack into MMI layer, authored GPS-WiFi-BT combo stress-test tooling.}
+    \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%--------PUBLICATIONS \& PATENTS------------
+\section{Publications \& Patents}
+  \resumeSubHeadingListStart
+    \resumeSubItem{\href{https://dl.acm.org/doi/10.1145/3492321.3519576}{Rolis: a software approach to efficiently replicating multi-core transactions} [\textcolor{blue}{EuroSys 2022}] (acknowledged contributor):}
+      {Designed and implemented core mechanisms for a distributed multi-core transactional database engine: asynchronous Paxos replication with minimal throughput loss, multi-core log truncation for checkpointing enabling read-only transactions at 10M ops/sec, and a replay protocol guaranteeing serializability across in-memory and disk logs.}
+    \resumeSubItem{Verification of metadata consistency across snapshot COW B+ tree logical maps [\href{https://patents.google.com/patent/US11573860B1}{\textcolor{blue}{US11573860B1}}]:}
+      {Methodology for verifying consistency of snapshot metadata across a hierarchy of ordered data structures; covers cross-tree node identification, consistency matrix construction, and repair logic.}
+    \resumeSubItem{Learning to Fingerprint the Latent Structure in Question Articulation [\href{https://ieeexplore.ieee.org/document/8614044}{\textcolor{blue}{publication}}]:}
+      {Demonstrated that latent question patterns can be modeled as a cost-function-maximizing system approximated by a trained neural auto-encoder.}
+  \resumeSubHeadingListEnd
+
+%-----------EDUCATION-----------------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubItem{Stony Brook University:}{M.S.\ in Computer Science (2019--2020)}
+    \resumeSubItem{NIT Bhopal:}{B.Tech.\ in Computer Science \& Engineering (2010--2014)}
+  \resumeSubHeadingListEnd
+
+\end{document}

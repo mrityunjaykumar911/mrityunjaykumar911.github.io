@@ -20,7 +20,7 @@ profile:
     Core ML engineer focused on the reward and evaluation side of RL for
     tool-using agents: reward signal correctness, LLM-as-judge grading,
     multi-turn evaluation, and multimodal tool integration into live RL
-    rollouts. Co-author **EuroSys 2022** (Rolis). Patent holder in storage
+    rollouts. Led early-stage development and evaluation of **Rolis** (EuroSys 2022). Patent holder in storage
     metadata verification.
 
 experienceOverrides:

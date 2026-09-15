@@ -49,6 +49,7 @@ const orderedLinks = [...links].sort(
           data-email-reversed={link.icon === 'mail' ? reverseEmail(link.href) : undefined}
           target={opensNewTab(link.href) ? '_blank' : undefined}
           rel={opensNewTab(link.href) ? 'noreferrer' : undefined}
+          download={link.icon === 'file' ? '' : undefined}
         >
           {link.label} <Icon name={iconFor(link.label)} size={16} />
         </a>

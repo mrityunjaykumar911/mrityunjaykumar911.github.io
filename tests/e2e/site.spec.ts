@@ -96,7 +96,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
     hasText: 'Graduate Research Assistant',
   });
   await expect(
-    researchAssistantRole.getByText('published at EuroSys 2022', { exact: false })
+    researchAssistantRole.getByText('Led early-stage development and evaluation', { exact: false })
   ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Visit the research group' })).toHaveAttribute(
     'href',

@@ -63,7 +63,8 @@ profile:
     Senior ML engineer with 12+ years across production ML systems, agent
     infrastructure, distributed serving and execution systems, and storage.
     Builds model evaluation, fine-tuning, data, and observability platforms for
-    PowerPoint. Co-author **EuroSys 2022** (Rolis). Patent holder in snapshot
+    PowerPoint. Led early-stage development and evaluation of **Rolis** (EuroSys
+    2022). Patent holder in snapshot
     metadata verification.
 
 links:
@@ -215,8 +216,8 @@ experience:
     start: 2019-08
     end: 2020-06
     summary: >-
-      Co-authored Rolis, published at EuroSys 2022, and implemented core
-      mechanisms for replicated multi-core transactions.
+      Led early-stage development and evaluation of Rolis (EuroSys 2022);
+      implemented core mechanisms for replicated multi-core transactions.
     tags:
       - Distributed systems research
 
@@ -294,19 +295,19 @@ research:
     label: Graduate Research Assistant · Stony Brook University · 2019–2020 · Advisor Prof. Shuai Mu
     title: Replicating multi-core transactions without giving up performance.
     body: >-
-      Co-authored Rolis (EuroSys 2022) and implemented core mechanisms for its
-      replicated multi-core transaction engine: asynchronous multi-process
-      Paxos, checkpoint log truncation, and serializable replay. Built a
-      header-only C++ logging library (~1200 LOC) and evaluation benchmarks
-      profiled with mutrace and gprof.
+      Led early-stage development and evaluation of Rolis (EuroSys 2022),
+      implementing core mechanisms for its replicated multi-core transaction
+      engine: asynchronous multi-process Paxos, checkpoint log truncation, and
+      serializable replay. Built a header-only C++ logging library (~1200 LOC)
+      and evaluation benchmarks profiled with mutrace and gprof.
     link:
       href: https://mpaxos.com/
       text: Visit the research group
 
   notes:
-    - type: Publication
+    - type: Contribution
       title: "Rolis: a software approach to efficiently replicating multi-core transactions"
-      meta: EuroSys 2022 · systems implementation & evaluation
+      meta: EuroSys 2022 · led early-stage development & evaluation
       href: https://dl.acm.org/doi/10.1145/3492321.3519576
     - type: Patent
       title: Verification of metadata consistency across snapshot COW B+ tree logical maps

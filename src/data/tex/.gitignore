@@ -1,0 +1,8 @@
+# LaTeX build artifacts — keep only main.tex under version control.
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+main.pdf
