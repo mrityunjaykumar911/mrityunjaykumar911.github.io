@@ -10,6 +10,7 @@ interface Props {
 
 const { heading, areas, links } = Astro.props;
 const isExternal = (href: string) => href.startsWith('http');
+const opensNewTab = (href: string) => isExternal(href) || href.endsWith('.pdf');
 const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-up-right');
 const reverseEmail = (href: string) => href.replace(/^mailto:/, '').split('').reverse().join('');
 const contactPriority = new Map([
@@ -46,8 +47,8 @@ const orderedLinks = [...links].sort(
           href={link.icon === 'mail' ? '#contact-email' : link.href}
           id={link.icon === 'mail' ? 'contact-email' : undefined}
           data-email-reversed={link.icon === 'mail' ? reverseEmail(link.href) : undefined}
-          target={isExternal(link.href) ? '_blank' : undefined}
-          rel={isExternal(link.href) ? 'noreferrer' : undefined}
+          target={opensNewTab(link.href) ? '_blank' : undefined}
+          rel={opensNewTab(link.href) ? 'noreferrer' : undefined}
         >
           {link.label} <Icon name={iconFor(link.label)} size={16} />
         </a>
@@ -186,6 +187,10 @@ const orderedLinks = [...links].sort(
   }
 
   @media (max-width: 620px) {
+    .contact-section {
+      text-align: center;
+    }
+
     .contact-section h2 {
       max-width: none;
     }
@@ -197,6 +202,7 @@ const orderedLinks = [...links].sort(
 
     .contact-areas li,
     .contact-areas li:first-child {
+      justify-content: center;
       padding: 14px 0;
       border-right: 0;
       border-bottom: 1px solid var(--line-strong);

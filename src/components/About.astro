@@ -1,14 +1,15 @@
 ---
-import type { Capability } from '../data/schema';
-import { inlineMarkup } from '../lib/text';
+import type { Capability, Resume } from '../data/schema';
+import { formatRange, inlineMarkup } from '../lib/text';
 
 interface Props {
   id: string;
   paragraphs: string[];
   capabilities: Capability[];
+  education: Resume['education'];
 }
 
-const { id, paragraphs, capabilities } = Astro.props;
+const { id, paragraphs, capabilities, education } = Astro.props;
 ---
 
 <section class="section about-section" id={id} aria-labelledby={`${id}-title`}>
@@ -34,6 +35,24 @@ const { id, paragraphs, capabilities } = Astro.props;
         ))
       }
     </dl>
+  </div>
+
+  <div class="education reveal" aria-label="Education">
+    <p class="mono-label education-label">Education</p>
+    <ul class="education-list">
+      {
+        education.map((school) => (
+          <li class="education-item">
+            <p class="education-degree">{school.degree}</p>
+            <p class="education-school">{school.school}</p>
+            <p class="education-meta">
+              <time datetime={school.start}>{formatRange(school.start, school.end)}</time>
+              <span aria-hidden="true"> · </span>{school.location}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </section>
 
@@ -99,6 +118,45 @@ const { id, paragraphs, capabilities } = Astro.props;
     font-size: 15px;
   }
 
+  .education {
+    margin-top: var(--s6);
+    padding-top: var(--s5);
+    border-top: 1px solid var(--line);
+  }
+
+  .education-label {
+    margin-bottom: var(--s3);
+    color: var(--accent);
+  }
+
+  .education-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s4);
+  }
+
+  .education-degree {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 620;
+    letter-spacing: -0.012em;
+  }
+
+  .education-school {
+    margin: 4px 0 0;
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .education-meta {
+    margin: 8px 0 0;
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
   @media (min-width: 1800px) {
     .about-copy {
       font-size: 28px;
@@ -125,9 +183,24 @@ const { id, paragraphs, capabilities } = Astro.props;
   }
 
   @media (max-width: 620px) {
+    .about-copy {
+      text-align: center;
+    }
+
     .capability {
       grid-template-columns: 1fr;
       gap: 8px;
+      justify-items: center;
+      text-align: center;
+    }
+
+    .education {
+      text-align: center;
+    }
+
+    .education-list {
+      grid-template-columns: 1fr;
+      gap: var(--s3);
     }
   }
 </style>

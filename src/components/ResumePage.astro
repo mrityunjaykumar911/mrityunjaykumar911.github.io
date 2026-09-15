@@ -135,6 +135,9 @@ const consoleHint = `
   title={title}
   description={description}
   image={profile.avatar}
+  imageAlt={`Portrait of ${profile.name}, ${profile.role}`}
+  imageWidth={1180}
+  imageHeight={1475}
   jsonLd={jsonLd}
   noindex={!indexable}
   canonicalPath={canonicalPath}
@@ -160,7 +163,7 @@ const consoleHint = `
     <SignalStrip signals={profile.signals} />
     <Work id="work" roles={experience} />
     <Research id="research" research={research} />
-    <About id="about" paragraphs={profile.about} capabilities={capabilities} />
+    <About id="about" paragraphs={profile.about} capabilities={capabilities} education={education} />
     <Contact heading={profile.contactHeading} areas={profile.contactAreas} links={links} />
   </main>
 

@@ -32,7 +32,6 @@ run any, and a résumé site doesn't need it.
 | `src/lib/preview.ts` | Preview-flag parsing. Inert in any build; live only under `astro dev`. |
 | `src/layouts/Base.astro` | `<head>`: SEO, OG/Twitter, JSON-LD `Person`, self-hosted font preloads. No external requests. |
 | `src/components/*.astro` | SiteHeader, Hero, SignalStrip, Work, Research, About, Contact, SiteFooter, Icon (inline SVG), PreviewBanner. |
-| `public/fonts/` | Manrope, Newsreader, DM Mono — self-hosted woff2 (latin subset). |
 | `src/pages/index.astro` | The page. Assembles sections, JSON-LD, and the reveal / menu / scroll-spy script. |
 | `src/pages/404.astro` | Styled 404 → `dist/404.html`. |
 | `public/` | `favicon.ico`, `images/mrityunjay.jpg`, `cv/MrityunjayKumar-CV.pdf`. |

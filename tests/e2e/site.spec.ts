@@ -144,7 +144,7 @@ test('landing viewport presents a clear thesis and proof', async ({ page }) => {
   await expect(methodSignal).toBeVisible();
   await expect(methodSignal).toHaveAttribute('href', '/method.html');
   await expect(methodSignal.getByText('New', { exact: true })).toBeVisible();
-  await expect(methodSignal.getByText('New', { exact: true })).toHaveCSS('color', 'rgb(235, 100, 10)');
+  await expect(methodSignal.getByText('New', { exact: true })).toHaveCSS('color', 'rgb(168, 64, 10)');
   await expect(methodSignal.getByText('Engineering method', { exact: true })).toBeVisible();
   await expect(methodSignal.getByText('How I build reliable ML systems', { exact: true })).toBeVisible();
   await expect(page.getByRole('list', { name: 'Delivery path' })).toHaveCount(0);

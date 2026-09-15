@@ -9,7 +9,7 @@
   --panel-2: #f0f1f3;
   --ink: #0b0c0e;
   --ink-soft: #62666d;
-  --ink-faint: #8a8f98;
+  --ink-faint: #6b7078;
   --line: rgba(11, 12, 14, 0.09);
   --line-strong: rgba(11, 12, 14, 0.16);
 
@@ -89,6 +89,7 @@ body {
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: clip;
 }
 
 body::before {
@@ -337,6 +338,13 @@ ol {
 @media (max-width: 620px) {
   .section-heading {
     gap: var(--s2);
+    text-align: center;
+  }
+
+  .section-heading .heading-body,
+  .section-lede {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 

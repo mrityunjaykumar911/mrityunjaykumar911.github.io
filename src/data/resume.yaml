@@ -199,7 +199,7 @@ experience:
         unmap, and segment cleaning.
       - >-
         Implemented serialized transactional **snapshot crash consistency** by
-        replaying committed reads from persisted write-ahead logs.
+        replaying committed writes from persisted write-ahead logs.
       - >-
         Built aggregated snapshot capacity statistics from scratch; p99 latency
         ≈ 30 ms.
@@ -339,10 +339,10 @@ education:
   - school: Stony Brook University
     degree: M.S. in Computer Science
     location: Stony Brook, NY
-    start: 2019
-    end: 2020
+    start: 2019-01
+    end: 2020-05
   - school: Maulana Azad National Institute of Technology, Bhopal
     degree: B.Tech. in Computer Science & Engineering
     location: Bhopal, India
-    start: 2010
-    end: 2014
+    start: 2010-08
+    end: 2014-04

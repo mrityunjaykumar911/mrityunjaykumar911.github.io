@@ -9,6 +9,11 @@ interface Props {
   description: string;
   /** Root-relative path to the social preview image. */
   image?: string;
+  /** Alt text describing the social preview image. */
+  imageAlt?: string;
+  /** Intrinsic pixel dimensions of the social preview image. */
+  imageWidth?: number;
+  imageHeight?: number;
   /** JSON-LD graph, serialised into a ld+json script tag. */
   jsonLd?: unknown;
   noindex?: boolean;
@@ -19,6 +24,9 @@ const {
   title,
   description,
   image = '/images/mrityunjay.jpg',
+  imageAlt = title,
+  imageWidth = 2007,
+  imageHeight = 2007,
   jsonLd,
   noindex = false,
   canonicalPath,
@@ -31,7 +39,7 @@ const gaId = import.meta.env.PUBLIC_GA_ID ?? 'G-2JMPRPCPBP';
 const canonical = new URL(withBase(canonicalPath ?? Astro.url.pathname), Astro.site).href;
 const socialImage = new URL(withBase(image), Astro.site).href;
 const favicon = withBase('/favicon.ico');
-const appleTouchIcon = withBase('/images/mrityunjay.jpg');
+const appleTouchIcon = withBase('/images/apple-touch-icon.png');
 const sitemap = withBase('/sitemap-index.xml');
 const llmsContext = withBase('/llms.txt');
 const markdownResume = withBase('/resume.md');
@@ -52,7 +60,7 @@ const markdownResume = withBase('/resume.md');
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     <link rel="icon" href={favicon} sizes="any" />
-    <link rel="apple-touch-icon" href={appleTouchIcon} />
+    <link rel="apple-touch-icon" href={appleTouchIcon} sizes="180x180" />
 
     <meta name="theme-color" content="#f6f8f5" />
 
@@ -63,11 +71,16 @@ const markdownResume = withBase('/resume.md');
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={socialImage} />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
 
     {
       jsonLd && (

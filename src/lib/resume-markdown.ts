@@ -85,7 +85,7 @@ export function renderResumeMarkdown(resume: Resume, site: URL): string {
     ...resume.education.flatMap((school) => [
       `### ${clean(school.degree)} - ${clean(school.school)}`,
       ``,
-      `${clean(String(school.start))} to ${clean(String(school.end))} | ${clean(school.location)}`,
+      `${formatRange(school.start, school.end)} | ${clean(school.location)}`,
       ``,
     ]),
     `## Canonical Links`,
