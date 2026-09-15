@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-push guard: the full e2e suite (build + Playwright) must pass before a push.
+# In a genuine emergency you can bypass it with:  git push --no-verify
+echo "[pre-push] Running e2e suite before push (npm run test:e2e)..."
+npm run test:e2e
