@@ -1,7 +1,14 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules", "playwright-report", "playwright-report-vqa", "test-results"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "playwright-report",
+    "playwright-report-vqa",
+    "test-results",
+    "plugins"
+  ],
   "compilerOptions": {
     "strictNullChecks": true,
     "allowJs": true

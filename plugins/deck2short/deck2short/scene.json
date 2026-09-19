@@ -1,0 +1,73 @@
+{
+  "aspect": "9:16",
+  "voice": "rex",
+  "beats": [
+    {
+      "id": "b0",
+      "vo": "Agent demos are easy. Production is the hard part.",
+      "visual": {"type": "hook", "tension": "Agent demos are easy.",
+                 "payoff": "Production is the hard part."},
+      "claims": [],
+      "est_dur_s": 4.0,
+      "transition": "cut"
+    },
+    {
+      "id": "b1",
+      "vo": "The PowerPoint agent generates over 100 million documents.",
+      "visual": {"type": "stat", "display": "100M+", "label": "documents generated",
+                 "source_ref": "profile.signals.1.value", "trend": "up"},
+      "claims": [{"text": "100 million", "value": 100000000, "unit": "absolute",
+                  "source_ref": "profile.signals.1.value"}],
+      "est_dur_s": 4.2,
+      "transition": "dissolve"
+    },
+    {
+      "id": "b2",
+      "vo": "I build the distributed infrastructure underneath it.",
+      "visual": {"type": "image", "src": "profile.avatar",
+                 "caption": "Mrityunjay Kumar · Senior ML Engineer, Microsoft",
+                 "treatment": "static"},
+      "claims": [],
+      "est_dur_s": 4.0,
+      "transition": "linger"
+    },
+    {
+      "id": "b3",
+      "vo": "Evaluation was the bottleneck. Parallel execution cut it 4.6 times.",
+      "visual": {"type": "stat", "display": "4.6x", "label": "faster model evaluation",
+                 "source_ref": "experience.0.lead.2#0", "trend": "up"},
+      "claims": [{"text": "4.6 times", "value": 4.6, "unit": "multiple",
+                  "source_ref": "experience.0.lead.2#0"}],
+      "est_dur_s": 4.4,
+      "transition": "scale_through"
+    },
+    {
+      "id": "b4",
+      "vo": "Before agents, search and ML pipelines. Relevancy up 45 percent.",
+      "visual": {"type": "chart_reveal", "src": "talentica", "series": 0,
+                 "highlight": [0], "mode": "bars"},
+      "claims": [{"text": "45 percent", "value": 45, "unit": "percent",
+                  "source_ref": "experience.3.lead.1#1"}],
+      "est_dur_s": 4.6,
+      "transition": "lift"
+    },
+    {
+      "id": "b5",
+      "vo": "Audio firmware. Distributed storage. Now agent infrastructure.",
+      "visual": {"type": "contrast", "left": "MediaTek", "left_label": "Audio firmware, 2014",
+                 "right": "Microsoft", "right_label": "Agent infrastructure, today"},
+      "claims": [],
+      "est_dur_s": 4.2,
+      "transition": "dissolve"
+    },
+    {
+      "id": "b6",
+      "vo": "Inference engines. Rigorous evals. RL systems at scale.",
+      "visual": {"type": "title_card",
+                 "headline": "Let's talk about production AI infrastructure.", "sub": null},
+      "claims": [],
+      "est_dur_s": 4.4,
+      "transition": "scale_through"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#f6f8f5">
+<title>Mrityunjay Kumar | Senior ML Engineer</title>
+<style>
+  :root{--bg:#f6f8f5;--ink:#16211b;--dim:#5f6f66;--rule:#d7e0d9;--accent:#1f6b4a}
+  *{box-sizing:border-box}
+  body{margin:0;padding:64px;background:var(--bg);color:var(--ink);
+       font-family:"Inter Tight",system-ui,-apple-system,sans-serif;line-height:1.5}
+  .eyebrow{color:var(--dim);font-size:14px;margin-bottom:10px}
+  h1{font-size:40px;line-height:1.1;letter-spacing:-0.025em;margin:0 0 18px;max-width:22ch}
+  h2{font-size:26px;letter-spacing:-0.02em;margin:56px 0 18px}
+  h3{font-size:19px;margin:0 0 4px}
+  p{max-width:62ch;margin:0 0 14px}
+  .stats{display:flex;gap:56px;margin:38px 0 8px}
+  .stat .figure{font-size:44px;font-weight:800;letter-spacing:-0.03em;line-height:1;color:var(--accent)}
+  .stat .caption{font-size:14px;color:var(--dim);margin-top:8px;max-width:16ch}
+  .role{border-top:1px solid var(--rule);padding:26px 0}
+  .role .meta{font-size:13px;color:var(--dim);margin-bottom:12px}
+  ul{margin:10px 0 0;padding-left:20px}
+  li{margin-bottom:8px;max-width:66ch}
+  table{border-collapse:collapse;margin-top:16px;font-size:15px}
+  td,th{padding:9px 28px 9px 0;text-align:left;border-bottom:1px solid var(--rule)}
+  th{color:var(--dim);font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="eyebrow">Senior ML Engineer at Microsoft</div>
+<h1>I build distributed infrastructure that makes LLM agents reliable in production.</h1>
+<p>Senior ML systems engineer building distributed execution, model serving, evaluation,
+and data platforms. Focused on latency, throughput, and fault recovery for agent and
+post-training workloads.</p>
+
+<img src="images/mrityunjay-portrait.jpg" alt="Portrait of Mrityunjay Kumar"
+     width="1180" height="1475" style="width:180px;height:auto;border-radius:4px;margin:8px 0">
+
+<div class="stats">
+  <div class="stat">
+    <div class="figure">100M+</div>
+    <div class="caption">Weekly documents generated</div>
+  </div>
+  <div class="stat">
+    <div class="figure">12+</div>
+    <div class="caption">Years building production systems</div>
+  </div>
+  <div class="stat">
+    <div class="figure">4.6x</div>
+    <div class="caption">Faster model evaluation</div>
+  </div>
+</div>
+
+<h2>Production systems. Measurable outcomes.</h2>
+
+<section class="role">
+  <h3>Senior ML Engineer, Microsoft</h3>
+  <div class="meta">May 2022 to Present &middot; Mountain View, CA</div>
+  <p>Production ML and agent infrastructure for PowerPoint, spanning model evaluation,
+  fine-tuning pipelines, and the distributed serving systems that run these workloads
+  at scale.</p>
+  <ul>
+    <li>Scaled the agent's distributed execution and serving infrastructure to thousands
+    of concurrent containers under strict latency SLOs, with load balancing, autoscaling,
+    and automated fault detection and recovery.</li>
+    <li>Built PowerPoint's first end-to-end fine-tuned model workflow, from synthetic-data
+    generation through secure deployment and inference.</li>
+    <li>Designed extensible slide-generation and evaluation systems with configurable
+    models and datasets, end-to-end telemetry, and parallel execution.</li>
+  </ul>
+</section>
+
+<section class="role">
+  <h3>Member of Technical Staff III, VMware</h3>
+  <div class="meta">Jul 2020 to May 2022 &middot; Palo Alto, CA</div>
+  <p>Led the design of the FSCK user-space tool infrastructure for VMware's distributed
+  storage, vSAN. Core member of the snapshot development team.</p>
+  <ul>
+    <li>Built distributed FSCK for analyzing and repairing storage metadata with
+    cross-consistency matrices across B+ trees, bitmaps, and segment usage tables.</li>
+    <li>Implemented serialized transactional snapshot crash consistency by replaying
+    committed writes from persisted write-ahead logs.</li>
+    <li>Built aggregated snapshot capacity statistics from scratch, at 30 ms p99 latency.</li>
+  </ul>
+</section>
+
+<section class="role">
+  <h3>Senior Software Engineer, Talentica Software</h3>
+  <div class="meta">Apr 2016 to Jan 2019 &middot; Pune, India</div>
+  <p>Data Science team. Three years across search, ML pipelines, file sync, chatbots,
+  and network analytics.</p>
+  <table>
+    <tr><th>Delivered</th><th>Improvement</th></tr>
+    <tr><td>Search relevancy</td><td>45%</td></tr>
+    <tr><td>Deployment frequency</td><td>40%</td></tr>
+    <tr><td>Ontology enhancement</td><td>30%</td></tr>
+    <tr><td>Sync frequency</td><td>30%</td></tr>
+  </table>
+</section>
+
+<h2>Ideas tested in code.</h2>
+<p>Graduate Research Assistant, Stony Brook University, 2020. Advisor Prof. Shuai Mu.</p>
+<section class="role">
+  <h3>Replicating multi-core transactions without giving up performance.</h3>
+  <p>Led early-stage development and evaluation of Rolis, EuroSys 2022, implementing
+  core mechanisms for its replicated multi-core transaction engine: asynchronous
+  multi-process Paxos, checkpoint log truncation, and serializable replay.</p>
+</section>
+
+<h2>Let's talk about production AI infrastructure.</h2>
+<p>Inference engines. Rigorous evals. RL systems at scale.</p>
+
+</body>
+</html>

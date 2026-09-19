@@ -1,0 +1,11 @@
+# core
+pydantic>=2.7
+lxml>=5.2
+anthropic>=0.40
+openai>=1.40          # OpenAI-compatible client, pointed at api.x.ai
+
+# optional: word-level caption timings
+# whisperx>=3.1
+# torch>=2.2
+
+# system: ffmpeg, ffprobe, node >= 18, npx

@@ -1,0 +1,10 @@
+.d2s/
+out/
+node_modules/
+remotion/public/audio/
+remotion/out/
+test-results/
+playwright-report/
+tests/e2e/**/*-snapshots/
+__pycache__/
+*.pyc

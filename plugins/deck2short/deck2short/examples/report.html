@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Q3 retention review</title>
+<style>
+  :root { --ink:#14181D; --dim:#7C8794; --signal:#1B5CFF; }
+  body { font-family: "Inter Tight", system-ui, sans-serif; color: var(--ink); margin:0; padding:56px; }
+  h1 { font-size:34px; letter-spacing:-0.02em; margin:0 0 28px; }
+  .callout { border:2px solid var(--ink); padding:28px 32px; max-width:640px; }
+  .callout .figure { font-size:72px; font-weight:800; letter-spacing:-0.04em; line-height:1; }
+  .callout .note { color:var(--dim); font-size:15px; margin-top:10px; }
+  table { border-collapse:collapse; margin-top:32px; font-size:15px; }
+  td, th { padding:10px 20px 10px 0; text-align:left; }
+  th { color:var(--dim); font-weight:500; }
+</style>
+</head>
+<body>
+
+<h1 data-ref="hero-title">Enterprise retention slipped for the first time in nine quarters</h1>
+
+<div class="callout" data-ref="churn-callout">
+  <div class="figure" data-ref="churn-rate" data-value="7.4" data-unit="percent">7.4%</div>
+  <div class="note" data-ref="churn-note">Gross logo churn, enterprise segment, Q3</div>
+</div>
+
+<section data-ref="arr-chart">
+  <table>
+    <tr><th>Quarter</th><th>Net new ARR ($M)</th></tr>
+    <tr><td>Q4</td><td>14.2</td></tr>
+    <tr><td>Q1</td><td>16.8</td></tr>
+    <tr><td>Q2</td><td>15.1</td></tr>
+    <tr><td>Q3</td><td>9.3</td></tr>
+  </table>
+
+  <!-- The sidecar is the only reliable source of chart numbers. Never parse
+       them back out of rendered SVG geometry. If the generator already builds
+       this table or chart from a spec, emit that spec here verbatim. -->
+  <script type="application/json" data-facts="arr-chart">
+  {
+    "title": "Net new ARR by quarter",
+    "categories": ["Q4", "Q1", "Q2", "Q3"],
+    "series": [{"values": [14.2, 16.8, 15.1, 9.3], "unit": "currency"}],
+    "scalars": {"qoq_decline": -38.4}
+  }
+  </script>
+</section>
+
+<div data-ref="drivers">
+  <p data-ref="drivers-lead">Three drivers account for most of the change.</p>
+  <p>Seat contraction at two logos in financial services.</p>
+  <p>A pricing change that landed mid-quarter.</p>
+  <p>Support response times above target for six straight weeks.</p>
+</div>
+
+</body>
+</html>
