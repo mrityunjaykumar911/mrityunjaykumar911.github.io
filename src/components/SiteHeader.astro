@@ -30,6 +30,7 @@ const initials = name
     aria-expanded="false"
     aria-controls="site-nav"
     data-menu-button
+    aria-label="Toggle navigation"
   >
     <Icon name="menu" size={20} />
     <span class="sr-only">Open navigation</span>
@@ -232,7 +233,7 @@ const initials = name
 
     .site-nav {
       position: absolute;
-      top: 72px;
+      top: calc(100% + 1px);
       right: 0;
       left: 0;
       display: none;
@@ -242,6 +243,9 @@ const initials = name
       padding: 28px 20px;
       border-bottom: 1px solid var(--ink);
       background: var(--paper-bright);
+      box-shadow: var(--shadow-md);
+      max-height: calc(100svh - 69px);
+      overflow-y: auto;
     }
 
     .site-nav.is-open {
