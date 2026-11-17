@@ -279,7 +279,9 @@ test('experience and research read as an evidence system', async ({ page }) => {
 
   const proofRegistry = page.getByRole('list', { name: 'Research proof registry' });
   await expect(proofRegistry).toBeVisible();
-  await expect(proofRegistry.getByRole('listitem')).toHaveCount(9);
+  await expect(proofRegistry.getByRole('listitem')).toHaveCount(10);
+  await expect(proofRegistry.getByRole('link', { name: 'Open: Scaling out a distributed LLM evaluation pipeline' }))
+    .toHaveAttribute('href', 'https://mrityunjaykumar911.github.io/studies/eval-pipeline.html');
 
   await proofRegistry.scrollIntoViewIfNeeded();
   const researchLink = page.locator('.site-nav a[href="#research"]');
@@ -619,13 +621,30 @@ test('eval pipeline design study is linked from the method page and renders', as
     /\/studies\/eval-pipeline\.html$/
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
-  const chapterIds = ['problem', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions'];
+  const chapterIds = ['problem', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions', 'design-doc'];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
   await expect(page.locator('.arch-services > li')).toHaveCount(3);
   await expect(page.locator('#failure tbody tr')).toHaveCount(5);
   await expect(page.locator('#metrics')).toContainText('graded + failed + cancelled = total');
+
+  // All four design-doc diagrams render natively through Mermaid, without parse errors.
+  await expect(page.locator('html')).toHaveAttribute('data-mermaid', 'rendered', { timeout: 30_000 });
+  for (const n of [1, 2, 3, 4]) {
+    await expect(page.locator(`#figure-${n} pre.mermaid svg`)).toHaveCount(1);
+  }
+  expect(await page.locator('pre.mermaid').evaluateAll(
+    (blocks) => blocks.filter((block) => /Syntax error|Parse error/i.test(block.textContent ?? '')).length
+  )).toBe(0);
+  await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
+  await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
+
+  // The appendix carries the full doc and points its diagrams at those figures.
+  const designDoc = page.locator('#design-doc .design-doc');
+  await expect(designDoc).toContainText('Grader UUID safety');
+  await expect(designDoc.locator('.doc-figure-ref a')).toHaveText(['Figure 1', 'Figure 2', 'Figure 3', 'Figure 4']);
+  await expect(designDoc.locator('pre.mermaid, code.language-mermaid')).toHaveCount(0);
 
   const sitemapIndex = await request.get('/sitemap-index.xml');
   const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];

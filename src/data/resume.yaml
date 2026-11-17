@@ -303,6 +303,10 @@ research:
       text: Visit the research group
 
   notes:
+    - type: Design study
+      title: Scaling out a distributed LLM evaluation pipeline
+      meta: Service boundaries, backpressure, idempotency, outbox/inbox
+      href: https://mrityunjaykumar911.github.io/studies/eval-pipeline.html
     - type: Contribution
       title: "Rolis: a software approach to efficiently replicating multi-core transactions"
       meta: EuroSys 2022 · led early-stage development & evaluation

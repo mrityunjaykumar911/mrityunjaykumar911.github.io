@@ -3,8 +3,20 @@ import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import { withBase } from '../../lib/url';
+import { Content as DesignDoc } from '../../data/studies/eval-pipeline.md';
+import designDocSource from '../../data/studies/eval-pipeline.md?raw';
 import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/source-sans-3';
+
+// The design doc is the single source of truth for the diagrams. They are
+// pulled out here and rendered natively by Mermaid in the browser. In the
+// appendix, the remark plugin in astro.config.mjs swaps each block for a link
+// back to its figure so nothing renders twice.
+const mermaidSources = [...designDocSource.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+if (mermaidSources.length !== 4) {
+  throw new Error(`Expected 4 mermaid diagrams in the eval design doc, found ${mermaidSources.length}`);
+}
+const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram] = mermaidSources;
 
 const homeHref = withBase('/');
 const methodHref = withBase('/method.html');
@@ -17,6 +29,7 @@ const chapters = [
   { id: 'failure', label: 'What breaks at scale' },
   { id: 'metrics', label: 'Honest metrics' },
   { id: 'decisions', label: 'Decision log' },
+  { id: 'design-doc', label: 'Full design doc' },
 ];
 
 const services = [
@@ -146,7 +159,12 @@ const decisions = [
         </p>
       </div>
 
-      <figure class="arch" aria-label="Three-service architecture with external dependencies">
+      <figure class="diagram fit" id="figure-1">
+        <div class="diagram-scroll"><pre class="mermaid">{architectureDiagram}</pre></div>
+        <figcaption><span class="mono-label">Figure 1</span> High-level architecture. Numbered edges are the client's calls, in order.</figcaption>
+      </figure>
+
+      <figure class="arch" aria-label="Load shape of each service and the external dependencies">
         <ol class="arch-services">
           {services.map((service, index) => (
             <li>
@@ -183,9 +201,15 @@ const decisions = [
         </p>
         <p>
           Ingestion also never sees the model config or the grader UUID. A dataset is reusable
-          across many models and graders, so those are execution concerns.
+          across many models and graders, so those are execution concerns. The client chains the
+          two calls itself, as <a href="#figure-2">Figure 2</a> shows end to end.
         </p>
       </div>
+
+      <figure class="diagram" id="figure-2">
+        <div class="diagram-scroll"><pre class="mermaid">{endToEndDiagram}</pre></div>
+        <figcaption><span class="mono-label">Figure 2</span> End-to-end flow, from dataset URL to final report.</figcaption>
+      </figure>
     </section>
 
     <section id="scale-out" class="study-section" aria-labelledby="scale-out-title">
@@ -290,8 +314,8 @@ const decisions = [
         <div>
           <h3>Persist the answer before grading</h3>
           <p>
-            Each task moves through <code>PENDING → GENERATING → ANSWER_PERSISTED → GRADING → GRADED</code>,
-            with retry-wait states on both the generation and grading steps. The generated answer
+            Each task moves through the states in <a href="#figure-3">Figure 3</a>, with
+            retry-wait states on both the generation and grading steps. The generated answer
             is stored before grading starts. If the grader fails, the retry resumes at grading
             against the stored answer. It never pays for a second LLM call, and it never grades a
             different, nondeterministic answer.
@@ -303,10 +327,21 @@ const decisions = [
             The worker commits the task result and an outbox event in one transaction. A publisher
             calls AggregationService and retries with backoff until accepted. AggregationService
             inserts into an inbox keyed by <code>event_id</code>, so a duplicate is acknowledged
-            and dropped. That is at-least-once delivery with idempotent processing.
+            and dropped. That is at-least-once delivery with idempotent processing
+            (<a href="#figure-4">Figure 4</a>).
           </p>
         </div>
       </div>
+
+      <figure class="diagram" id="figure-3">
+        <div class="diagram-scroll"><pre class="mermaid">{lifecycleDiagram}</pre></div>
+        <figcaption><span class="mono-label">Figure 3</span> Worker task lifecycle. A grading retry never goes back through generation.</figcaption>
+      </figure>
+
+      <figure class="diagram fit" id="figure-4">
+        <div class="diagram-scroll"><pre class="mermaid">{outboxDiagram}</pre></div>
+        <figcaption><span class="mono-label">Figure 4</span> Transactional outbox in ExecutionService, deduplicating inbox in AggregationService.</figcaption>
+      </figure>
 
       <aside class="definition-band" aria-label="Exactly-once caveat">
         <p class="mono-label">The caveat I state up front</p>
@@ -372,12 +407,176 @@ const decisions = [
         </p>
       </div>
     </section>
+
+    <section id="design-doc" class="study-section" aria-labelledby="design-doc-title">
+      <div class="section-intro">
+        <p class="eyebrow">07 / Full design doc</p>
+        <h2 id="design-doc-title">The complete design, as written.</h2>
+        <p>
+          Everything above is my reading of this document. Here is the source in full: APIs,
+          request and response shapes, SSRF rules, grader safety, retry policy, and data model.
+          Its diagrams are the four figures above.
+        </p>
+      </div>
+      <article class="design-doc">
+        <DesignDoc />
+      </article>
+    </section>
   </main>
 
   <SiteFooter name="Mrityunjay Kumar" year={year} />
 </Base>
 
+<script>
+  // Native Mermaid rendering in the browser. Mermaid is bundled by Vite and
+  // served from this site, so the page makes no third-party requests. Without
+  // JavaScript the diagram source stays visible as plain text.
+  import mermaid from 'mermaid';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    theme: 'neutral',
+    fontFamily: "'Source Sans 3 Variable', sans-serif",
+    flowchart: { useMaxWidth: false },
+    sequence: { useMaxWidth: false, wrap: true, width: 140, actorMargin: 40 },
+    state: { useMaxWidth: false },
+  });
+
+  // Flag figures that still overflow their frame so the caption can say so.
+  const markScrollable = () => {
+    for (const frame of document.querySelectorAll<HTMLElement>('.diagram-scroll')) {
+      const figure = frame.closest('figure');
+      if (figure) figure.dataset.scrollable = String(frame.scrollWidth > frame.clientWidth + 4);
+    }
+  };
+
+  mermaid.run({ querySelector: 'pre.mermaid' }).then(() => {
+    markScrollable();
+    window.addEventListener('resize', markScrollable, { passive: true });
+    document.documentElement.dataset.mermaid = 'rendered';
+  });
+</script>
+
 <style>
+  .diagram {
+    margin: 40px 0 0;
+  }
+
+  .diagram-scroll {
+    overflow-x: auto;
+    padding: 24px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+  }
+
+  .diagram pre.mermaid {
+    margin: 0;
+    min-width: max-content;
+    font-family: var(--mono);
+    font-size: 13px;
+    white-space: pre;
+  }
+
+  .diagram pre.mermaid :global(svg) {
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+
+  @media (min-width: 861px) {
+    .diagram.fit pre.mermaid {
+      min-width: 0;
+    }
+
+    .diagram.fit pre.mermaid :global(svg) {
+      width: 100%;
+    }
+  }
+
+  .diagram[data-scrollable='true'] figcaption::after {
+    content: 'Scroll sideways to see the whole diagram →';
+    color: var(--accent-strong);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .diagram figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    align-items: baseline;
+    margin-top: 12px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .prose a,
+  .two-col a,
+  .design-doc :global(a) {
+    color: var(--accent-strong);
+  }
+
+  .design-doc {
+    max-width: 82ch;
+    margin-top: 40px;
+    line-height: 1.65;
+  }
+
+  .design-doc :global(h2) {
+    margin: 48px 0 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-strong);
+    font-size: 26px;
+  }
+
+  .design-doc :global(h3) {
+    margin: 32px 0 8px;
+    font-size: 20px;
+  }
+
+  .design-doc :global(p) {
+    margin: 0 0 14px;
+  }
+
+  .design-doc :global(ul),
+  .design-doc :global(ol) {
+    margin: 0 0 16px;
+    padding-left: 24px;
+  }
+
+  .design-doc :global(li > ul) {
+    margin: 4px 0 4px;
+  }
+
+  .design-doc :global(pre) {
+    margin: 0 0 16px;
+    overflow-x: auto;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .design-doc :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+
+  .design-doc :global(table) {
+    display: block;
+    overflow-x: auto;
+    margin: 16px 0;
+  }
+
+  .design-doc :global(.doc-figure-ref) {
+    padding: 12px 16px;
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+  }
+
   .study-page {
     --display: 'Bricolage Grotesque Variable', sans-serif;
     --sans: 'Source Sans 3 Variable', sans-serif;
