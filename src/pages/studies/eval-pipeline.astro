@@ -124,6 +124,164 @@ const scalePlaneDiagram = `flowchart TB
     W1 & W2 & WN --> DB[("Results DB + outbox")]
     DB -->|"task events"| AGG[AggregationService]`;
 
+// Temporal mini workers: one small pool per task queue.
+const temporalPoolsDiagram = `flowchart TB
+    API[Execution API] -->|"start EvaluationWorkflow<br/>workflow id = execution_id"| T[("Temporal cluster<br/>durable event history")]
+    subgraph POOLS["Temporal mini workers: one pool per task queue"]
+        direction LR
+        WF["Workflow workers<br/>orchestration only, no I/O"]
+        GEN["Generate workers<br/>async I/O, many calls in flight"]
+        GRD["Grade workers<br/>CPU-bound, sandboxed"]
+        PUB["Publish workers<br/>events to AggregationService"]
+    end
+    T <-->|"tq: workflows"| WF
+    T <-->|"tq: generate-model<br/>rate limit = provider limit"| GEN
+    T <-->|"tq: grade"| GRD
+    T <-->|"tq: publish"| PUB
+    GEN --> LLM[External LLM API]
+    GEN --> DB[("Results DB")]
+    GRD --> DB
+    PUB -->|"POST event with event_id"| AGG[AggregationService]`;
+
+const temporalFlowDiagram = `sequenceDiagram
+    participant API as Execution API
+    participant P as Evaluation workflow (parent)
+    participant B as BatchWorkflow (child)
+    participant G as generate activity
+    participant R as grade activity
+    participant E as publish activity
+    API->>P: start, workflow id = execution_id
+    P->>B: one child per batch of at most 500 questions
+    loop each question, up to max_concurrency at once
+        B->>G: generate(record_id), retry policy A
+        G-->>B: generation_id
+        B->>R: grade(generation_id, grader_version), retry policy B
+        R-->>B: verdict 0 or 1
+        B->>E: publish TASK_GRADED(event_id)
+    end
+    B-->>P: batch complete
+    Note over API,P: cancel = workflow cancellation, progress = query`;
+
+const temporalReasons = [
+  {
+    title: 'Durable task state without a state table',
+    body: 'The task lifecycle lives in the workflow event history. If a worker dies, another one replays the history and continues from the last completed step. Generate and grade are separate activities, and a completed result is recorded, so a grading retry never re-runs generation.',
+    replaces: 'Task-state table and conditional transitions',
+  },
+  {
+    title: 'Retries are declared, not hand-coded',
+    body: 'Each activity gets its own retry policy: backoff, maximum attempts, and non-retryable errors such as invalid requests or bad credentials. Generation and grading retry on different terms.',
+    replaces: 'Retry-wait states and backoff code',
+  },
+  {
+    title: 'Dead workers are detected by timeouts',
+    body: 'Start-to-close and heartbeat timeouts tell Temporal when a long model call or grading run has stalled, and the activity is retried elsewhere.',
+    replaces: 'Queue lease renewal for long-running work',
+  },
+  {
+    title: 'The provider limit is enforced by the server',
+    body: "One generate task queue per model, with max_task_queue_activities_per_second set to the provider's rate. Temporal enforces it across every worker on that queue, so adding generate workers cannot exceed it. Concurrency is still capped per worker, so pool size × max_concurrent_activities must stay under the provider's concurrency.",
+    replaces: 'Hand-built distributed rate limiter',
+  },
+  {
+    title: 'Each pool scales on its own bottleneck',
+    body: 'Generate workers are I/O-bound and hold many async calls. Grade workers are CPU-bound and run sandboxed in separate processes. Workflow workers are light. Each pool scales on its own task-queue backlog, so a slow grader never holds model calls hostage.',
+    replaces: 'One worker type doing everything',
+  },
+  {
+    title: 'Idempotent create and cancel come built in',
+    body: 'The workflow ID is the execution_id. With a conflict policy that returns the running workflow, a retried POST cannot start a second run. Cancel is workflow cancellation, and progress is a query.',
+    replaces: 'Execution-side create dedupe, cancel and progress plumbing',
+  },
+  {
+    title: 'The outbox publisher becomes a workflow step',
+    body: 'Publish runs only after the result commit completes, and it retries until AggregationService accepts the event. The inbox there still deduplicates by event_id.',
+    replaces: 'Outbox table and publisher loop',
+  },
+];
+
+const temporalLimits = [
+  'Event history is capped at 51,200 events or 50 MB per workflow run. At roughly 10 events per question (three activities plus workflow tasks), one workflow for a 10,000-question run would pass the cap. So a parent fans out child workflows of at most 500 questions, about 5,000 events each, or uses Continue-As-New.',
+  'Payloads error at 2 MB. Activities pass generation_id, never answer text; answers stay in the Results DB.',
+  'Activities are at-least-once. A model call can run again if a worker dies mid-call, so commits stay idempotent and provider idempotency keys still matter. Temporal does not make LLM calls exactly-once.',
+  'Workflow code must be deterministic. Model calls and grading happen only inside activities.',
+  'It is new infrastructure to run: a Temporal cluster or Temporal Cloud, and at least two workers per task queue for availability.',
+];
+
+// Measured on the running system.
+const latencyChart = `---
+config:
+  themeVariables:
+    xyChart:
+      plotColorPalette: "#087a55"
+---
+xychart-beta
+    title "End-to-end latency per evaluation (minutes)"
+    x-axis ["P50", "P95", "P99"]
+    y-axis "Minutes" 0 --> 60
+    bar [24, 26, 60]`;
+
+const retryStateDiagram = `flowchart TB
+    R1["Run 1<br/>pins: snapshot hash, model version, grader version"] -->|"some tasks failed"| R2["Retry run 2<br/>parent = run 1, same pins"]
+    R2 --> Q{"For each task:<br/>what is already saved?"}
+    Q -->|"verdict exists"| A["Reuse the verdict<br/>0 LLM calls"]
+    Q -->|"answer stored, no verdict"| B["Re-grade the stored answer<br/>0 LLM calls"]
+    Q -->|"no answer"| C["Generate, then grade"]
+    A & B & C --> REP["Report for run 2"]
+    REP -.->|"lineage"| L["report → run → task → attempt → verdict"]`;
+
+const observabilityDiagram = `flowchart LR
+    subgraph APP["Instrumented with OpenTelemetry"]
+        direction TB
+        API[Execution API]
+        WK["Temporal mini workers<br/>TracingInterceptor"]
+        AGG[AggregationService]
+    end
+    APP -->|"traces, OTLP"| COL[OTel Collector]
+    COL --> TR[(Trace store)]
+    APP -->|"Temporal SDK and service metrics"| PROM[(Prometheus)]
+    PROM --> GRAF["Grafana<br/>dashboards and alerts"]
+    TR --> GRAF`;
+
+const issues = [
+  {
+    title: 'Backed-up queue',
+    symptom: 'Tasks wait in the queue before any worker picks them up. The median barely moves while P99 grows.',
+    answer: 'Admission control with per-tenant quotas at the API. Each mini worker pool autoscales on schedule-to-start latency and backlog age, not queue depth alone. Child workflows of at most 500 questions keep one large evaluation from holding a whole queue.',
+    signal: 'temporal_activity_schedule_to_start_latency per task queue; outstanding evaluations per tenant.',
+  },
+  {
+    title: 'Throttling',
+    symptom: 'The provider returns 429s. Retries pile on top of new work and the tail stretches.',
+    answer: "One generate task queue per model, with max_task_queue_activities_per_second at the provider's rate, so Temporal holds dispatch under the limit across all workers. Pool size × max_concurrent_activities stays under the provider's concurrency. Retry-After is respected, with exponential backoff and jitter.",
+    signal: 'Provider 429 rate, activity retries per minute, tokens per minute against quota.',
+  },
+  {
+    title: 'Retry and lineage tracking',
+    symptom: 'After retries, it is hard to tell which attempt produced a verdict, or which run a number came from.',
+    answer: 'Every model call is a row with (generation_id, attempt_id). Verdicts are keyed by (generation_id, grader_version, grader_config_hash). Each run stores its pins and its Temporal workflow and run IDs, and a retry run records its parent run. Any number traces back: report, run, task, attempt, verdict.',
+    signal: 'Attempts per task, retry runs per evaluation, verdicts without a lineage path (should be zero).',
+  },
+  {
+    title: 'Retry from saved state',
+    symptom: 'Re-running a failed evaluation from scratch repeats model calls that already succeeded.',
+    answer: "A retry loads the original run's pins, never today's defaults. Tasks with a verdict are reused, tasks with a stored answer are only re-graded, and only tasks with no answer call the model again. In-flight workflows resume from Temporal history; finished runs resume from the Results DB.",
+    signal: 'Share of tasks reused per retry run; model calls avoided.',
+  },
+  {
+    title: 'Analytics integration',
+    symptom: 'Reports stay inside the service, and comparisons become ad hoc queries over raw tables.',
+    answer: 'AggregationService exports deduplicated, task-level verdict events, each carrying its pins, to the analytics store. Comparisons join on the pins, so only like-for-like evaluations are compared.',
+    signal: 'Export lag, and exported rows reconciling with graded + failed + cancelled = total.',
+  },
+  {
+    title: 'Telemetry and observability',
+    symptom: 'Without one trace per evaluation, a slow P99 run cannot be explained.',
+    answer: "OpenTelemetry traces run from the API through the workflow, activities, model call, and grader, propagated by Temporal's TracingInterceptor. Prometheus scrapes Temporal SDK and service metrics. Grafana holds the dashboards and the alerts on P95, P99, throughput, and throttling.",
+    signal: 'Latency histogram (P50, P95, P99), evaluations per hour, schedule-to-start latency, 429 rate.',
+  },
+];
+
 const claims = [
   {
     claim: 'Generation throughput grows linearly with workers until the provider limit.',
@@ -160,6 +318,12 @@ const claims = [
     mechanism: 'Durable per-service queues plus admission control.',
     bound: 'Backlog grows at λ − μ while arrivals exceed capacity. Outstanding work is capped per tenant.',
     breaks: 'Sustained λ > μ. Then the answer is more safe capacity or 429/503, not a deeper queue.',
+  },
+  {
+    claim: 'Orchestration state stays bounded per workflow, however large the run.',
+    mechanism: 'A parent workflow fans out child workflows of at most 500 questions each.',
+    bound: 'About 10 history events per question, so about 5,000 per child: roughly 10% of the 51,200-event cap.',
+    breaks: 'One workflow for a whole large run: 10,000 questions is about 100,000 events, past the cap.',
   },
   {
     claim: "One tenant's large run cannot starve other tenants.",
@@ -239,7 +403,10 @@ const chapters = [
   { id: 'baseline', label: 'Baseline v0' },
   { id: 'boundaries', label: 'Boundaries first' },
   { id: 'scale-out', label: 'Scaling out' },
+  { id: 'temporal', label: 'Temporal workers' },
   { id: 'claims', label: 'Scalability claims' },
+  { id: 'results', label: 'Measured results' },
+  { id: 'issues', label: 'Main issues' },
   { id: 'failure', label: 'What breaks at scale' },
   { id: 'metrics', label: 'Honest metrics' },
   { id: 'decisions', label: 'Decision log' },
@@ -290,6 +457,7 @@ const decisions = [
   { q: 'Why a grader UUID, not code?', a: 'The platform owns the mapping from ID to an approved, versioned artifact. Callers never supply executable code.' },
   { q: 'Why an outbox, not a direct call?', a: 'The network can fail after the result is committed. Outbox plus inbox gives retryable delivery with deduplication.' },
   { q: 'Why not promise exactly-once?', a: 'An LLM call can succeed on the provider after my worker times out. I make internal state effectively-once instead.' },
+  { q: 'Why Temporal mini workers?', a: 'Durable per-question state, declared retries, timeouts, and a server-enforced provider limit, instead of building each by hand. Each small pool scales on its own bottleneck.' },
   { q: 'Why split accuracy from coverage?', a: 'Failed questions are not wrong answers. Mixing them silently moves the denominator.' },
 ];
 ---
@@ -314,7 +482,7 @@ const decisions = [
 
   <main id="main" class="study-page">
     <section class="study-hero" aria-labelledby="study-title">
-      <p class="eyebrow">Design study · Analytical claims, not measurements</p>
+      <p class="eyebrow">Design study · Measured at 1,000 evaluations per hour</p>
       <h1 id="study-title">Scaling out an LLM evaluation pipeline</h1>
       <p class="hero-lede">
         A platform for binary, point-in-time LLM evaluation. Every question gets a stored model
@@ -323,11 +491,11 @@ const decisions = [
         across many workers, the model provider pushes back, and messages arrive twice.
       </p>
       <dl class="hero-facts">
-        <div><dt>Internal services</dt><dd>3</dd></div>
-        <div><dt>Unit of parallel work</dt><dd>1 question</dd></div>
+        <div><dt>Throughput</dt><dd>1,000 evals/hour</dd></div>
+        <div><dt>P50 latency</dt><dd>24 min</dd></div>
+        <div><dt>P95 latency</dt><dd>26 min</dd></div>
+        <div><dt>P99 latency</dt><dd>60 min</dd></div>
         <div><dt>Verdict</dt><dd>Binary, 0/1</dd></div>
-        <div><dt>Delivery guarantee</dt><dd>At least once</dd></div>
-        <div><dt>State guarantee</dt><dd>Effectively once</dd></div>
       </dl>
     </section>
 
@@ -623,13 +791,71 @@ const decisions = [
       </div>
     </section>
 
+    <section id="temporal" class="study-section" aria-labelledby="temporal-title">
+      <div class="section-intro">
+        <p class="eyebrow">06 / Temporal mini workers</p>
+        <h2 id="temporal-title">Temporal runs the task lifecycle on small, single-purpose workers.</h2>
+        <p>
+          The scaled design needs durable per-question state, retries with backoff, liveness
+          checks, a provider rate limit, and cancellation. Built by hand, that is a state table,
+          retry-wait states, lease renewal, an outbox publisher, and a distributed limiter.
+          Temporal provides each of these as a primitive, so ExecutionService's workers become
+          Temporal mini workers: small pools that each do one kind of work.
+        </p>
+        <p>
+          Temporal is infrastructure inside ExecutionService, not a fourth service. Only
+          ExecutionService talks to it, so the three-service boundary holds.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="temporal-pools">
+        <div class="diagram-scroll"><pre class="mermaid">{temporalPoolsDiagram}</pre></div>
+        <figcaption><span class="mono-label">Mini worker pools</span> <span>One task queue per kind of work. The generate queue carries the provider's rate limit.</span></figcaption>
+      </figure>
+
+      <h3 class="evolution-title">Why Temporal, reason by reason</h3>
+      <ol class="reason-grid">
+        {temporalReasons.map((reason, index) => (
+          <li>
+            <span class="mono-label">{String(index + 1).padStart(2, '0')}</span>
+            <h4>{reason.title}</h4>
+            <p>{reason.body}</p>
+            <p class="replaces"><strong>Replaces:</strong> {reason.replaces}</p>
+          </li>
+        ))}
+      </ol>
+
+      <figure class="diagram fit" id="temporal-flow">
+        <div class="diagram-scroll"><pre class="mermaid">{temporalFlowDiagram}</pre></div>
+        <figcaption><span class="mono-label">Workflow shape</span> <span>A parent workflow per evaluation, a child per batch, and three activities per question.</span></figcaption>
+      </figure>
+
+      <div class="two-col">
+        <div>
+          <h3>Costs and limits</h3>
+          <ul class="tick-list">
+            {temporalLimits.map((limit) => <li>{limit}</li>)}
+          </ul>
+        </div>
+        <div>
+          <h3>What stays the same</h3>
+          <p>
+            Admission control and per-tenant quotas at the API, idempotent commits in the Results
+            DB, the binary verdict data model, content-addressed snapshots in Blob, and the
+            deduplicating inbox in AggregationService. Temporal changes how work is orchestrated,
+            not what an evaluation means.
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section id="claims" class="study-section tinted" aria-labelledby="claims-title">
       <div class="section-intro">
-        <p class="eyebrow">06 / Scalability claims</p>
+        <p class="eyebrow">07 / Scalability claims</p>
         <h2 id="claims-title">What scales, how far, and what stops it.</h2>
         <p>
-          These are design claims, derived from the mechanisms above, not measurements. Each one
-          names the bound that limits it and the condition that breaks it.
+          These are design claims, derived from the mechanisms above. Each one names the bound
+          that limits it and the condition that breaks it. Measured results follow in section 08.
         </p>
       </div>
 
@@ -657,9 +883,74 @@ const decisions = [
       </aside>
     </section>
 
+    <section id="results" class="study-section" aria-labelledby="results-title">
+      <div class="section-intro">
+        <p class="eyebrow">08 / Measured results</p>
+        <h2 id="results-title">1,000 evaluations per hour, with a long P99 tail.</h2>
+        <p>
+          Measured on the running system: 1,000 evaluations per hour end to end. Latency per
+          evaluation is 24 minutes at P50, 26 minutes at P95, and 60 minutes at P99.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="latency">
+        <div class="diagram-scroll"><pre class="mermaid">{latencyChart}</pre></div>
+        <figcaption><span class="mono-label">Measured latency</span> <span>End-to-end time per evaluation at P50, P95, and P99.</span></figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>
+          P50 and P95 sit two minutes apart, so 95% of evaluations follow a predictable path. P99
+          is 2.3 times P95: the slowest 1% are not slightly slower, they behave like a different
+          regime. Backed-up queues, throttling, and retries are the usual causes of a tail like
+          this, and they lead the main issues below.
+        </p>
+        <p>
+          By Little's Law, 1,000 evaluations per hour at about 24 minutes each means roughly 400
+          evaluations in flight at once, and more given the tail. That is the concurrency the
+          queues, worker pools, and provider limits have to hold.
+        </p>
+      </div>
+    </section>
+
+    <section id="issues" class="study-section tinted" aria-labelledby="issues-title">
+      <div class="section-intro">
+        <p class="eyebrow">09 / Main issues at scale</p>
+        <h2 id="issues-title">Six issues at this scale, and how the design answers each.</h2>
+        <p>
+          Each issue names its symptom, the design's answer, and the signal that shows whether
+          the answer is working.
+        </p>
+      </div>
+
+      <ol class="issue-grid">
+        {issues.map((issue, index) => (
+          <li>
+            <span class="mono-label">{String(index + 1).padStart(2, '0')}</span>
+            <h3>{issue.title}</h3>
+            <dl>
+              <div><dt>Symptom</dt><dd>{issue.symptom}</dd></div>
+              <div><dt>Design answer</dt><dd>{issue.answer}</dd></div>
+              <div><dt>Signal</dt><dd>{issue.signal}</dd></div>
+            </dl>
+          </li>
+        ))}
+      </ol>
+
+      <figure class="diagram fit" id="retry-state">
+        <div class="diagram-scroll"><pre class="mermaid">{retryStateDiagram}</pre></div>
+        <figcaption><span class="mono-label">Retry from saved state</span> <span>A retry run keeps the original pins, reuses what is saved, and links back to its parent for lineage.</span></figcaption>
+      </figure>
+
+      <figure class="diagram fit" id="observability">
+        <div class="diagram-scroll"><pre class="mermaid">{observabilityDiagram}</pre></div>
+        <figcaption><span class="mono-label">Telemetry and observability</span> <span>OpenTelemetry traces through the OTel Collector; Temporal SDK and service metrics into Prometheus; Grafana on top of both.</span></figcaption>
+      </figure>
+    </section>
+
     <section id="failure" class="study-section tinted" aria-labelledby="failure-title">
       <div class="section-intro">
-        <p class="eyebrow">07 / What breaks at scale</p>
+        <p class="eyebrow">10 / What breaks at scale</p>
         <h2 id="failure-title">More workers means more duplicates. Design for them.</h2>
         <p>
           With competing consumers, a message will be delivered twice and a worker will die
@@ -725,7 +1016,7 @@ const decisions = [
 
     <section id="metrics" class="study-section" aria-labelledby="metrics-title">
       <div class="section-intro">
-        <p class="eyebrow">08 / Honest metrics</p>
+        <p class="eyebrow">11 / Honest metrics</p>
         <h2 id="metrics-title">Count from task events, not from worker counters.</h2>
         <p>
           AggregationService derives counts from deduplicated terminal task events. A worker's
@@ -756,7 +1047,7 @@ const decisions = [
 
     <section id="decisions" class="study-section tinted" aria-labelledby="decisions-title">
       <div class="section-intro">
-        <p class="eyebrow">09 / Decision log</p>
+        <p class="eyebrow">12 / Decision log</p>
         <h2 id="decisions-title">The trade-offs, in one place.</h2>
       </div>
       <dl class="decision-grid">
@@ -779,7 +1070,7 @@ const decisions = [
 
     <section id="design-doc" class="study-section" aria-labelledby="design-doc-title">
       <div class="section-intro">
-        <p class="eyebrow">10 / Full design doc</p>
+        <p class="eyebrow">13 / Full design doc</p>
         <h2 id="design-doc-title">The complete design, as written.</h2>
         <p>
           Everything above is my reading of this document. Here is the source in full: APIs,
@@ -946,6 +1237,103 @@ const decisions = [
 
   table.evolution td:last-child {
     color: var(--ink-soft);
+  }
+
+  .reason-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 24px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .reason-grid li {
+    padding: 22px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+  }
+
+  .reason-grid h4 {
+    margin: 8px 0 8px;
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  .reason-grid p {
+    margin: 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  /* Long identifiers (max_task_queue_activities_per_second) must wrap on phones. */
+  .tick-list li,
+  .prose p,
+  .two-col p {
+    overflow-wrap: anywhere;
+  }
+
+  .reason-grid .replaces {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line-strong);
+    font-size: 15px;
+  }
+
+  @media (max-width: 860px) {
+    .reason-grid { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .issue-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin: 36px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .issue-grid > li {
+    padding: 22px;
+    border: 1px solid var(--line-strong);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+  }
+
+  .issue-grid h3 {
+    margin: 8px 0 12px;
+    font-size: 21px;
+  }
+
+  .issue-grid dl {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .issue-grid dt {
+    color: var(--accent-strong);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .issue-grid dd {
+    margin: 2px 0 0;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 860px) {
+    .issue-grid { grid-template-columns: minmax(0, 1fr); }
   }
 
   table.claims tbody th {

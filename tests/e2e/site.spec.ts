@@ -622,7 +622,8 @@ test('eval pipeline design study is linked from the method page and renders', as
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
   const chapterIds = [
-    'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'claims',
+    'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'temporal', 'claims',
+    'results', 'issues',
     'failure', 'metrics', 'decisions', 'design-doc',
   ];
   expect(await page.locator('main > section[id]').evaluateAll(
@@ -650,7 +651,30 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#eval-identity svg')).toContainText('verdict = 0 or 1');
   await expect(page.locator('#data-model svg')).toContainText('GRADING_RESULT');
   await expect(page.locator('#scale-plane svg')).toContainText('Distributed limiter');
-  await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(7);
+  await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(8);
+
+  // Temporal mini workers: both diagrams render, each reason names what it replaces.
+  for (const id of ['temporal-pools', 'temporal-flow']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#temporal-pools svg')).toContainText('Grade workers');
+  await expect(page.locator('#temporal-flow svg')).toContainText('BatchWorkflow');
+  await expect(page.locator('#temporal .reason-grid > li')).toHaveCount(7);
+  await expect(page.locator('#temporal .reason-grid .replaces')).toHaveCount(7);
+  await expect(page.locator('#temporal')).toContainText('51,200 events');
+
+  // Measured results and the main issues at that scale.
+  await expect(page.locator('.hero-facts')).toContainText('1,000 evals/hour');
+  for (const id of ['latency', 'retry-state', 'observability']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#results')).toContainText('24 minutes at P50, 26 minutes at P95, and 60 minutes at P99');
+  await expect(page.locator('#issues .issue-grid > li h3')).toHaveText([
+    'Backed-up queue', 'Throttling', 'Retry and lineage tracking',
+    'Retry from saved state', 'Analytics integration', 'Telemetry and observability',
+  ]);
+  await expect(page.locator('#observability svg')).toContainText('Prometheus');
+  await expect(page.locator('#retry-state svg')).toContainText('same pins');
   await expect(page.locator('#claims .sizing')).toContainText('500 × 5 / 20 = 125 seconds');
   await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
 
