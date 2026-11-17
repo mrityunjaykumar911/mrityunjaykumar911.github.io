@@ -621,7 +621,10 @@ test('eval pipeline design study is linked from the method page and renders', as
     /\/studies\/eval-pipeline\.html$/
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
-  const chapterIds = ['problem', 'first-sketch', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions', 'design-doc'];
+  const chapterIds = [
+    'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'claims',
+    'failure', 'metrics', 'decisions', 'design-doc',
+  ];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
@@ -640,13 +643,24 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
   await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
 
-  // The first whiteboard sketch: architecture and schema render, API and states match it.
+  // Study diagrams: point-in-time binary eval, scaled data model, scale-out plane.
+  for (const id of ['eval-identity', 'data-model', 'scale-plane']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#eval-identity svg')).toContainText('verdict = 0 or 1');
+  await expect(page.locator('#data-model svg')).toContainText('GRADING_RESULT');
+  await expect(page.locator('#scale-plane svg')).toContainText('Distributed limiter');
+  await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(7);
+  await expect(page.locator('#claims .sizing')).toContainText('500 × 5 / 20 = 125 seconds');
+  await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
+
+  // Baseline (v0): architecture and schema render, API and states match it.
   for (const id of ['sketch-1', 'sketch-2']) {
     await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
   }
   await expect(page.locator('#sketch-1 svg')).toContainText('LLMGeneration Pipeline');
   await expect(page.locator('#sketch-2 svg')).toContainText('ModelParameterJson');
-  const sketch = page.locator('#first-sketch');
+  const sketch = page.locator('#baseline');
   await expect(sketch).toContainText('ArtifactLink, GraderIID, ttl');
   await expect(sketch).toContainText('Job_UUID_1 (same ID)');
   await expect(sketch.locator('.state-lists dd').first().locator('code'))

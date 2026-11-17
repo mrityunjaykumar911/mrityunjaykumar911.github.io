@@ -18,8 +18,8 @@ if (mermaidSources.length !== 4) {
 }
 const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram] = mermaidSources;
 
-// The first whiteboard pass, redrawn as written. Labels and columns match the
-// sketch; ER column types are added only because Mermaid requires one.
+// Baseline (v0): one eval pipeline over one metadata table. ER column types
+// are illustrative; Mermaid requires one per column.
 const sketchArchitecture = `flowchart LR
     MATH((Math500)) --> ING[Ingestion Pipeline]
     ING -.-> BLOB[(Blob Storage)]
@@ -55,6 +55,119 @@ const sketchSchema = `erDiagram
         int RowID PK, FK
         json GraderOutput
     }`;
+
+// What one evaluation is: binary verdicts, pinned at a point in time.
+const evalIdentityDiagram = `flowchart LR
+    subgraph PIN["Pinned when the run is created"]
+        direction TB
+        DS[("Dataset snapshot<br/>content_hash")]
+        MC["Model config<br/>+ model_version"]
+        GR["grader_uuid<br/>→ grader_version"]
+    end
+    DS --> GEN["Generate answer<br/>per question"]
+    MC --> GEN
+    GEN --> ANS[("Stored answers<br/>generation_id")]
+    ANS --> GRD["Grade<br/>verdict = 0 or 1"]
+    GR --> GRD
+    GRD --> REP["Report at time t<br/>accuracy = Σ verdicts / graded<br/>coverage = graded / total"]
+    NG["New grader_version"] -.-> RG["Re-grade<br/>no LLM calls"]
+    ANS -.-> RG
+    RG -.-> REP2["New report at t′<br/>same answers"]`;
+
+// Scaled (v1) records in ExecutionService.
+const dataModelDiagram = `erDiagram
+    direction LR
+    EXECUTION ||--|{ TASK : "one per record"
+    TASK ||--|{ GENERATION_ATTEMPT : "retries add attempts"
+    GENERATION_ATTEMPT ||--o{ GRADING_RESULT : "one per grader version"
+    EXECUTION {
+        string execution_id PK
+        string dataset_content_hash
+        json model_config
+        string model_version
+        string grader_uuid
+        string grader_version
+    }
+    TASK {
+        string execution_id PK, FK
+        string record_id PK
+        string state
+    }
+    GENERATION_ATTEMPT {
+        string generation_id PK
+        string execution_id FK
+        string record_id FK
+        text answer
+    }
+    GRADING_RESULT {
+        string generation_id PK, FK
+        string grader_version PK
+        string grader_config_hash PK
+        int verdict "0 or 1"
+    }`;
+
+// Scale-out data plane for ExecutionService.
+const scalePlaneDiagram = `flowchart TB
+    C[Client] -->|"POST /v1/executions"| API[Execution API]
+    API -->|"admit, or 429 / 503"| Q[("Execution queue<br/>task = (execution_id, record_id)")]
+    Q --> W1 & W2 & WN
+    subgraph WORKERS["Execution workers × N: stateless, competing consumers"]
+        direction LR
+        W1["Worker 1<br/>generate → grade"]
+        W2["Worker 2<br/>generate → grade"]
+        WN["Worker N<br/>generate → grade"]
+    end
+    SIG(["Signals: queue depth, oldest age,<br/>latency, CPU, provider budget"]) -.-> AS[Autoscaler]
+    AS -.->|"scale N"| WORKERS
+    W1 & W2 & WN --> LIM{{"Distributed limiter<br/>global · per model · per tenant"}}
+    LIM --> LLM[External LLM API]
+    W1 & W2 & WN --> DB[("Results DB + outbox")]
+    DB -->|"task events"| AGG[AggregationService]`;
+
+const claims = [
+  {
+    claim: 'Generation throughput grows linearly with workers until the provider limit.',
+    mechanism: 'Per-question tasks on a shared queue. Workers are stateless and never coordinate with each other.',
+    bound: 'X ≤ min(N · c / W, R), for N workers, c calls each, W seconds per call, R provider rate.',
+    breaks: 'When R binds. More workers then only add 429s, so the limiter caps concurrency instead.',
+  },
+  {
+    claim: 'Ingestion cost does not grow with the number of evaluations.',
+    mechanism: 'Datasets are content-addressed snapshots. Equal content is stored once, and executions read Blob directly.',
+    bound: 'One fetch and parse per unique dataset content: O(dataset bytes).',
+    breaks: 'Only first-time content pays. Evaluations never touch ingestion.',
+  },
+  {
+    claim: 'Changing the grader costs no LLM calls.',
+    mechanism: 'Answers are stored apart from verdicts, and verdicts are keyed by grader version.',
+    bound: 'Re-grade cost = questions × grader CPU time.',
+    breaks: 'If the grader is itself an LLM judge, it needs its own provider budget and limiter.',
+  },
+  {
+    claim: 'A retry never duplicates a verdict.',
+    mechanism: 'Stable task identity, conditional state transitions, idempotent commits, and a deduplicating inbox.',
+    bound: 'LLM calls per question ≤ 1 + the generation retry limit. Grading retries add zero.',
+    breaks: 'A timed-out call may still be billed by the provider. That costs money, not correctness.',
+  },
+  {
+    claim: 'Aggregation cost per event is constant and independent of model latency.',
+    mechanism: 'Insert into the inbox by event_id, then update counters.',
+    bound: 'O(1) work per event and O(tasks) inbox rows per evaluation.',
+    breaks: 'One very large evaluation turns its counter row into a write hotspot. Mitigation: shard counters by task hash and sum on read.',
+  },
+  {
+    claim: 'A burst becomes waiting time, not errors, up to the admission limit.',
+    mechanism: 'Durable per-service queues plus admission control.',
+    bound: 'Backlog grows at λ − μ while arrivals exceed capacity. Outstanding work is capped per tenant.',
+    breaks: 'Sustained λ > μ. Then the answer is more safe capacity or 429/503, not a deeper queue.',
+  },
+  {
+    claim: "One tenant's large run cannot starve other tenants.",
+    mechanism: 'Per-tenant quotas, per-tenant concurrency limits, and fair scheduling.',
+    bound: "Each tenant's in-flight work ≤ its quota.",
+    breaks: 'If quotas add up to more than the provider limit, fairness still holds, but every tenant slows down.',
+  },
+];
 
 const sketchApis = [
   { call: 'Ingestion · POST', req: 'Headers {effort, ctx_len}; body data: binary', res: 'IID' },
@@ -122,9 +235,11 @@ const year = new Date().getFullYear();
 
 const chapters = [
   { id: 'problem', label: 'The problem' },
-  { id: 'first-sketch', label: 'First sketch' },
+  { id: 'evaluation', label: 'Binary eval' },
+  { id: 'baseline', label: 'Baseline v0' },
   { id: 'boundaries', label: 'Boundaries first' },
   { id: 'scale-out', label: 'Scaling out' },
+  { id: 'claims', label: 'Scalability claims' },
   { id: 'failure', label: 'What breaks at scale' },
   { id: 'metrics', label: 'Honest metrics' },
   { id: 'decisions', label: 'Decision log' },
@@ -199,17 +314,18 @@ const decisions = [
 
   <main id="main" class="study-page">
     <section class="study-hero" aria-labelledby="study-title">
-      <p class="eyebrow">Design study · Not a measured system</p>
+      <p class="eyebrow">Design study · Analytical claims, not measurements</p>
       <h1 id="study-title">Scaling out an LLM evaluation pipeline</h1>
       <p class="hero-lede">
-        Take a dataset like Math500, generate a model answer for every question, grade each
-        answer with a Python library, and report the result. The interesting part is not the
-        happy path. It is what happens when the work is spread across many workers, the model
-        provider pushes back, and messages arrive twice.
+        A platform for binary, point-in-time LLM evaluation. Every question gets a stored model
+        answer and a 0/1 verdict from a selected, pinned grader. Math500 is the sample dataset.
+        The happy path is easy. This study is about scale: what happens when the work spreads
+        across many workers, the model provider pushes back, and messages arrive twice.
       </p>
       <dl class="hero-facts">
         <div><dt>Internal services</dt><dd>3</dd></div>
         <div><dt>Unit of parallel work</dt><dd>1 question</dd></div>
+        <div><dt>Verdict</dt><dd>Binary, 0/1</dd></div>
         <div><dt>Delivery guarantee</dt><dd>At least once</dd></div>
         <div><dt>State guarantee</dt><dd>Effectively once</dd></div>
       </dl>
@@ -220,7 +336,7 @@ const decisions = [
         {chapters.map((chapter, index) => (
           <li>
             <a href={`#${chapter.id}`}>
-              <span aria-hidden="true">0{index + 1}</span>{chapter.label}
+              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{chapter.label}
             </a>
           </li>
         ))}
@@ -234,41 +350,87 @@ const decisions = [
       </div>
       <div class="prose">
         <p>
-          The platform accepts a dataset URL, produces an answer for each question with an
-          external LLM, grades each answer against the expected one, and aggregates metrics.
-          Every step can take minutes, and a single run can hold thousands of questions.
+          The platform takes a dataset of questions with reference answers, by URL. Math500 is the
+          sample; nothing in the design depends on it. For each question it generates an answer
+          with an external LLM, asks the selected grader for a binary verdict, and aggregates the
+          verdicts into a report. Every step can take minutes, and a run can hold thousands of
+          questions.
         </p>
         <p>
-          I set three goals before any design work. First, a run must be <strong>reproducible</strong>:
-          the same snapshot, model config, and grader version should mean the same experiment.
-          Second, throughput must <strong>scale out</strong> by adding workers, up to the limit that
-          the slowest external dependency allows. Third, the final report must be
+          Three goals come first. A result must be <strong>point-in-time</strong>: pinned to a
+          dataset snapshot, a model version, and a grader version, so it means the same thing
+          tomorrow. Throughput must <strong>scale out</strong> by adding workers, up to the limit
+          that the slowest external dependency allows. And the report must be
           <strong>honest</strong> under failure: retries and duplicates must not change the numbers.
         </p>
       </div>
     </section>
 
-    <section id="first-sketch" class="study-section tinted" aria-labelledby="first-sketch-title">
+    <section id="evaluation" class="study-section" aria-labelledby="evaluation-title">
       <div class="section-intro">
-        <p class="eyebrow">02 / First sketch</p>
-        <h2 id="first-sketch-title">Where I started: one pipeline, one table.</h2>
+        <p class="eyebrow">02 / Binary, point-in-time evaluation</p>
+        <h2 id="evaluation-title">One evaluation is a 0/1 verdict per question, pinned in time.</h2>
         <p>
-          The design began on a whiteboard. This is that first pass, redrawn as I wrote it. It
-          already had the parts that survived: a job ID, per-row state keyed by
-          <code>(JobUUID, RowID)</code>, and a requeue that keeps the job's identity. The table
-          at the end of this section shows what changed once the work had to spread across
-          many workers, and why.
+          The platform accepts any dataset of questions with reference answers. For each question
+          it stores the model's answer, and the selected grader returns a binary verdict: 1 if the
+          answer is correct, 0 if it is not.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="eval-identity">
+        <div class="diagram-scroll"><pre class="mermaid">{evalIdentityDiagram}</pre></div>
+        <figcaption><span class="mono-label">Point-in-time evaluation</span> <span>What is pinned, where the 0/1 verdict comes from, and the re-grade path.</span></figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>
+          A result is a measurement at a point in time with respect to the selected grader. Four
+          things are pinned when the run is created: the dataset snapshot by content hash, the
+          model config and model version, the <code>grader_uuid</code>, and the grader version it
+          resolves to. Two reports are comparable only when those pins match. Change any one of
+          them and it is a different evaluation.
+        </p>
+        <p>
+          Answers and verdicts are stored separately. A grading result is keyed by
+          <code>(generation_id, grader_version, grader_config_hash)</code>, so one stored answer can
+          carry verdicts from several graders. Re-grading a finished run with a new grader version
+          costs grader CPU and no LLM calls, and it produces a new point-in-time report over the
+          same answers.
+        </p>
+        <p>
+          Binary verdicts keep the arithmetic simple and honest:
+          <code>accuracy = Σ verdicts / graded</code> and <code>coverage = graded / total</code>. A
+          question that failed to generate has no verdict. It lowers coverage, not accuracy.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="data-model">
+        <div class="diagram-scroll"><pre class="mermaid">{dataModelDiagram}</pre></div>
+        <figcaption><span class="mono-label">Scaled data model</span> <span>ExecutionService records. One task per record, retries add attempts, and each attempt can hold one binary verdict per grader version.</span></figcaption>
+      </figure>
+    </section>
+
+    <section id="baseline" class="study-section tinted" aria-labelledby="baseline-title">
+      <div class="section-intro">
+        <p class="eyebrow">03 / Baseline v0</p>
+        <h2 id="baseline-title">Baseline (v0): one pipeline, one table.</h2>
+        <p>
+          The simplest design that runs an evaluation end to end puts generation and grading
+          inside one eval pipeline over one metadata table. It is the baseline this study scales
+          from. Three of its ideas survive into the scaled design: a job ID, per-row state keyed
+          by <code>(JobUUID, RowID)</code>, and a requeue that keeps the job's identity. The table
+          at the end shows what changes when the work spreads across many workers, and why.
         </p>
       </div>
 
       <figure class="diagram fit" id="sketch-1">
         <div class="diagram-scroll"><pre class="mermaid">{sketchArchitecture}</pre></div>
-        <figcaption><span class="mono-label">Sketch A</span> First-pass architecture: generation and grading as two pipelines inside one eval pipeline, sharing one metadata table.</figcaption>
+        <figcaption><span class="mono-label">Baseline v0 · architecture</span> <span>Generation and grading as two pipelines inside one eval pipeline, sharing one metadata table.</span></figcaption>
       </figure>
 
       <div class="two-col">
         <div>
-          <h3>API boundary, as drawn</h3>
+          <h3>API boundary (v0)</h3>
           <div class="table-wrap tight">
             <table>
               <thead><tr><th scope="col">Call</th><th scope="col">Request</th><th scope="col">Response</th></tr></thead>
@@ -281,7 +443,7 @@ const decisions = [
           </div>
         </div>
         <div>
-          <h3>State, as drawn</h3>
+          <h3>State (v0)</h3>
           <dl class="state-lists">
             <div>
               <dt>JobState <span>per job</span></dt>
@@ -293,7 +455,7 @@ const decisions = [
             </div>
           </dl>
           <p class="state-note">
-            Retry lived at the job level: <code>/Requeue</code> takes a <code>Job_UUID</code> and
+            Retry is at the job level: <code>/Requeue</code> takes a <code>Job_UUID</code> and
             returns the same one, so a retry never forks the job's identity.
           </p>
         </div>
@@ -301,13 +463,13 @@ const decisions = [
 
       <figure class="diagram fit" id="sketch-2">
         <div class="diagram-scroll"><pre class="mermaid">{sketchSchema}</pre></div>
-        <figcaption><span class="mono-label">Sketch B</span> <span>Schema as drawn. Rows flow through the grading pipeline into <code>(JobUUID, RowID, GraderOutput)</code>. Column names are from the whiteboard; types are added for the diagram.</span></figcaption>
+        <figcaption><span class="mono-label">Baseline v0 · schema</span> <span>Rows flow through grading into <code>(JobUUID, RowID, GraderOutput)</code>, where GraderOutput is the 0/1 verdict. Types are illustrative.</span></figcaption>
       </figure>
 
-      <h3 class="evolution-title">How the sketch became the design</h3>
+      <h3 class="evolution-title">From baseline to scaled design</h3>
       <div class="table-wrap">
         <table class="evolution">
-          <thead><tr><th scope="col">In the sketch</th><th scope="col">In the final design</th><th scope="col">Why</th></tr></thead>
+          <thead><tr><th scope="col">Baseline (v0)</th><th scope="col">Scaled design (v1)</th><th scope="col">Why</th></tr></thead>
           <tbody>
             {evolution.map((row) => (
               <tr><th scope="row">{row.sketch}</th><td>{row.final}</td><td>{row.why}</td></tr>
@@ -319,7 +481,7 @@ const decisions = [
 
     <section id="boundaries" class="study-section tinted" aria-labelledby="boundaries-title">
       <div class="section-intro">
-        <p class="eyebrow">03 / Boundaries first</p>
+        <p class="eyebrow">04 / Boundaries first</p>
         <h2 id="boundaries-title">Three services, each owning its API, queue, workers, and database.</h2>
         <p>
           Scale-out starts with ownership. A service can only scale on its own if nothing else
@@ -382,7 +544,7 @@ const decisions = [
 
     <section id="scale-out" class="study-section" aria-labelledby="scale-out-title">
       <div class="section-intro">
-        <p class="eyebrow">04 / Scaling out</p>
+        <p class="eyebrow">05 / Scaling out</p>
         <h2 id="scale-out-title">Find the real bottleneck, then scale against it.</h2>
         <p>
           The three services have very different load shapes. That is the main reason to keep
@@ -412,6 +574,11 @@ const decisions = [
           <p>Autoscale on queue depth, oldest message age, end-to-end latency, CPU, memory, and remaining provider budget together.</p>
         </li>
       </ol>
+
+      <figure class="diagram fit" id="scale-plane">
+        <div class="diagram-scroll"><pre class="mermaid">{scalePlaneDiagram}</pre></div>
+        <figcaption><span class="mono-label">Scale-out data plane</span> <span>Workers are stateless competing consumers. A shared limiter, not the worker count, sets the rate at the provider.</span></figcaption>
+      </figure>
 
       <div class="math-band">
         <article>
@@ -456,9 +623,43 @@ const decisions = [
       </div>
     </section>
 
+    <section id="claims" class="study-section tinted" aria-labelledby="claims-title">
+      <div class="section-intro">
+        <p class="eyebrow">06 / Scalability claims</p>
+        <h2 id="claims-title">What scales, how far, and what stops it.</h2>
+        <p>
+          These are design claims, derived from the mechanisms above, not measurements. Each one
+          names the bound that limits it and the condition that breaks it.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="claims">
+          <thead><tr><th scope="col">Claim</th><th scope="col">Mechanism</th><th scope="col">Bound</th><th scope="col">Breaks when</th></tr></thead>
+          <tbody>
+            {claims.map((row) => (
+              <tr><th scope="row">{row.claim}</th><td>{row.mechanism}</td><td>{row.bound}</td><td>{row.breaks}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <aside class="sizing" aria-label="Worked sizing example">
+        <p class="mono-label">Worked sizing: Math500 against one provider</p>
+        <h3>The ceiling is the provider, not the worker count.</h3>
+        <p>
+          Assume 5 seconds per generation and 20 concurrent calls per run. One 500-question run
+          needs about 500 × 5 / 20 = 125 seconds of generation. Ten runs at once hold
+          10 × 20 = 200 calls in flight, which by Little's Law is 40 calls per second. If the
+          provider allows 100 calls in flight, five such runs is the ceiling, however many workers
+          are added. So the platform's job at scale is to queue fairly and never exceed that limit.
+        </p>
+      </aside>
+    </section>
+
     <section id="failure" class="study-section tinted" aria-labelledby="failure-title">
       <div class="section-intro">
-        <p class="eyebrow">05 / What breaks at scale</p>
+        <p class="eyebrow">07 / What breaks at scale</p>
         <h2 id="failure-title">More workers means more duplicates. Design for them.</h2>
         <p>
           With competing consumers, a message will be delivered twice and a worker will die
@@ -524,7 +725,7 @@ const decisions = [
 
     <section id="metrics" class="study-section" aria-labelledby="metrics-title">
       <div class="section-intro">
-        <p class="eyebrow">06 / Honest metrics</p>
+        <p class="eyebrow">08 / Honest metrics</p>
         <h2 id="metrics-title">Count from task events, not from worker counters.</h2>
         <p>
           AggregationService derives counts from deduplicated terminal task events. A worker's
@@ -555,7 +756,7 @@ const decisions = [
 
     <section id="decisions" class="study-section tinted" aria-labelledby="decisions-title">
       <div class="section-intro">
-        <p class="eyebrow">07 / Decision log</p>
+        <p class="eyebrow">09 / Decision log</p>
         <h2 id="decisions-title">The trade-offs, in one place.</h2>
       </div>
       <dl class="decision-grid">
@@ -578,7 +779,7 @@ const decisions = [
 
     <section id="design-doc" class="study-section" aria-labelledby="design-doc-title">
       <div class="section-intro">
-        <p class="eyebrow">08 / Full design doc</p>
+        <p class="eyebrow">10 / Full design doc</p>
         <h2 id="design-doc-title">The complete design, as written.</h2>
         <p>
           Everything above is my reading of this document. Here is the source in full: APIs,
@@ -747,6 +948,40 @@ const decisions = [
     color: var(--ink-soft);
   }
 
+  table.claims tbody th {
+    width: 24%;
+    white-space: normal;
+    font-weight: 650;
+  }
+
+  table.claims td:nth-child(4) {
+    color: var(--ink-soft);
+  }
+
+  .sizing {
+    margin-top: 40px;
+    padding: 26px 28px;
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: #e9ece9;
+  }
+
+  .sizing .mono-label {
+    color: var(--accent-on-dark);
+  }
+
+  .sizing h3 {
+    margin: 12px 0 10px;
+    color: #fff;
+    font-size: 26px;
+  }
+
+  .sizing p:not(.mono-label) {
+    max-width: 80ch;
+    margin: 0;
+    line-height: 1.65;
+  }
+
   .design-doc {
     max-width: 82ch;
     margin-top: 40px;
@@ -900,7 +1135,7 @@ const decisions = [
 
   .hero-facts {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0;
     margin: 40px 0 0;
     border-top: 1px solid var(--line-strong);
