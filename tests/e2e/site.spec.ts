@@ -9,7 +9,7 @@ const previewOnlyMarkers = [
 ];
 
 test('published content does not use em dashes', async ({ page, request }) => {
-  for (const path of ['/', '/latest.html', '/method.html']) {
+  for (const path of ['/', '/latest.html', '/method.html', '/studies/eval-pipeline.html']) {
     await page.goto(path);
     expect(await page.locator('body').innerText(), path).not.toContain('—');
   }
@@ -605,4 +605,36 @@ test('method page presents staff-level ML systems judgment with bounded research
   }
   await chapters.getByRole('link', { name: 'How I think', exact: true }).click();
   await expect(page).toHaveURL(/#judgment$/);
+});
+
+test('eval pipeline design study is linked from the method page and renders', async ({ page, request }) => {
+  await page.goto('/method.html');
+  const studyLink = page.locator('#scale').getByRole('link', { name: /Scaling out an LLM evaluation pipeline/ });
+  await expect(studyLink).toHaveAttribute('href', '/studies/eval-pipeline.html');
+  await studyLink.click();
+
+  await expect(page).toHaveTitle('Design Study: Scaling Out an LLM Evaluation Pipeline | Mrityunjay Kumar');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    /\/studies\/eval-pipeline\.html$/
+  );
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
+  const chapterIds = ['problem', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions'];
+  expect(await page.locator('main > section[id]').evaluateAll(
+    (sections) => sections.map((section) => section.id)
+  )).toEqual(chapterIds);
+  await expect(page.locator('.arch-services > li')).toHaveCount(3);
+  await expect(page.locator('#failure tbody tr')).toHaveCount(5);
+  await expect(page.locator('#metrics')).toContainText('graded + failed + cancelled = total');
+
+  const sitemapIndex = await request.get('/sitemap-index.xml');
+  const sitemapLocation = (await sitemapIndex.text()).match(/<loc>([^<]+)<\/loc>/)?.[1];
+  expect(sitemapLocation).toBeTruthy();
+  const sitemap = await request.get(new URL(sitemapLocation!).pathname);
+  expect(await sitemap.text()).toContain('/studies/eval-pipeline.html');
+
+  for (const width of [1440, 1024, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth), `${width}px`).toBe(width);
+  }
 });

@@ -1,0 +1,703 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import { withBase } from '../../lib/url';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/source-sans-3';
+
+const homeHref = withBase('/');
+const methodHref = withBase('/method.html');
+const year = new Date().getFullYear();
+
+const chapters = [
+  { id: 'problem', label: 'The problem' },
+  { id: 'boundaries', label: 'Boundaries first' },
+  { id: 'scale-out', label: 'Scaling out' },
+  { id: 'failure', label: 'What breaks at scale' },
+  { id: 'metrics', label: 'Honest metrics' },
+  { id: 'decisions', label: 'Decision log' },
+];
+
+const services = [
+  {
+    name: 'IngestionService',
+    role: 'Turns a dataset URL into an immutable snapshot.',
+    owns: ['REST API', 'Ingestion queue', 'Ingestion workers', 'Metadata DB'],
+    load: 'Bursty, network bound. Scales with fetch and parse throughput.',
+  },
+  {
+    name: 'ExecutionService',
+    role: 'Generates an answer per question, then grades it.',
+    owns: ['REST API', 'Execution queue', 'Execution workers', 'Results DB + outbox'],
+    load: 'The hot path. Bound by LLM provider limits and grader CPU.',
+  },
+  {
+    name: 'AggregationService',
+    role: 'Turns task events into progress and a final report.',
+    owns: ['REST API', 'Aggregation queue', 'Aggregation workers', 'Inbox + counters DB'],
+    load: 'Cheap per event. Scales with event rate, not with model latency.',
+  },
+];
+
+const externals = [
+  { name: 'Dataset source URL', note: 'Untrusted input. Fetched once, behind SSRF checks.' },
+  { name: 'Azure Blob Storage', note: 'Managed storage, not a service. Holds content-addressed snapshots.' },
+  { name: 'External LLM API', note: 'Called directly by execution workers. The real bottleneck.' },
+  { name: 'Python grading library', note: 'Runs inside the worker process. Not a network hop.' },
+];
+
+const idempotency = [
+  { layer: 'API request', key: '(tenant_id, idempotency_key)', guards: 'A client retrying the same create call.' },
+  { layer: 'Dataset content', key: '(tenant, normalized_hash, schema_version)', guards: 'Two ingestions of the same bytes.' },
+  { layer: 'Task', key: '(execution_id, record_id)', guards: 'A queue delivering the same task twice.' },
+  { layer: 'Grading result', key: '(generation_id, grader_version, config_hash)', guards: 'Re-grading the same stored answer.' },
+  { layer: 'Event', key: 'event_id', guards: 'The outbox re-sending an event after a lost ack.' },
+];
+
+const decisions = [
+  { q: 'Why async APIs?', a: 'Downloads, model calls, and grading take minutes. Return 202 and expose durable status instead of holding connections open.' },
+  { q: 'Why snapshot datasets?', a: 'A URL can serve different bytes tomorrow. A content-addressed snapshot makes every evaluation reproducible.' },
+  { q: 'Why let execution read Blob directly?', a: 'Large payloads should not be proxied through ingestion. It keeps ingestion off the hot path and lets each side scale alone.' },
+  { q: 'Why keep model config out of ingestion?', a: 'A dataset is reusable across models and graders. Ingestion should not know about either.' },
+  { q: 'Why a grader UUID, not code?', a: 'The platform owns the mapping from ID to an approved, versioned artifact. Callers never supply executable code.' },
+  { q: 'Why an outbox, not a direct call?', a: 'The network can fail after the result is committed. Outbox plus inbox gives retryable delivery with deduplication.' },
+  { q: 'Why not promise exactly-once?', a: 'An LLM call can succeed on the provider after my worker times out. I make internal state effectively-once instead.' },
+  { q: 'Why split accuracy from coverage?', a: 'Failed questions are not wrong answers. Mixing them silently moves the denominator.' },
+];
+---
+
+<Base
+  title="Design Study: Scaling Out an LLM Evaluation Pipeline | Mrityunjay Kumar"
+  description="How Mrityunjay Kumar reasoned about service boundaries, scale-out, backpressure, and idempotency in a distributed LLM evaluation pipeline."
+  canonicalPath="/studies/eval-pipeline.html"
+>
+  <header class="study-header" id="top">
+    <a class="study-wordmark" href={homeHref} aria-label="Return to portfolio">
+      <span class="wordmark-mark">MK</span>
+      <span>
+        <strong>Mrityunjay Kumar</strong>
+        <small>Design study · Scale-out architecture</small>
+      </span>
+    </a>
+    <a class="back-link" href={methodHref}>
+      Method <Icon name="arrow-up-right" size={15} />
+    </a>
+  </header>
+
+  <main id="main" class="study-page">
+    <section class="study-hero" aria-labelledby="study-title">
+      <p class="eyebrow">Design study · Not a measured system</p>
+      <h1 id="study-title">Scaling out an LLM evaluation pipeline</h1>
+      <p class="hero-lede">
+        Take a dataset like Math500, generate a model answer for every question, grade each
+        answer with a Python library, and report the result. The interesting part is not the
+        happy path. It is what happens when the work is spread across many workers, the model
+        provider pushes back, and messages arrive twice.
+      </p>
+      <dl class="hero-facts">
+        <div><dt>Internal services</dt><dd>3</dd></div>
+        <div><dt>Unit of parallel work</dt><dd>1 question</dd></div>
+        <div><dt>Delivery guarantee</dt><dd>At least once</dd></div>
+        <div><dt>State guarantee</dt><dd>Effectively once</dd></div>
+      </dl>
+    </section>
+
+    <nav class="study-nav" aria-label="Study chapters">
+      <ol>
+        {chapters.map((chapter, index) => (
+          <li>
+            <a href={`#${chapter.id}`}>
+              <span aria-hidden="true">0{index + 1}</span>{chapter.label}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+
+    <section id="problem" class="study-section" aria-labelledby="problem-title">
+      <div class="section-intro">
+        <p class="eyebrow">01 / The problem</p>
+        <h2 id="problem-title">State the goal before drawing boxes.</h2>
+      </div>
+      <div class="prose">
+        <p>
+          The platform accepts a dataset URL, produces an answer for each question with an
+          external LLM, grades each answer against the expected one, and aggregates metrics.
+          Every step can take minutes, and a single run can hold thousands of questions.
+        </p>
+        <p>
+          I set three goals before any design work. First, a run must be <strong>reproducible</strong>:
+          the same snapshot, model config, and grader version should mean the same experiment.
+          Second, throughput must <strong>scale out</strong> by adding workers, up to the limit that
+          the slowest external dependency allows. Third, the final report must be
+          <strong>honest</strong> under failure: retries and duplicates must not change the numbers.
+        </p>
+      </div>
+    </section>
+
+    <section id="boundaries" class="study-section tinted" aria-labelledby="boundaries-title">
+      <div class="section-intro">
+        <p class="eyebrow">02 / Boundaries first</p>
+        <h2 id="boundaries-title">Three services, each owning its API, queue, workers, and database.</h2>
+        <p>
+          Scale-out starts with ownership. A service can only scale on its own if nothing else
+          reads its database or its queue. Services talk only through APIs.
+        </p>
+      </div>
+
+      <figure class="arch" aria-label="Three-service architecture with external dependencies">
+        <ol class="arch-services">
+          {services.map((service, index) => (
+            <li>
+              <p class="mono-label">Step {index + 1}</p>
+              <h3>{service.name}</h3>
+              <p>{service.role}</p>
+              <ul>{service.owns.map((item) => <li>{item}</li>)}</ul>
+              <p class="arch-load">{service.load}</p>
+            </li>
+          ))}
+        </ol>
+        <div class="arch-external">
+          <p class="mono-label">External, not services</p>
+          <ul>
+            {externals.map((item) => (
+              <li><strong>{item.name}</strong><span>{item.note}</span></li>
+            ))}
+          </ul>
+        </div>
+        <figcaption>
+          The client ingests a dataset, waits for <code>READY</code>, then submits the dataset
+          reference with a grader UUID and model config to ExecutionService. Execution events
+          reach AggregationService through a retrying outbox. The client reads the report there.
+        </figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>
+          The hardest calls were about what is <em>not</em> a service. The LLM API is an external
+          provider. Blob Storage is managed infrastructure, not a fourth microservice. The grader
+          is a library that runs inside the execution worker, so grading costs CPU, not a network
+          round trip. Keeping these out of the service count kept the design small and made the
+          real bottleneck obvious.
+        </p>
+        <p>
+          Ingestion also never sees the model config or the grader UUID. A dataset is reusable
+          across many models and graders, so those are execution concerns.
+        </p>
+      </div>
+    </section>
+
+    <section id="scale-out" class="study-section" aria-labelledby="scale-out-title">
+      <div class="section-intro">
+        <p class="eyebrow">03 / Scaling out</p>
+        <h2 id="scale-out-title">Find the real bottleneck, then scale against it.</h2>
+        <p>
+          The three services have very different load shapes. That is the main reason to keep
+          them separate: each one scales on its own signal.
+        </p>
+      </div>
+
+      <ol class="reasoning-chain" aria-label="Scale-out reasoning">
+        <li>
+          <span>Partition</span>
+          <p>The unit of work is one question. Task identity is <code>(execution_id, record_id)</code>, so any worker can pick up any task.</p>
+        </li>
+        <li>
+          <span>Bypass</span>
+          <p>Execution workers read dataset chunks straight from Blob. Large bytes never pass through ingestion, so ingestion stays off the hot path.</p>
+        </li>
+        <li>
+          <span>Bottleneck</span>
+          <p>Execution is bound by the LLM provider and grader CPU, not by worker count. More workers past that point only create 429s.</p>
+        </li>
+        <li>
+          <span>Limit</span>
+          <p>Apply distributed concurrency limits at global, per-model, and per-tenant levels. Respect the provider's <code>Retry-After</code>.</p>
+        </li>
+        <li>
+          <span>Signal</span>
+          <p>Autoscale on queue depth, oldest message age, end-to-end latency, CPU, memory, and remaining provider budget together.</p>
+        </li>
+      </ol>
+
+      <div class="math-band">
+        <article>
+          <p class="mono-label">A queue is not capacity</p>
+          <h3>1,000 in, 200 out, per minute.</h3>
+          <p>
+            Backlog grows by 800 tasks every minute. After five minutes, about 4,000 tasks are
+            waiting, and it never recovers. A queue absorbs bursts. It does not fix sustained
+            overload. Only admission control or more <em>safe</em> capacity does.
+          </p>
+        </article>
+        <article>
+          <p class="mono-label">Little's Law</p>
+          <h3>L = λ × W</h3>
+          <p>
+            At 100 tasks per second and 5 seconds in the system, about 500 tasks are in flight.
+            That sizes the concurrency I need to hold. It says nothing about what the provider
+            will actually allow, so I check both numbers.
+          </p>
+        </article>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <h3>Admission control</h3>
+          <ul class="tick-list">
+            <li>Cap outstanding jobs globally, per tenant, and per evaluation, by count and by estimated cost.</li>
+            <li>Return <code>429</code> for a tenant quota. Return <code>503</code> with <code>Retry-After</code> for service-wide overload.</li>
+            <li>Never return <code>202</code> until the job and its enqueue intent are durable.</li>
+            <li>Use fair scheduling so one large evaluation cannot starve small tenants.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Queue choice</h3>
+          <p>
+            This is task distribution, not stream processing. A Service Bus or SQS style queue
+            gives me leases, delayed retries, dead-letter queues, and competing consumers out of
+            the box. Kafka earns its cost when ordered replay and high-throughput streams are core
+            requirements. Here they are not.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="failure" class="study-section tinted" aria-labelledby="failure-title">
+      <div class="section-intro">
+        <p class="eyebrow">04 / What breaks at scale</p>
+        <h2 id="failure-title">More workers means more duplicates. Design for them.</h2>
+        <p>
+          With competing consumers, a message will be delivered twice and a worker will die
+          mid-task. "Idempotent" is not one property here. It is five, and each one guards a
+          different failure.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Layer</th><th scope="col">Key</th><th scope="col">Guards against</th></tr></thead>
+          <tbody>
+            {idempotency.map((row) => (
+              <tr><th scope="row">{row.layer}</th><td><code>{row.key}</code></td><td>{row.guards}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <h3>Persist the answer before grading</h3>
+          <p>
+            Each task moves through <code>PENDING → GENERATING → ANSWER_PERSISTED → GRADING → GRADED</code>,
+            with retry-wait states on both the generation and grading steps. The generated answer
+            is stored before grading starts. If the grader fails, the retry resumes at grading
+            against the stored answer. It never pays for a second LLM call, and it never grades a
+            different, nondeterministic answer.
+          </p>
+        </div>
+        <div>
+          <h3>Outbox in, inbox out</h3>
+          <p>
+            The worker commits the task result and an outbox event in one transaction. A publisher
+            calls AggregationService and retries with backoff until accepted. AggregationService
+            inserts into an inbox keyed by <code>event_id</code>, so a duplicate is acknowledged
+            and dropped. That is at-least-once delivery with idempotent processing.
+          </p>
+        </div>
+      </div>
+
+      <aside class="definition-band" aria-label="Exactly-once caveat">
+        <p class="mono-label">The caveat I state up front</p>
+        <p>
+          I do not promise exactly-once LLM calls. The provider may finish a request after my
+          worker times out. I record every attempt, use provider idempotency keys where they
+          exist, and make commits idempotent. The goal is effectively-once business state, not
+          exactly-once side effects.
+        </p>
+      </aside>
+    </section>
+
+    <section id="metrics" class="study-section" aria-labelledby="metrics-title">
+      <div class="section-intro">
+        <p class="eyebrow">05 / Honest metrics</p>
+        <h2 id="metrics-title">Count from task events, not from worker counters.</h2>
+        <p>
+          AggregationService derives counts from deduplicated terminal task events. A worker's
+          cumulative counter can be repeated or arrive out of order. A task event cannot be
+          counted twice.
+        </p>
+      </div>
+      <dl class="formula-grid">
+        <div><dt>accuracy</dt><dd>correct / graded</dd></div>
+        <div><dt>coverage</dt><dd>graded / total</dd></div>
+        <div><dt>terminal invariant</dt><dd>graded + failed + cancelled = total</dd></div>
+      </dl>
+      <div class="prose">
+        <p>
+          A failed question is not a wrong answer. If it were counted as wrong, a provider
+          outage would look like a model regression. Reporting coverage next to accuracy keeps
+          the two visible. The run finalizes only when every task is terminal, or when the
+          cancellation policy says it is.
+        </p>
+        <p>
+          I also keep a reproducibility fingerprint over snapshot hash, model config and version,
+          grader UUID and version, and execution config. It is <em>not</em> an idempotency key.
+          Running the same config twice on purpose is a valid experiment. Only the API
+          idempotency key identifies a retried request.
+        </p>
+      </div>
+    </section>
+
+    <section id="decisions" class="study-section tinted" aria-labelledby="decisions-title">
+      <div class="section-intro">
+        <p class="eyebrow">06 / Decision log</p>
+        <h2 id="decisions-title">The trade-offs, in one place.</h2>
+      </div>
+      <dl class="decision-grid">
+        {decisions.map((item) => (
+          <div><dt>{item.q}</dt><dd>{item.a}</dd></div>
+        ))}
+      </dl>
+
+      <div class="staff-lesson">
+        <p class="eyebrow">What I would carry to the next design</p>
+        <h3>Scale-out is mostly a boundary and correctness problem, not a worker-count problem.</h3>
+        <p>
+          Adding workers is the easy part. The design work is deciding who owns which state,
+          finding the dependency that actually limits throughput, and making every retry safe.
+          Out of scope on purpose: a server-side orchestration service. The client can chain
+          ingest and execute; I would add an orchestrator only if the problem required it.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <SiteFooter name="Mrityunjay Kumar" year={year} />
+</Base>
+
+<style>
+  .study-page {
+    --display: 'Bricolage Grotesque Variable', sans-serif;
+    --sans: 'Source Sans 3 Variable', sans-serif;
+    font-family: var(--sans);
+    font-size: 17px;
+    letter-spacing: 0;
+  }
+
+  .study-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 68px;
+    padding: 0 var(--gutter);
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(18px) saturate(1.25);
+  }
+
+  .study-wordmark,
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .study-wordmark { gap: 11px; }
+  .study-wordmark > span:last-child { display: grid; line-height: 1.15; }
+  .study-wordmark strong { font-family: 'Bricolage Grotesque Variable', sans-serif; font-size: 15px; font-weight: 650; }
+  .study-wordmark small { margin-top: 3px; color: var(--ink-faint); font-size: 13px; }
+
+  .wordmark-mark {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .back-link { gap: 7px; color: var(--ink-soft); font-size: 14px; font-weight: 550; }
+
+  .study-hero,
+  .study-section,
+  .study-nav {
+    padding-inline: var(--gutter);
+  }
+
+  .study-hero {
+    padding-top: clamp(48px, 7vw, 96px);
+    padding-bottom: clamp(40px, 5vw, 64px);
+    background: #f4f6f3;
+  }
+
+  .eyebrow,
+  .mono-label {
+    margin: 0;
+    color: var(--accent-strong);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--display);
+    letter-spacing: 0;
+    color: var(--ink);
+  }
+
+  h1 {
+    max-width: 18ch;
+    margin: 18px 0 0;
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 650;
+    line-height: 1.02;
+  }
+
+  .hero-lede {
+    max-width: 62ch;
+    margin: 24px 0 0;
+    color: var(--ink-soft);
+    font-size: clamp(18px, 1.6vw, 20px);
+    line-height: 1.55;
+  }
+
+  .hero-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    margin: 40px 0 0;
+    border-top: 1px solid var(--line-strong);
+  }
+
+  .hero-facts div { padding: 16px 16px 0 0; }
+  .hero-facts dt { color: var(--ink-faint); font-size: 13px; }
+  .hero-facts dd { margin: 6px 0 0; font-family: var(--display); font-size: 24px; font-weight: 650; }
+
+  .study-nav {
+    position: sticky;
+    top: 68px;
+    z-index: 10;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+  }
+
+  .study-nav ol {
+    display: flex;
+    gap: 24px;
+    margin: 0;
+    padding: 14px 0;
+    list-style: none;
+    white-space: nowrap;
+  }
+
+  .study-nav a {
+    display: inline-flex;
+    gap: 8px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .study-nav a span { color: var(--accent-strong); font-family: var(--mono); font-size: 11px; }
+  .study-nav a:hover { color: var(--ink); }
+
+  .study-section {
+    padding-top: clamp(56px, 7vw, 96px);
+    padding-bottom: clamp(56px, 7vw, 96px);
+    scroll-margin-top: 120px;
+  }
+
+  .tinted { background: var(--panel); }
+
+  .section-intro { max-width: 760px; }
+  .section-intro h2 {
+    margin: 14px 0 0;
+    font-size: clamp(30px, 3.4vw, 40px);
+    font-weight: 650;
+    line-height: 1.1;
+  }
+  .section-intro > p:not(.eyebrow) { margin: 18px 0 0; color: var(--ink-soft); line-height: 1.6; }
+
+  .prose { max-width: 72ch; margin-top: 28px; }
+  .prose p { margin: 0 0 16px; line-height: 1.65; color: var(--ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    padding: 1px 5px;
+    border-radius: 5px;
+    background: var(--accent-tint);
+    overflow-wrap: anywhere;
+  }
+
+  .arch { margin: 40px 0 0; }
+
+  .arch-services {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .arch-services > li {
+    padding: 22px;
+    border: 1px solid var(--line-strong);
+    border-top: 3px solid var(--ink);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+  }
+
+  .arch-services h3 { margin: 10px 0 6px; font-size: 21px; }
+  .arch-services > li > p { margin: 0; color: var(--ink-soft); line-height: 1.5; }
+  .arch-services ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; padding: 0; list-style: none; }
+  .arch-services ul li { padding: 3px 9px; border-radius: 999px; background: var(--panel-2); font-size: 13px; }
+  .arch-services .arch-load { padding-top: 12px; border-top: 1px dashed var(--line-strong); font-size: 15px; }
+
+  .arch-external {
+    margin-top: 16px;
+    padding: 20px 22px;
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-sm);
+  }
+
+  .arch-external ul {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .arch-external li { display: grid; gap: 4px; }
+  .arch-external strong { font-size: 15px; }
+  .arch-external span { color: var(--ink-soft); font-size: 14px; line-height: 1.45; }
+
+  .arch figcaption { max-width: 80ch; margin-top: 16px; color: var(--ink-soft); font-size: 15px; line-height: 1.55; }
+
+  .reasoning-chain {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    margin: 40px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 3px solid var(--ink);
+  }
+
+  .reasoning-chain li { padding: 18px 18px 0 0; }
+  .reasoning-chain span { font-family: var(--display); font-size: 20px; font-weight: 650; }
+  .reasoning-chain p { margin: 8px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
+
+  .math-band {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  .math-band article {
+    padding: 26px;
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: #e9ece9;
+  }
+
+  .math-band .mono-label { color: var(--accent-on-dark); }
+  .math-band h3 { margin: 12px 0 10px; color: #fff; font-size: 28px; }
+  .math-band p:not(.mono-label) { margin: 0; line-height: 1.6; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(32px, 5vw, 72px);
+    margin-top: 48px;
+  }
+
+  .two-col h3 { margin: 0 0 12px; font-size: 22px; }
+  .two-col p { margin: 0; line-height: 1.65; }
+
+  .tick-list { margin: 0; padding-left: 18px; }
+  .tick-list li { margin-bottom: 10px; line-height: 1.55; }
+
+  .table-wrap { margin-top: 36px; overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--paper); }
+  th, td { padding: 12px 14px; border-bottom: 1px solid var(--line-strong); text-align: left; vertical-align: top; }
+  thead th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
+  tbody th { font-weight: 650; white-space: nowrap; }
+
+  .definition-band {
+    margin-top: 48px;
+    padding: 24px 28px;
+    border-left: 4px solid var(--accent);
+    background: var(--paper);
+  }
+
+  .definition-band p:not(.mono-label) { margin: 10px 0 0; max-width: 80ch; font-size: 18px; line-height: 1.6; }
+
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 36px 0 0;
+  }
+
+  .formula-grid div { padding: 20px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
+  .formula-grid dt { color: var(--accent-strong); font-family: var(--mono); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  .formula-grid dd { margin: 8px 0 0; font-family: var(--mono); font-size: 16px; }
+
+  .decision-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 clamp(32px, 5vw, 72px);
+    margin: 36px 0 0;
+  }
+
+  .decision-grid div { padding: 18px 0; border-top: 1px solid var(--line-strong); }
+  .decision-grid dt { font-family: var(--display); font-size: 19px; font-weight: 650; }
+  .decision-grid dd { margin: 6px 0 0; color: var(--ink-soft); line-height: 1.55; }
+
+  .staff-lesson {
+    margin-top: 56px;
+    padding-top: 36px;
+    border-top: 3px solid var(--ink);
+  }
+
+  .staff-lesson h3 { max-width: 30ch; margin: 14px 0 14px; font-size: clamp(26px, 3vw, 34px); line-height: 1.15; }
+  .staff-lesson p:not(.eyebrow) { max-width: 72ch; margin: 0; color: var(--ink-soft); line-height: 1.65; }
+
+  @media (max-width: 1024px) {
+    .reasoning-chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .arch-external ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 860px) {
+    .arch-services,
+    .math-band,
+    .two-col,
+    .formula-grid,
+    .decision-grid { grid-template-columns: minmax(0, 1fr); }
+    .hero-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 560px) {
+    .reasoning-chain,
+    .arch-external ul { grid-template-columns: minmax(0, 1fr); }
+    tbody th { white-space: normal; }
+  }
+</style>

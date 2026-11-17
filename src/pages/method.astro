@@ -8,6 +8,7 @@ import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/source-sans-3';
 
 const homeHref = withBase('/');
+const evalStudyHref = withBase('/studies/eval-pipeline.html');
 const year = new Date().getFullYear();
 const chapters = [
   { id: 'mandate', label: 'What I care about' },
@@ -172,6 +173,12 @@ const chapters = [
           for the organization to act on them.
         </p>
       </div>
+
+      <a class="design-study-link" href={evalStudyHref}>
+        <span class="mono-label">Design study</span>
+        <strong>Scaling out an LLM evaluation pipeline</strong>
+        <Icon name="arrow-up-right" size={16} />
+      </a>
     </section>
 
     <MethodCaseStudies />
@@ -679,6 +686,24 @@ const chapters = [
   .staff-leverage > p {
     color: var(--ink-soft);
     font-size: var(--method-body-size);
+  }
+
+  .design-study-link {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 40px;
+    padding: 14px 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font-size: var(--method-body-size);
+    text-decoration: none;
+  }
+
+  .design-study-link:hover {
+    border-color: var(--ink);
   }
 
   @media (min-width: 1800px) {
