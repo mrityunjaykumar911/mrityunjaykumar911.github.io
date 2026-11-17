@@ -46,6 +46,10 @@ export default defineConfig({
   base,
   output: isDevelopmentServer ? 'server' : 'static',
   trailingSlash: 'ignore',
+  // Astro 7 defaults to 'jsx' whitespace rules, which delete line breaks next to
+  // inline elements ("Present·Mountain View", "must behonest"). `true` keeps the
+  // lossless compression Astro 5 used, so multi-line prose renders as written.
+  compressHTML: true,
   integrations: [
     sitemap({
       // Error and plain-text utility routes are not search destinations.
