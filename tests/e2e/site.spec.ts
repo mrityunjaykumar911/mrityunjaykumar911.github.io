@@ -621,7 +621,11 @@ test('eval pipeline design study is linked from the method page and renders', as
     /\/studies\/eval-pipeline\.html$/
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
-  const chapterIds = ['problem', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions', 'design-doc'];
+  const chapterIds = [
+    'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'temporal', 'claims',
+    'results', 'issues',
+    'failure', 'metrics', 'decisions', 'design-doc',
+  ];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
@@ -639,6 +643,55 @@ test('eval pipeline design study is linked from the method page and renders', as
   )).toBe(0);
   await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
   await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
+
+  // Study diagrams: point-in-time binary eval, scaled data model, scale-out plane.
+  for (const id of ['eval-identity', 'data-model', 'scale-plane']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#eval-identity svg')).toContainText('verdict = 0 or 1');
+  await expect(page.locator('#data-model svg')).toContainText('GRADING_RESULT');
+  await expect(page.locator('#scale-plane svg')).toContainText('Distributed limiter');
+  await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(8);
+
+  // Temporal mini workers: both diagrams render, each reason names what it replaces.
+  for (const id of ['temporal-pools', 'temporal-flow']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#temporal-pools svg')).toContainText('Grade workers');
+  await expect(page.locator('#temporal-flow svg')).toContainText('BatchWorkflow');
+  await expect(page.locator('#temporal .reason-grid > li')).toHaveCount(7);
+  await expect(page.locator('#temporal .reason-grid .replaces')).toHaveCount(7);
+  await expect(page.locator('#temporal')).toContainText('51,200 events');
+
+  // Measured results and the main issues at that scale.
+  await expect(page.locator('.hero-facts')).toContainText('1,000 evals/hour');
+  for (const id of ['latency', 'retry-state', 'observability']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#results')).toContainText('24 minutes at P50, 26 minutes at P95, and 60 minutes at P99');
+  await expect(page.locator('#issues .issue-grid > li h3')).toHaveText([
+    'Backed-up queue', 'Throttling', 'Retry and lineage tracking',
+    'Retry from saved state', 'Analytics integration', 'Telemetry and observability',
+  ]);
+  await expect(page.locator('#observability svg')).toContainText('Prometheus');
+  await expect(page.locator('#retry-state svg')).toContainText('same pins');
+  await expect(page.locator('#claims .sizing')).toContainText('500 × 5 / 20 = 125 seconds');
+  await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
+
+  // Baseline (v0): architecture and schema render, API and states match it.
+  for (const id of ['sketch-1', 'sketch-2']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#sketch-1 svg')).toContainText('LLMGeneration Pipeline');
+  await expect(page.locator('#sketch-2 svg')).toContainText('ModelParameterJson');
+  const sketch = page.locator('#baseline');
+  await expect(sketch).toContainText('ArtifactLink, GraderIID, ttl');
+  await expect(sketch).toContainText('Job_UUID_1 (same ID)');
+  await expect(sketch.locator('.state-lists dd').first().locator('code'))
+    .toHaveText(['Enqueue', 'InProcess', 'Cancelled', 'Finished']);
+  await expect(sketch.locator('.state-lists dd').nth(1).locator('code'))
+    .toHaveText(['NotProcessed', 'InProgress', 'Finished']);
+  await expect(sketch.locator('table.evolution tbody tr')).toHaveCount(10);
 
   // The appendix carries the full doc and points its diagrams at those figures.
   const designDoc = page.locator('#design-doc .design-doc');

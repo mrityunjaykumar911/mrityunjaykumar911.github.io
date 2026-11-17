@@ -485,7 +485,7 @@ Little's Law: `L = λ × W`. At 100 tasks/second and a mean in-system time of 5 
 
 Keep ownership strict: each service is the only writer/reader of its own database. Other services obtain information through documented APIs or immutable external blob references with explicit authorization.
 
-## 8. Key interview trade-offs and decisions
+## 8. Key trade-offs and decisions
 
 1. **Why async APIs?** Dataset downloads, model calls, and grading can take minutes. Return `202 Accepted` and expose durable status APIs rather than holding client connections open.
 2. **Why snapshot datasets?** A URL can change. An immutable content-addressed snapshot ensures an evaluation is reproducible.
@@ -496,7 +496,7 @@ Keep ownership strict: each service is the only writer/reader of its own databas
 7. **Why not claim exactly-once?** External LLM calls have ambiguous outcomes after timeouts. Persist attempts and idempotently commit internal state instead.
 8. **Why report accuracy and coverage separately?** Failed or unprocessed questions should not silently distort the accuracy denominator.
 
-## 9. Scope boundaries to state explicitly in the interview
+## 9. Scope boundaries
 
 - Only three internal services: IngestionService, ExecutionService, AggregationService.
 - LLM generation endpoint is an external provider API, called by ExecutionService workers.
