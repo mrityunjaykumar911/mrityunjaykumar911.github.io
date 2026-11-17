@@ -18,12 +18,111 @@ if (mermaidSources.length !== 4) {
 }
 const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram] = mermaidSources;
 
+// The first whiteboard pass, redrawn as written. Labels and columns match the
+// sketch; ER column types are added only because Mermaid requires one.
+const sketchArchitecture = `flowchart LR
+    MATH((Math500)) --> ING[Ingestion Pipeline]
+    ING -.-> BLOB[(Blob Storage)]
+    ING --> EVAL
+    subgraph EVAL[Eval Pipeline]
+        direction LR
+        GEN[LLMGeneration Pipeline] ~~~ GRADE[Grading Pipeline]
+    end
+    EVAL --> LLM[LLM API]
+    EVAL --> META[(Metadata Table)]`;
+
+const sketchSchema = `erDiagram
+    direction LR
+    JOB ||--o{ EVAL_ROW : "has rows"
+    EVAL_ROW ||--o| GRADER_OUTPUT : "graded into"
+    JOB {
+        uuid JobUUID PK
+        string DatasetUri
+        enum JobState
+    }
+    EVAL_ROW {
+        uuid JobUUID PK, FK
+        int RowID PK
+        enum EvalState
+        text InputQuestion
+        text RefOutput
+        text LLMOutput
+        string GraderIID
+        json ModelParameterJson
+    }
+    GRADER_OUTPUT {
+        uuid JobUUID PK, FK
+        int RowID PK, FK
+        json GraderOutput
+    }`;
+
+const sketchApis = [
+  { call: 'Ingestion · POST', req: 'Headers {effort, ctx_len}; body data: binary', res: 'IID' },
+  { call: 'Eval · POST', req: 'ArtifactLink, GraderIID, ttl', res: 'Job_UUID' },
+  { call: 'Eval · POST /Requeue', req: 'Job_UUID_1', res: 'Job_UUID_1 (same ID)' },
+  { call: 'Eval · GET /status', req: 'Job_UUID', res: 'Job status' },
+];
+
+const evolution = [
+  {
+    sketch: 'effort and ctx_len headers on the ingestion request',
+    final: 'No model settings in ingestion. model_config travels with the execution request.',
+    why: 'A dataset is reusable across many models and graders.',
+  },
+  {
+    sketch: 'Upload data: binary, get back an IID',
+    final: 'Submit a dataset URL, get an ingestion_id, then a READY reference with dataset_id and content hash.',
+    why: 'A content-addressed snapshot makes every run reproducible, even if the URL later serves different bytes.',
+  },
+  {
+    sketch: 'ArtifactLink and GraderIID in the eval request',
+    final: 'A validated dataset reference and a grader_uuid resolved through a platform registry to a pinned version.',
+    why: 'Callers never make workers fetch arbitrary URIs or run arbitrary code.',
+  },
+  {
+    sketch: 'POST returns Job_UUID',
+    final: 'POST returns execution_id, with an Idempotency-Key header.',
+    why: 'A retried create returns the same execution instead of starting a second one.',
+  },
+  {
+    sketch: '/Requeue returns the same Job_UUID',
+    final: 'POST /executions/{id}/retry under an explicit policy, on stable task identity (execution_id, record_id).',
+    why: 'Retry keeps identity, so a duplicate delivery cannot create a duplicate result.',
+  },
+  {
+    sketch: 'ttl on the eval request',
+    final: 'Not carried over. Explicit POST /cancel plus admission control.',
+    why: 'Stopping work is a cooperative state change, checked between generation and grading.',
+  },
+  {
+    sketch: 'EvalState: NotProcessed, InProgress, Finished',
+    final: 'Task lifecycle with ANSWER_PERSISTED, two retry-wait states, and FAILED (Figure 3).',
+    why: 'The answer is stored before grading, so a grading retry never calls the LLM again. Failure is a state, not a missing row.',
+  },
+  {
+    sketch: 'JobState: Enqueue, InProcess, Cancelled, Finished',
+    final: 'Execution status plus terminal accounting: graded + failed + cancelled = total.',
+    why: 'A run can finish with some rows failed. That has to be visible, not hidden inside "Finished".',
+  },
+  {
+    sketch: 'One Metadata Table holding LLMOutput, GraderIID, and ModelParameterJson on every row',
+    final: 'Each service owns its database. GenerationAttempt and GradingResult are separate records; model config is stored once per execution.',
+    why: 'Model calls are nondeterministic, so attempts are kept separately, and a grading result is keyed by (generation_id, grader_version, config_hash).',
+  },
+  {
+    sketch: 'GET /status read from the same table',
+    final: 'A separate AggregationService counting deduplicated task events, with accuracy and coverage reported separately.',
+    why: 'Counting from events survives duplicates and out-of-order delivery.',
+  },
+];
+
 const homeHref = withBase('/');
 const methodHref = withBase('/method.html');
 const year = new Date().getFullYear();
 
 const chapters = [
   { id: 'problem', label: 'The problem' },
+  { id: 'first-sketch', label: 'First sketch' },
   { id: 'boundaries', label: 'Boundaries first' },
   { id: 'scale-out', label: 'Scaling out' },
   { id: 'failure', label: 'What breaks at scale' },
@@ -149,9 +248,78 @@ const decisions = [
       </div>
     </section>
 
+    <section id="first-sketch" class="study-section tinted" aria-labelledby="first-sketch-title">
+      <div class="section-intro">
+        <p class="eyebrow">02 / First sketch</p>
+        <h2 id="first-sketch-title">Where I started: one pipeline, one table.</h2>
+        <p>
+          The design began on a whiteboard. This is that first pass, redrawn as I wrote it. It
+          already had the parts that survived: a job ID, per-row state keyed by
+          <code>(JobUUID, RowID)</code>, and a requeue that keeps the job's identity. The table
+          at the end of this section shows what changed once the work had to spread across
+          many workers, and why.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="sketch-1">
+        <div class="diagram-scroll"><pre class="mermaid">{sketchArchitecture}</pre></div>
+        <figcaption><span class="mono-label">Sketch A</span> First-pass architecture: generation and grading as two pipelines inside one eval pipeline, sharing one metadata table.</figcaption>
+      </figure>
+
+      <div class="two-col">
+        <div>
+          <h3>API boundary, as drawn</h3>
+          <div class="table-wrap tight">
+            <table>
+              <thead><tr><th scope="col">Call</th><th scope="col">Request</th><th scope="col">Response</th></tr></thead>
+              <tbody>
+                {sketchApis.map((api) => (
+                  <tr><th scope="row">{api.call}</th><td>{api.req}</td><td><code>{api.res}</code></td></tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>State, as drawn</h3>
+          <dl class="state-lists">
+            <div>
+              <dt>JobState <span>per job</span></dt>
+              <dd><code>Enqueue</code><code>InProcess</code><code>Cancelled</code><code>Finished</code></dd>
+            </div>
+            <div>
+              <dt>EvalState <span>per row</span></dt>
+              <dd><code>NotProcessed</code><code>InProgress</code><code>Finished</code></dd>
+            </div>
+          </dl>
+          <p class="state-note">
+            Retry lived at the job level: <code>/Requeue</code> takes a <code>Job_UUID</code> and
+            returns the same one, so a retry never forks the job's identity.
+          </p>
+        </div>
+      </div>
+
+      <figure class="diagram fit" id="sketch-2">
+        <div class="diagram-scroll"><pre class="mermaid">{sketchSchema}</pre></div>
+        <figcaption><span class="mono-label">Sketch B</span> <span>Schema as drawn. Rows flow through the grading pipeline into <code>(JobUUID, RowID, GraderOutput)</code>. Column names are from the whiteboard; types are added for the diagram.</span></figcaption>
+      </figure>
+
+      <h3 class="evolution-title">How the sketch became the design</h3>
+      <div class="table-wrap">
+        <table class="evolution">
+          <thead><tr><th scope="col">In the sketch</th><th scope="col">In the final design</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            {evolution.map((row) => (
+              <tr><th scope="row">{row.sketch}</th><td>{row.final}</td><td>{row.why}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <section id="boundaries" class="study-section tinted" aria-labelledby="boundaries-title">
       <div class="section-intro">
-        <p class="eyebrow">02 / Boundaries first</p>
+        <p class="eyebrow">03 / Boundaries first</p>
         <h2 id="boundaries-title">Three services, each owning its API, queue, workers, and database.</h2>
         <p>
           Scale-out starts with ownership. A service can only scale on its own if nothing else
@@ -214,7 +382,7 @@ const decisions = [
 
     <section id="scale-out" class="study-section" aria-labelledby="scale-out-title">
       <div class="section-intro">
-        <p class="eyebrow">03 / Scaling out</p>
+        <p class="eyebrow">04 / Scaling out</p>
         <h2 id="scale-out-title">Find the real bottleneck, then scale against it.</h2>
         <p>
           The three services have very different load shapes. That is the main reason to keep
@@ -290,7 +458,7 @@ const decisions = [
 
     <section id="failure" class="study-section tinted" aria-labelledby="failure-title">
       <div class="section-intro">
-        <p class="eyebrow">04 / What breaks at scale</p>
+        <p class="eyebrow">05 / What breaks at scale</p>
         <h2 id="failure-title">More workers means more duplicates. Design for them.</h2>
         <p>
           With competing consumers, a message will be delivered twice and a worker will die
@@ -356,7 +524,7 @@ const decisions = [
 
     <section id="metrics" class="study-section" aria-labelledby="metrics-title">
       <div class="section-intro">
-        <p class="eyebrow">05 / Honest metrics</p>
+        <p class="eyebrow">06 / Honest metrics</p>
         <h2 id="metrics-title">Count from task events, not from worker counters.</h2>
         <p>
           AggregationService derives counts from deduplicated terminal task events. A worker's
@@ -387,7 +555,7 @@ const decisions = [
 
     <section id="decisions" class="study-section tinted" aria-labelledby="decisions-title">
       <div class="section-intro">
-        <p class="eyebrow">06 / Decision log</p>
+        <p class="eyebrow">07 / Decision log</p>
         <h2 id="decisions-title">The trade-offs, in one place.</h2>
       </div>
       <dl class="decision-grid">
@@ -410,7 +578,7 @@ const decisions = [
 
     <section id="design-doc" class="study-section" aria-labelledby="design-doc-title">
       <div class="section-intro">
-        <p class="eyebrow">07 / Full design doc</p>
+        <p class="eyebrow">08 / Full design doc</p>
         <h2 id="design-doc-title">The complete design, as written.</h2>
         <p>
           Everything above is my reading of this document. Here is the source in full: APIs,
@@ -441,6 +609,7 @@ const decisions = [
     flowchart: { useMaxWidth: false },
     sequence: { useMaxWidth: false, wrap: true, width: 140, actorMargin: 40 },
     state: { useMaxWidth: false },
+    er: { useMaxWidth: false },
   });
 
   // Flag figures that still overflow their frame so the caption can say so.
@@ -490,8 +659,9 @@ const decisions = [
       min-width: 0;
     }
 
+    /* Shrink wide diagrams to the column; never enlarge small ones. */
     .diagram.fit pre.mermaid :global(svg) {
-      width: 100%;
+      max-width: 100%;
     }
   }
 
@@ -517,6 +687,64 @@ const decisions = [
   .two-col a,
   .design-doc :global(a) {
     color: var(--accent-strong);
+  }
+
+  .table-wrap.tight {
+    margin-top: 0;
+  }
+
+  .table-wrap.tight th,
+  .table-wrap.tight td {
+    padding: 10px 12px;
+  }
+
+  .state-lists {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+  }
+
+  .state-lists dt {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 650;
+  }
+
+  .state-lists dt span {
+    margin-left: 6px;
+    color: var(--ink-faint);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .state-lists dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 0;
+  }
+
+  .state-note {
+    margin: 18px 0 0;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  .evolution-title {
+    margin: 56px 0 0;
+    font-size: 24px;
+  }
+
+  table.evolution tbody th {
+    width: 28%;
+    white-space: normal;
+    font-weight: 600;
+  }
+
+  table.evolution td:last-child {
+    color: var(--ink-soft);
   }
 
   .design-doc {

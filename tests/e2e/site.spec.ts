@@ -621,7 +621,7 @@ test('eval pipeline design study is linked from the method page and renders', as
     /\/studies\/eval-pipeline\.html$/
   );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Scaling out an LLM evaluation pipeline');
-  const chapterIds = ['problem', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions', 'design-doc'];
+  const chapterIds = ['problem', 'first-sketch', 'boundaries', 'scale-out', 'failure', 'metrics', 'decisions', 'design-doc'];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
@@ -639,6 +639,21 @@ test('eval pipeline design study is linked from the method page and renders', as
   )).toBe(0);
   await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
   await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
+
+  // The first whiteboard sketch: architecture and schema render, API and states match it.
+  for (const id of ['sketch-1', 'sketch-2']) {
+    await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
+  }
+  await expect(page.locator('#sketch-1 svg')).toContainText('LLMGeneration Pipeline');
+  await expect(page.locator('#sketch-2 svg')).toContainText('ModelParameterJson');
+  const sketch = page.locator('#first-sketch');
+  await expect(sketch).toContainText('ArtifactLink, GraderIID, ttl');
+  await expect(sketch).toContainText('Job_UUID_1 (same ID)');
+  await expect(sketch.locator('.state-lists dd').first().locator('code'))
+    .toHaveText(['Enqueue', 'InProcess', 'Cancelled', 'Finished']);
+  await expect(sketch.locator('.state-lists dd').nth(1).locator('code'))
+    .toHaveText(['NotProcessed', 'InProgress', 'Finished']);
+  await expect(sketch.locator('table.evolution tbody tr')).toHaveCount(10);
 
   // The appendix carries the full doc and points its diagrams at those figures.
   const designDoc = page.locator('#design-doc .design-doc');
