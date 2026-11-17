@@ -624,18 +624,20 @@ test('eval pipeline design study is linked from the method page and renders', as
   const chapterIds = [
     'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'temporal', 'claims',
     'results', 'issues',
-    'failure', 'metrics', 'decisions', 'design-doc',
+    'failure', 'metrics', 'validity', 'alignment', 'decisions', 'design-doc',
   ];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
   await expect(page.locator('.arch-services > li')).toHaveCount(3);
   await expect(page.locator('#failure tbody tr')).toHaveCount(5);
-  await expect(page.locator('#metrics')).toContainText('graded + failed + cancelled = total');
+  // Formulas are typeset by KaTeX at build time; the TeX source travels in the MathML annotation.
+  await expect(page.locator('#metrics .formula-grid .katex')).toHaveCount(3);
+  await expect(page.locator('#metrics annotation').last()).toHaveText(/\\text\{graded\} \+ \\text\{failed\} \+ \\text\{cancelled\} = \\text\{total\}/);
 
-  // All four design-doc diagrams render natively through Mermaid, without parse errors.
+  // All five design-doc diagrams render natively through Mermaid, without parse errors.
   await expect(page.locator('html')).toHaveAttribute('data-mermaid', 'rendered', { timeout: 30_000 });
-  for (const n of [1, 2, 3, 4]) {
+  for (const n of [1, 2, 3, 4, 5]) {
     await expect(page.locator(`#figure-${n} pre.mermaid svg`)).toHaveCount(1);
   }
   expect(await page.locator('pre.mermaid').evaluateAll(
@@ -643,6 +645,8 @@ test('eval pipeline design study is linked from the method page and renders', as
   )).toBe(0);
   await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
   await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
+  await expect(page.locator('#figure-3 svg')).toContainText('ESCALATED');
+  await expect(page.locator('#figure-5 svg')).toContainText('Grader validation report');
 
   // Study diagrams: point-in-time binary eval, scaled data model, scale-out plane.
   for (const id of ['eval-identity', 'data-model', 'scale-plane']) {
@@ -675,7 +679,7 @@ test('eval pipeline design study is linked from the method page and renders', as
   ]);
   await expect(page.locator('#observability svg')).toContainText('Prometheus');
   await expect(page.locator('#retry-state svg')).toContainText('same pins');
-  await expect(page.locator('#claims .sizing')).toContainText('500 × 5 / 20 = 125 seconds');
+  await expect(page.locator('#claims .sizing annotation').first()).toHaveText('500 \\times 5 / 20 = 125');
   await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
 
   // Baseline (v0): architecture and schema render, API and states match it.
@@ -696,7 +700,33 @@ test('eval pipeline design study is linked from the method page and renders', as
   // The appendix carries the full doc and points its diagrams at those figures.
   const designDoc = page.locator('#design-doc .design-doc');
   await expect(designDoc).toContainText('Grader UUID safety');
-  await expect(designDoc.locator('.doc-figure-ref a')).toHaveText(['Figure 1', 'Figure 2', 'Figure 3', 'Figure 4']);
+  await expect(designDoc.locator('.doc-figure-ref a')).toHaveText(['Figure 1', 'Figure 2', 'Figure 3', 'Figure 4', 'Figure 5']);
+  await expect(designDoc).toContainText('Evidence: a public judge against expert labels');
+  expect(await designDoc.locator('.katex').count()).toBeGreaterThan(100);
+
+  // Measurement validity and judge alignment: formulas, chart, and tables built from the analysis JSON.
+  await expect(page.locator('#validity .formula-cards > li .katex-display')).toHaveCount(5);
+  await expect(page.locator('#alignment .agreement-svg')).toHaveCount(2);
+  await expect(page.locator('#alignment .agreement-svg .bar')).toHaveCount(24);
+  await expect(page.locator('#alignment .chart-data tbody tr')).toHaveCount(8);
+  await expect(page.locator('#alignment .finding-list > li')).toHaveCount(3);
+  await expect(page.locator('#alignment table.alignment-table').last().locator('tbody tr')).toHaveCount(4);
+  await expect(page.locator('#alignment')).toContainText('Rater equivalence');
+
+  // Math is typeset, never written in Unicode or left as raw TeX.
+  await expect(page.locator('.katex-error')).toHaveCount(0);
+  const looseMath = await page.locator('main').evaluate((main) => {
+    const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    const hits: string[] = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const el = node.parentElement;
+      if (!el || el.closest('.katex, pre.mermaid, svg, code, script, style')) continue;
+      const text = node.textContent ?? '';
+      if (/[≤≥±×−√ΣλμθκτΔ]|\$[^$\s][^$]*\$/.test(text)) hits.push(text.trim().slice(0, 80));
+    }
+    return hits;
+  });
+  expect(looseMath).toEqual([]);
   await expect(designDoc.locator('pre.mermaid, code.language-mermaid')).toHaveCount(0);
 
   const sitemapIndex = await request.get('/sitemap-index.xml');

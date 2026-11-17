@@ -2,6 +2,8 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import yaml from '@rollup/plugin-yaml';
 import { loadEnv } from 'vite';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 /**
  * In design-study markdown under src/data/studies/, replace each ```mermaid
@@ -61,7 +63,10 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    remarkPlugins: [remarkStudyFigureRefs],
+    // Math in markdown ($...$ inline, $$...$$ display) is rendered by KaTeX at
+    // build time: no math JavaScript ships and no request leaves the site.
+    remarkPlugins: [remarkMath, remarkStudyFigureRefs],
+    rehypePlugins: [[rehypeKatex, { throwOnError: true, output: 'htmlAndMathml' }]],
   },
   build: {
     // Emit /404.html rather than /404/index.html — GitHub Pages only serves
