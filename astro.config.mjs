@@ -3,6 +3,32 @@ import sitemap from '@astrojs/sitemap';
 import yaml from '@rollup/plugin-yaml';
 import { loadEnv } from 'vite';
 
+/**
+ * In design-study markdown under src/data/studies/, replace each ```mermaid
+ * block with a link to the figure the page renders natively from the same
+ * source. Keeps the full doc readable without rendering any diagram twice.
+ */
+function remarkStudyFigureRefs() {
+  return (tree, file) => {
+    const filePath = String(file?.path ?? file?.history?.[0] ?? '').replaceAll('\\', '/');
+    if (!filePath.includes('/src/data/studies/')) return;
+    let figure = 0;
+    tree.children = tree.children.map((node) => {
+      if (node.type !== 'code' || node.lang !== 'mermaid') return node;
+      figure += 1;
+      return {
+        type: 'paragraph',
+        data: { hProperties: { className: ['doc-figure-ref'] } },
+        children: [
+          { type: 'text', value: 'Diagram: rendered above as ' },
+          { type: 'link', url: `#figure-${figure}`, children: [{ type: 'text', value: `Figure ${figure}` }] },
+          { type: 'text', value: '.' },
+        ],
+      };
+    });
+  };
+}
+
 const isDevelopmentServer = process.argv.includes('dev');
 const mode = isDevelopmentServer ? 'development' : 'production';
 const env = loadEnv(mode, process.cwd(), '');
@@ -34,6 +60,9 @@ export default defineConfig({
       }),
     }),
   ],
+  markdown: {
+    remarkPlugins: [remarkStudyFigureRefs],
+  },
   build: {
     // Emit /404.html rather than /404/index.html — GitHub Pages only serves
     // a custom 404 from the former.

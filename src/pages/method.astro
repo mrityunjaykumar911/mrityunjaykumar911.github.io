@@ -175,9 +175,13 @@ const chapters = [
       </div>
 
       <a class="design-study-link" href={evalStudyHref}>
-        <span class="mono-label">Design study</span>
+        <span class="mono-label">Worked example · Design study</span>
         <strong>Scaling out an LLM evaluation pipeline</strong>
-        <Icon name="arrow-up-right" size={16} />
+        <span class="design-study-desc">
+          How I drew the service boundaries, scaled against the real bottleneck, and kept every
+          retry safe. Includes the full design doc and its diagrams.
+        </span>
+        <span class="design-study-cta">Read the study <Icon name="arrow-up-right" size={16} /></span>
       </a>
     </section>
 
@@ -689,21 +693,67 @@ const chapters = [
   }
 
   .design-study-link {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 14px;
-    margin-top: 40px;
-    padding: 14px 18px;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-sm);
-    color: var(--ink);
-    font-size: var(--method-body-size);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 32px;
+    align-items: end;
+    margin-top: 48px;
+    padding: clamp(24px, 3vw, 36px);
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: #fff;
     text-decoration: none;
   }
 
-  .design-study-link:hover {
-    border-color: var(--ink);
+  .design-study-link .mono-label {
+    grid-column: 1 / -1;
+    color: var(--accent-on-dark);
+  }
+
+  .design-study-link strong {
+    grid-column: 1;
+    font-family: var(--display);
+    font-size: var(--method-study-title-size);
+    font-weight: 650;
+    line-height: 1.15;
+  }
+
+  .design-study-desc {
+    grid-column: 1;
+    max-width: 62ch;
+    color: #c9cec9;
+    font-size: var(--method-body-size);
+  }
+
+  .design-study-cta {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--ink);
+    font-weight: 650;
+    white-space: nowrap;
+  }
+
+  .design-study-link:hover .design-study-cta,
+  .design-study-link:focus-visible .design-study-cta {
+    background: var(--accent-on-dark);
+  }
+
+  @media (max-width: 720px) {
+    .design-study-link {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .design-study-cta {
+      grid-column: 1;
+      grid-row: auto;
+      justify-self: start;
+    }
   }
 
   @media (min-width: 1800px) {
