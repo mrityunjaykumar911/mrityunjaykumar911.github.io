@@ -14,10 +14,12 @@ on:
 permissions:
   contents: read
 
-# Allow one in-progress deploy to finish rather than cancelling it.
+# One run per PR (a new push cancels the old run) and one queue for master.
+# The shared "pages" group lives on the deploy job only, so pull request test
+# runs never wait behind, or get cancelled by, each other or a deploy.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -86,6 +88,10 @@ jobs:
     # Deploy only from master, including manual workflow_dispatch runs.
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    # Allow one in-progress deploy to finish rather than cancelling it.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       pages: write
       id-token: write
