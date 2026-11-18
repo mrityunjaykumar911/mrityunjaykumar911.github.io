@@ -21,7 +21,7 @@ test('published content does not use em dashes', async ({ page, request }) => {
 test('published page stays generic and exposes complete metadata', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page).toHaveTitle('Mrityunjay Kumar | Senior ML Engineer');
+  await expect(page).toHaveTitle('Mrityunjay Kumar | Member of Technical Staff');
   const thesis = 'I build distributed infrastructure that makes LLM agents reliable in production';
   await expect(page.getByRole('heading', { level: 1 })).toContainText(thesis);
   await expect(page.getByText(thesis, { exact: false })).toHaveCount(1);
@@ -272,7 +272,7 @@ test('experience and research read as an evidence system', async ({ page }) => {
   const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
   await expect(microsoftRole.getByText('Accomplishments', { exact: true })).toBeVisible();
   await expect(microsoftRole.locator('.experience-head .company')).toHaveText('Microsoft');
-  await expect(microsoftRole.locator('.experience-head .role')).toHaveText('Senior ML Engineer');
+  await expect(microsoftRole.locator('.experience-head .role')).toHaveText('Member of Technical Staff');
   await expect(microsoftRole.locator('.experience-head .org')).toContainText(
     'May 2022 to Present · Mountain View, CA'
   );
@@ -373,7 +373,7 @@ test('crawler resources expose professional context without contact PII', async 
     '## Core Expertise', '## Research, Publications, and Intellectual Property', '## Education']) {
     expect(markdown).toContain(heading);
   }
-  expect(markdown).toContain('### Senior ML Engineer - Microsoft');
+  expect(markdown).toContain('### Member of Technical Staff - Microsoft');
   expect(markdown).toContain('### Member of Technical Staff III - VMware');
   expect(markdown).toContain('[Engineering method](https://mrityunjaykumar911.github.io/method.html)');
   expect(markdown).not.toMatch(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i);
@@ -674,8 +674,14 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#temporal .reason-grid .replaces')).toHaveCount(7);
   await expect(page.locator('#temporal')).toContainText('51,200 events');
 
-  // Measured results and the main issues at that scale.
+  // Sizing estimate and the main issues at that scale. The throughput and latency figures
+  // are estimates from environment math and must never be presented as measured.
   await expect(page.locator('.hero-facts')).toContainText('1,000 evals/hour');
+  await expect(page.locator('.hero-facts')).toContainText('Est. P99 latency');
+  await expect(page.locator('#results')).toContainText('estimates from environment math, not measurements from a run');
+  await expect(page.locator('main')).not.toContainText(/Measured on the running system|Measured at 1,000|Measured results|Measured latency/);
+  await expect(page.locator('#results .status-split')).toContainText('Exists today');
+  await expect(page.locator('#results .status-split')).toContainText('Prometheus metrics and Grafana dashboards');
   for (const id of ['latency', 'retry-state', 'observability']) {
     await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
   }
@@ -688,11 +694,12 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#retry-state svg')).toContainText('same pins');
   await expect(page.locator('#claims .sizing annotation').first()).toHaveText('100 / 5 = 20');
 
-  // Workload model: measured values are labeled, derived values are typeset, and the
+  // Workload model: estimates are labeled, derived values are typeset, and the
   // first screen states problem, architecture, workload, and trade-offs.
   await expect(page.locator('.glance > div')).toHaveCount(4);
   await expect(page.locator('#results table.workload-table tbody tr')).toHaveCount(10);
-  await expect(page.locator('#results .src-measured')).toHaveCount(2);
+  await expect(page.locator('#results .src-estimate')).toHaveCount(2);
+  await expect(page.locator('#results .src-measured')).toHaveCount(0);
   await expect(page.locator('#results table.workload-table')).toContainText('Not published');
   await expect(page.locator('#temporal table.retry-table tbody tr')).toHaveCount(5);
   await expect(page.locator('#temporal')).toContainText('Two sources of truth, one each');

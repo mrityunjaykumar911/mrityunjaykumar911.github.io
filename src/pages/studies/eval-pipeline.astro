@@ -212,7 +212,7 @@ const temporalLimits = [
   'It is new infrastructure to run: a Temporal cluster or Temporal Cloud, and at least two workers per task queue for availability.',
 ];
 
-// Measured on the running system.
+// Estimated from environment math; not measured on a running system.
 const latencyChart = `---
 config:
   themeVariables:
@@ -220,7 +220,7 @@ config:
       plotColorPalette: "#087a55"
 ---
 xychart-beta
-    title "End-to-end latency per evaluation (minutes)"
+    title "Estimated latency per evaluation (minutes)"
     x-axis ["P50", "P95", "P99"]
     y-axis "Minutes" 0 --> 60
     bar [24, 26, 60]`;
@@ -235,17 +235,23 @@ const retryStateDiagram = `flowchart TB
     REP -.->|"lineage"| L["report → run → task → attempt → verdict"]`;
 
 const observabilityDiagram = `flowchart LR
-    subgraph APP["Instrumented with OpenTelemetry"]
+    subgraph TODAY["Exists today: current harness"]
         direction TB
-        API[Execution API]
-        WK["Temporal mini workers<br/>TracingInterceptor"]
-        AGG[AggregationService]
+        H["Multi-turn harness<br/>per-turn spans: session, model turn, tool call"]
+        ART[("Per-turn artifacts<br/>slide state, thumbnails")]
+        J[(Jaeger)]
+        H -->|"OTLP traces"| J
+        H --> ART
     end
-    APP -->|"traces, OTLP"| COL[OTel Collector]
-    COL --> TR[(Trace store)]
-    APP -->|"Temporal SDK and service metrics"| PROM[(Prometheus)]
-    PROM --> GRAF["Grafana<br/>dashboards and alerts"]
-    TR --> GRAF`;
+    subgraph PLAN["Proposed in this design"]
+        direction TB
+        WK["Temporal mini workers<br/>TracingInterceptor"]
+        PROM[(Prometheus)]
+        GRAF["Grafana<br/>dashboards and alerts"]
+        WK -.->|"SDK and service metrics"| PROM
+        PROM -.-> GRAF
+    end
+    J -.->|"traces"| GRAF`;
 
 const issues = [
   {
@@ -263,13 +269,13 @@ const issues = [
   {
     title: 'Retry and lineage tracking',
     symptom: 'After retries, it is hard to tell which attempt produced a verdict, or which run a number came from.',
-    answer: 'Every model call is a row with (generation_id, attempt_id). Verdicts are keyed by (generation_id, grader_version, grader_config_hash). Each run stores its pins and its Temporal workflow and run IDs, and a retry run records its parent run. Any number traces back: report, run, task, attempt, verdict.',
+    answer: 'Today, model attempts are logged separately from conversation results, and runs correlate by evaluation ID. This design adds the rest: every model call is a row with (generation_id, attempt_id), verdicts are keyed by (generation_id, grader_version, grader_config_hash), each run stores its pins and its Temporal workflow and run IDs, and a retry run records its parent run. Any number then traces back: report, run, task, attempt, verdict.',
     signal: 'Attempts per task, retry runs per evaluation, verdicts without a lineage path (should be zero).',
   },
   {
     title: 'Retry from saved state',
     symptom: 'Re-running a failed evaluation from scratch repeats model calls that already succeeded.',
-    answer: "A retry loads the original run's pins, never today's defaults. Tasks with a verdict are reused, tasks with a stored answer are only re-graded, and only tasks with no answer call the model again. In-flight workflows resume from Temporal history; finished runs resume from the Results DB.",
+    answer: "Today, saved outputs can be re-graded without re-running the agent, though the grader is itself a model and still makes calls. This design goes further: a retry loads the original run's pins, never today's defaults. Tasks with a verdict are reused, tasks with a stored answer are only re-graded, and only tasks with no answer call the model again. In-flight workflows resume from Temporal history; finished runs resume from the Results DB.",
     signal: 'Share of tasks reused per retry run; model calls avoided.',
   },
   {
@@ -281,7 +287,7 @@ const issues = [
   {
     title: 'Telemetry and observability',
     symptom: 'Without one trace per evaluation, a slow P99 run cannot be explained.',
-    answer: "OpenTelemetry traces run from the API through the workflow, activities, model call, and grader, propagated by Temporal's TracingInterceptor. Prometheus scrapes Temporal SDK and service metrics. Grafana holds the dashboards and the alerts on P95, P99, throughput, and throttling.",
+    answer: "Today, the harness emits per-turn OpenTelemetry spans for the session, each model turn, and each tool call, captures every turn's artifacts, and shows traces in Jaeger. Proposed: Temporal's TracingInterceptor carries one trace per evaluation through the workflow and its activities, Prometheus scrapes Temporal SDK and service metrics, and Grafana holds dashboards and alerts on P95, P99, throughput, and throttling.",
     signal: 'Latency histogram (P50, P95, P99), evaluations per hour, schedule-to-start latency, 429 rate.',
   },
 ];
@@ -483,8 +489,9 @@ const validityFormulas = [
 ];
 
 
-// Workload model. "Measured" values come from the running system. Everything
-// else is derived from them or is a stated design default, and is labeled so.
+// Workload model. "Estimate" values come from environment math, not from a
+// measured run. Everything else is derived from them or is a stated design
+// default, and is labeled so.
 const RUN_QUESTIONS = 500;
 const RUNS_PER_HOUR = 1000;
 const P50_MIN = 24;
@@ -499,8 +506,8 @@ const n0 = (x: number) => Math.round(x).toLocaleString('en-US');
 const t0 = (x: number) => n0(x).replace(/,/g, '{,}');
 const workloadRows = [
   { q: 'One evaluation', v: `A full run of about ${RUN_QUESTIONS} questions (Math500-sized)`, src: 'Definition' },
-  { q: 'Completed throughput', v: `${RUNS_PER_HOUR.toLocaleString('en-US')} evaluations per hour`, src: 'Measured' },
-  { q: 'Latency per evaluation', v: '24 min P50, 26 min P95, 60 min P99', src: 'Measured' },
+  { q: 'Target throughput', v: `${RUNS_PER_HOUR.toLocaleString('en-US')} evaluations per hour`, src: 'Estimate' },
+  { q: 'Estimated latency per evaluation', v: '24 min P50, 26 min P95, 60 min P99', src: 'Estimate' },
   { q: 'Model calls per evaluation', v: `About ${RUN_QUESTIONS}, at most ${CALLS_PER_RUN} in flight`, src: 'Design default' },
   { q: 'Questions per second', v: tex(String.raw`\tfrac{1000 \times 500}{3600} \approx ${t0(questionsPerSecond)}`), src: 'Derived', math: true },
   { q: 'Evaluations in flight', v: tex(String.raw`L = \lambda W = \tfrac{1000}{60} \times 24 \approx ${t0(runsInFlight)}`), src: "Derived (Little's Law)", math: true },
@@ -522,7 +529,7 @@ const retrySemantics = [
 const glance = [
   { k: 'Problem', v: 'Binary 0/1 evaluation of an LLM over a dataset, pinned to a snapshot, model version, and grader version.' },
   { k: 'Architecture', v: 'Three services (ingestion, execution, aggregation). Temporal mini workers orchestrate execution; the Results DB holds every answer and verdict.' },
-  { k: 'Workload', v: `One evaluation is a ${RUN_QUESTIONS}-question run. At 1,000 per hour that is about ${n0(questionsPerSecond)} questions per second and about ${n0(callsInFlight)} model calls in flight.` },
+  { k: 'Workload', v: `One evaluation is a ${RUN_QUESTIONS}-question run. Sized for an estimated 1,000 per hour: about ${n0(questionsPerSecond)} questions per second and about ${n0(callsInFlight)} model calls in flight.` },
   { k: 'Main trade-offs', v: 'The provider quota, not the worker count, sets throughput. Effectively-once state instead of exactly-once calls. Answers are stored before grading.' },
 ];
 
@@ -538,7 +545,7 @@ const chapters = [
   { id: 'scale-out', label: 'Scaling out' },
   { id: 'temporal', label: 'Temporal workers' },
   { id: 'claims', label: 'Scalability claims' },
-  { id: 'results', label: 'Measured results' },
+  { id: 'results', label: 'Sizing estimate' },
   { id: 'issues', label: 'Main issues' },
   { id: 'failure', label: 'What breaks at scale' },
   { id: 'metrics', label: 'Honest metrics' },
@@ -621,7 +628,7 @@ const decisions = [
 
   <main id="main" class="study-page">
     <section class="study-hero" aria-labelledby="study-title">
-      <p class="eyebrow">Design study · Measured at 1,000 evaluations per hour</p>
+      <p class="eyebrow">Design study · Sized with estimates, not measurements</p>
       <h1 id="study-title">Scaling out an LLM evaluation pipeline</h1>
       <p class="hero-lede">
         A platform for binary, point-in-time LLM evaluation. Every question gets a stored model
@@ -630,10 +637,10 @@ const decisions = [
         across many workers, the model provider pushes back, and messages arrive twice.
       </p>
       <dl class="hero-facts">
-        <div><dt>Throughput, 500-question runs</dt><dd>1,000 evals/hour</dd></div>
-        <div><dt>P50 latency</dt><dd>24 min</dd></div>
-        <div><dt>P95 latency</dt><dd>26 min</dd></div>
-        <div><dt>P99 latency</dt><dd>60 min</dd></div>
+        <div><dt>Target throughput, 500-question runs</dt><dd>1,000 evals/hour</dd></div>
+        <div><dt>Est. P50 latency</dt><dd>24 min</dd></div>
+        <div><dt>Est. P95 latency</dt><dd>26 min</dd></div>
+        <div><dt>Est. P99 latency</dt><dd>60 min</dd></div>
         <div><dt>Verdict</dt><dd>Binary, 0/1</dd></div>
       </dl>
       <dl class="glance" aria-label="At a glance">
@@ -1025,7 +1032,8 @@ const decisions = [
         <h2 id="claims-title">What scales, how far, and what stops it.</h2>
         <p>
           These are design claims, derived from the mechanisms above. Each one names the bound
-          that limits it and the condition that breaks it. Measured results follow in section 08.
+          that limits it and the condition that breaks it. Section 08 sizes the system against an
+          estimated workload.
         </p>
       </div>
 
@@ -1055,27 +1063,51 @@ const decisions = [
           of piling on top of it.
         </p>
         <p>
-          The measured 1,000 evaluations per hour (section 08) therefore implies a much larger
-          quota: about 8,000 calls in flight.
+          The 1,000-per-hour sizing target (section 08) therefore needs a much larger quota:
+          about 8,000 calls in flight.
         </p>
       </aside>
     </section>
 
     <section id="results" class="study-section" aria-labelledby="results-title">
       <div class="section-intro">
-        <p class="eyebrow">08 / Measured results</p>
-        <h2 id="results-title">1,000 evaluations per hour, with a long P99 tail.</h2>
+        <p class="eyebrow">08 / Sizing estimate</p>
+        <h2 id="results-title">Sized for 1,000 evaluations per hour.</h2>
         <p>
-          Measured on the running system: 1,000 evaluations completed per hour, where one
-          evaluation is a full run of about 500 questions. Latency per evaluation is 24 minutes
-          at P50, 26 minutes at P95, and 60 minutes at P99. The provider, model, and quota are not
-          published, so the table below derives what any deployment needs to reach these numbers.
+          These figures are estimates from environment math, not measurements from a run. The
+          sizing target is 1,000 evaluations per hour, where one evaluation is a full run of about
+          500 questions, with an estimated latency of 24 minutes at P50, 26 minutes at P95, and
+          60 minutes at P99. The provider, model, and quota are not published, so the table below
+          derives what any deployment needs to reach that target.
         </p>
       </div>
 
+      <aside class="status-split" aria-label="What exists today and what is estimated or proposed">
+        <div>
+          <p class="mono-label">Exists today</p>
+          <ul class="tick-list">
+            <li>A model-agnostic, multi-turn evaluation harness: one interface for RL, fine-tuned, and hosted models.</li>
+            <li>Per-turn OpenTelemetry spans for the session, each model turn, and each tool call.</li>
+            <li>Full artifact capture on every turn, viewable next to its trace in Jaeger.</li>
+            <li>Model attempts logged separately from conversation results.</li>
+            <li>Re-grading saved outputs without re-running the agent. The grader is itself a model, so re-grading still makes model calls.</li>
+          </ul>
+        </div>
+        <div>
+          <p class="mono-label">Estimated or proposed in this study</p>
+          <ul class="tick-list">
+            <li>The throughput and latency figures on this page: estimates from environment math.</li>
+            <li>Temporal mini workers and the quota limiter.</li>
+            <li>Parent-run lineage for retries.</li>
+            <li>Prometheus metrics and Grafana dashboards.</li>
+            <li>Re-grading with zero model calls, which needs a deterministic grader.</li>
+          </ul>
+        </div>
+      </aside>
+
       <div class="table-wrap">
         <table class="workload-table">
-          <caption>Workload model. Measured values are from the running system; the rest is derived from them or is a stated design default.</caption>
+          <caption>Workload model. Estimates come from environment math, not a measured run; the rest is derived from them or is a stated design default.</caption>
           <thead><tr><th scope="col">Quantity</th><th scope="col">Value</th><th scope="col">Source</th></tr></thead>
           <tbody>
             {workloadRows.map((row) => (
@@ -1091,12 +1123,12 @@ const decisions = [
 
       <figure class="diagram fit" id="latency">
         <div class="diagram-scroll"><pre class="mermaid">{latencyChart}</pre></div>
-        <figcaption><span class="mono-label">Measured latency</span> <span>End-to-end time per evaluation at P50, P95, and P99.</span></figcaption>
+        <figcaption><span class="mono-label">Estimated latency</span> <span>Estimated end-to-end time per evaluation at P50, P95, and P99. Not measured.</span></figcaption>
       </figure>
 
       <div class="prose">
         <p>
-          The derived numbers are the point. Sustaining 1,000 evaluations per hour means about
+          The derived numbers are the point. Sustaining 1,000 evaluations per hour would take about
           139 questions per second, about 400 evaluations and 8,000 model calls in flight, and
           about 8,300 requests per minute at the provider. At 20 calls per evaluation, a 24-minute
           run also implies close to a minute per model call, which fits long reasoning outputs,
@@ -1104,9 +1136,9 @@ const decisions = [
           hour, whatever the worker count.
         </p>
         <p>
-          P50 and P95 sit two minutes apart, so 95% of evaluations follow a predictable path. P99
-          is 2.3 times P95: the slowest 1% behave like a different regime. That is a hypothesis
-          to test, not a conclusion. Each run's trace splits its time into queue wait
+          In the estimate, P50 and P95 sit two minutes apart and P99 is 2.3 times P95: a
+          predictable body with a long tail. Whether a real deployment has that shape is for
+          measurement to establish. Each run's trace splits its time into queue wait
           (schedule-to-start), limiter wait, generation, grading, and retry backoff. If the extra
           30-odd minutes at P99 sit in limiter wait and backoff, the tail is throttling; if they
           sit in queue wait, it is admission and backlog; if a few questions dominate, it is long
@@ -1146,7 +1178,7 @@ const decisions = [
 
       <figure class="diagram fit" id="observability">
         <div class="diagram-scroll"><pre class="mermaid">{observabilityDiagram}</pre></div>
-        <figcaption><span class="mono-label">Telemetry and observability</span> <span>OpenTelemetry traces through the OTel Collector; Temporal SDK and service metrics into Prometheus; Grafana on top of both.</span></figcaption>
+        <figcaption><span class="mono-label">Telemetry and observability</span> <span>Solid: what the current harness does today. Dashed: what this design proposes.</span></figcaption>
       </figure>
     </section>
 
@@ -2093,7 +2125,26 @@ const decisions = [
   table.retry-table caption { caption-side: top; padding: 0 0 10px; text-align: left; color: var(--ink-soft); font-size: 14px; }
   table.workload-table td { font-variant-numeric: tabular-nums; }
   .src { display: inline-block; padding: 2px 8px; border-radius: 999px; background: var(--panel); color: var(--ink-soft); font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .src-measured { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-strong); }
+  .src-estimate { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-strong); }
+  .status-split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 32px;
+    margin-top: 32px;
+    padding: 22px 24px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+  }
+
+  .status-split .tick-list {
+    margin-top: 10px;
+  }
+
+  @media (max-width: 860px) {
+    .status-split { grid-template-columns: minmax(0, 1fr); }
+  }
+
   .src-undisclosed { background: transparent; border: 1px dashed var(--line-strong); }
   table.retry-table th[scope="row"] { width: 30%; white-space: normal; font-weight: 650; }
   table.retry-table td:last-child { color: var(--ink-soft); }
