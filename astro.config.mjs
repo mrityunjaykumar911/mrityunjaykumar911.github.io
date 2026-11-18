@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { unified } from '@astrojs/markdown-remark';
 import yaml from '@rollup/plugin-yaml';
 import { loadEnv } from 'vite';
 
@@ -46,10 +47,6 @@ export default defineConfig({
   base,
   output: isDevelopmentServer ? 'server' : 'static',
   trailingSlash: 'ignore',
-  // Astro 7 defaults to 'jsx' whitespace rules, which delete line breaks next to
-  // inline elements ("Present·Mountain View", "must behonest"). `true` keeps the
-  // lossless compression Astro 5 used, so multi-line prose renders as written.
-  compressHTML: true,
   integrations: [
     sitemap({
       // Error and plain-text utility routes are not search destinations.
@@ -64,8 +61,16 @@ export default defineConfig({
       }),
     }),
   ],
+  // Astro 7 changed the default to 'jsx' whitespace rules, which delete the
+  // line-break whitespace between inline elements (for example, the spaces
+  // around the '·' in role headers). `true` is the lossless compression Astro 5
+  // used: it keeps whitespace that affects rendering.
+  compressHTML: true,
   markdown: {
-    remarkPlugins: [remarkStudyFigureRefs],
+    // Astro 7 defaults to the Sätteri Markdown processor, which does not run
+    // remark plugins. The figure-reference plugin needs the unified
+    // (remark/rehype) processor, so select it explicitly.
+    processor: unified({ remarkPlugins: [remarkStudyFigureRefs] }),
   },
   build: {
     // Emit /404.html rather than /404/index.html — GitHub Pages only serves
