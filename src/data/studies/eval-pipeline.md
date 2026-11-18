@@ -221,11 +221,12 @@ Do not put `model_config` or `grader_uuid` in this request. Ingestion is model- 
     "manifest_uri": "https://account.blob.core.windows.net/datasets/sha256/abc123/manifest.json",
     "record_count": 500,
     "schema_version": "1"
-  }
+  },
+  "dataset_ref": "eyJhbGciOiJFZERTQSJ9.eyJkYXRhc2V0X2lkIjoiZHMtYWJjIn0.c2lnbmF0dXJl"
 }
 ```
 
-The blob URI is a private resource reference, not a public URL or bearer credential. ExecutionService reads it with its own managed identity and scoped permissions. If a delegated SAS is required, issue a short-lived, read-only token through a separate controlled mechanism.
+`dataset_ref` is the only thing a client passes to ExecutionService (section 4.2). The blob URI is a private resource reference, not a public URL or bearer credential. ExecutionService reads it with its own managed identity and scoped permissions. If a delegated SAS is required, issue a short-lived, read-only token through a separate controlled mechanism.
 
 **Dataset deduplication**
 
@@ -264,12 +265,7 @@ Idempotency-Key: execution-request-123
 
 ```json
 {
-  "dataset": {
-    "dataset_id": "ds-abc",
-    "blob_uri": "https://account.blob.core.windows.net/datasets/sha256/abc123/data.jsonl",
-    "manifest_uri": "https://account.blob.core.windows.net/datasets/sha256/abc123/manifest.json",
-    "content_hash": "sha256:abc123"
-  },
+  "dataset_ref": "eyJhbGciOiJFZERTQSJ9.eyJkYXRhc2V0X2lkIjoiZHMtYWJjIn0.c2lnbmF0dXJl",
   "grader_uuid": "platform-issued-grader-uuid",
   "model_config": {
     "model": "model-name",
@@ -291,7 +287,7 @@ Idempotency-Key: execution-request-123
 - `human_audit_fraction`: share of tasks sampled at random for human labeling, used for the bias-corrected estimate (section 7.4). A value of $0$ disables it.
 - `model_family` lets the platform flag a grader from the same family as the evaluated model (section 7.3).
 
-In a stricter API design, the client can pass only `dataset_id`; ExecutionService then resolves the authorized blob reference through an ingestion metadata API or a shared dataset-reference contract. If the blob URI is passed directly, treat it as untrusted input: validate account/container allowlists, tenant authorization, object identity, and content hash. Never let a caller use an arbitrary URI to make workers fetch arbitrary network locations.
+**Dataset reference.** ExecutionService never accepts a raw blob URI, because a URI cannot prove that the dataset belongs to the caller's tenant or that IngestionService produced it. IngestionService issues `dataset_ref` when a snapshot becomes `READY`: a token signed with IngestionService's key that carries `dataset_id`, tenant scope, content hash, schema version, and the blob object identity (path and version). ExecutionService verifies the signature with IngestionService's public key, checks that the tenant matches the caller, reads the object by that identity, and checks the content hash before creating tasks. A reference does not expire on its own, because the snapshot is immutable, but revoking a dataset adds its ID to a deny list that ExecutionService checks. The alternative is to pass only `dataset_id` and have ExecutionService resolve it through an IngestionService API. That adds a synchronous dependency on every create; the signed reference avoids it.
 
 **Suggested APIs**
 
@@ -492,7 +488,20 @@ sequenceDiagram
     O->>DB: Mark outbox event published
 ```
 
-### 5.5 Execution fingerprint is not an idempotency key
+### 5.5 Retry semantics by failure point
+
+Every step commits its result before it reports success, and every retry reads the committed state before acting. So a retry after a partial failure finishes the work instead of repeating it.
+
+| Failure point | What the retry does | Cost |
+|---|---|---|
+| A model call times out, but the provider finished it | Retries with a new `attempt_id`. The answer commit is conditional on the task having no committed answer, so a late response is discarded. | A second billed call, never a second answer. Provider idempotency keys remove it where supported. |
+| Generation commits its answer, then the worker dies before the orchestrator records completion | Reads the task first, finds the committed answer for `(execution_id, record_id, sample_idx)`, and returns that `generation_id` without calling the model. | One database read. |
+| Grading commits its verdict, then the worker dies | Inserts the verdict only if absent, keyed by `(generation_id, grader_version, grader_config_hash)`, and returns the stored one. | Nothing; grading never reruns generation. |
+| The event is re-sent after AggregationService accepted it | The inbox already holds that `event_id`, so the duplicate is acknowledged and dropped. | One extra request. |
+
+When a workflow engine such as Temporal orchestrates the steps, it is the source of truth for orchestration (which step each question is on, timers, retries). The Execution DB stays the source of truth for the domain (answers, attempts, verdicts, outbox). The engine's history holds only IDs, and if the two disagree after a crash, the DB wins.
+
+### 5.6 Execution fingerprint is not an idempotency key
 
 A reproducibility fingerprint can be computed as:
 
@@ -529,7 +538,19 @@ Scale on a combination of:
 - External LLM provider rate limits and available concurrency
 - Grader CPU/memory consumption
 
-Do not scale solely on queue depth. More workers can overload the LLM provider or saturate grader CPU. Apply distributed concurrency limits at global, per-model, and per-tenant levels.
+Do not scale solely on queue depth. More workers can overload the LLM provider or saturate grader CPU.
+
+### Provider quota limiter
+
+Every model call is admitted by a limiter inside ExecutionService. It is keyed on the provider's quota, not on the model or the queue: `(provider, account or project, model or deployment)`. Models or deployments that share one quota share one key. Each key holds three budgets:
+
+- **Requests per minute:** a token bucket, charged one per call.
+- **Tokens per minute:** a token bucket, charged the prompt size plus `max_tokens` before the call and refunded to actual usage after it.
+- **Calls in flight:** a semaphore with leases, so a crashed worker's slot frees itself.
+
+Within a key, tenants get weighted fair shares, so one large evaluation cannot take the whole quota. On a `429`, the limiter honors `Retry-After` and halves that key's in-flight cap, then raises it slowly as calls succeed. A rate limit in the orchestrator (for example a Temporal task-queue limit) can stay as a coarse backstop, but it counts dispatches per second, not tokens or calls in flight, so it cannot replace this limiter.
+
+Throughput is then bounded by the quota, not the worker count. With $C$ calls in flight and $W$ seconds per call, at most $C / W$ calls per second complete. For example, $C = 100$ and $W = 5$ allow 20 calls per second: 144 evaluations of 500 questions per hour, and about 69 hours for 10,000 of them, before retries.
 
 Setting `samples_per_question` to $K$ multiplies generation and grading load by $K$. Admission control must count $K$ when it estimates the cost of an execution.
 
@@ -600,6 +621,8 @@ $$
 $$
 
 For small $n$, or for $\hat{\mu}$ near 0 or 1, use a Wilson interval instead.
+
+State what the interval covers. The observed accuracy is an exact score for this benchmark. The interval describes how much it would move if the questions had been drawn again from the same population, and, with $K > 1$, if the model had been sampled again. It does not cover grader error; section 7.4 handles that. When questions are clustered, use the clustered form below, not the binomial one.
 
 At 425 of 500 correct, $\hat{\mu} = 0.85$, $\mathrm{SE} \approx 0.016$, and the 95% interval is $[0.819,\ 0.881]$. Two runs that differ by one point on a 500-question dataset are usually not distinguishable.
 
@@ -721,7 +744,7 @@ For an LLM judge, confidence can be the agreement rate over several sampled judg
 
 ### 7.6 Run-to-run noise and dataset choice
 
-Executions with the same fingerprint $F$ (section 5.5) measure **noise**: how much the score moves when nothing changes but sampling. Executions of different models or checkpoints on the same dataset measure **signal**: how far apart the dataset spreads models. Heineman et al. (*Signal and Noise*, AI2, NeurIPS 2025) show that datasets with a higher signal-to-noise ratio give more reliable decisions from small experiments. AggregationService can report this ratio per dataset content hash, to pick which datasets drive go/no-go decisions.
+Executions with the same fingerprint $F$ (section 5.6) measure **noise**: how much the score moves when nothing changes but sampling. Executions of different models or checkpoints on the same dataset measure **signal**: how far apart the dataset spreads models. Heineman et al. (*Signal and Noise*, AI2, NeurIPS 2025) show that datasets with a higher signal-to-noise ratio give more reliable decisions from small experiments. AggregationService can report this ratio per dataset content hash, to pick which datasets drive go/no-go decisions.
 
 ### 7.7 Evidence: a public judge against expert labels
 
