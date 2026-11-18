@@ -17,7 +17,7 @@
 profile:
   name: Mrityunjay Kumar
   pronunciation: MRIT-yen-jay koo-MARR
-  role: Senior ML Engineer
+  role: Member of Technical Staff
   focus: ML Systems & Agent Infrastructure
   company: Microsoft
   location: San Francisco Bay Area
@@ -146,7 +146,7 @@ experience:
   # visible) + optional `detail` groups behind a "Full detail" toggle, + `tags`.
   # Pre-Microsoft roles keep the full project-level record from the older CV.
   - company: Microsoft
-    role: Senior ML Engineer
+    role: Member of Technical Staff
     location: Mountain View, CA
     start: 2022-05
     end: null # null renders as "Present"

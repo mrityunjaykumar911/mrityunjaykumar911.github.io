@@ -5,7 +5,7 @@
 flag: latest
 
 profile:
-  role: Senior ML Engineer
+  role: Member of Technical Staff
   focus: RL Reward & Evaluation Infrastructure
   headline: I build the RL Infrastructure and Applied AI systems that keep RL *honest*.
   intro: >-
@@ -25,7 +25,7 @@ profile:
 
 experienceOverrides:
   Microsoft:
-    role: Senior ML Engineer, PowerPoint agent
+    role: Member of Technical Staff, PowerPoint agent
     summary: >-
       Reward correctness, multi-turn evaluation, and multimodal tool
       integration for the PowerPoint agent's live RL rollouts.
