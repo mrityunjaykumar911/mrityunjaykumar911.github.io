@@ -635,6 +635,13 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#metrics .formula-grid .katex')).toHaveCount(3);
   await expect(page.locator('#metrics annotation').last()).toHaveText(/\\text\{graded\} \+ \\text\{failed\} \+ \\text\{cancelled\} = \\text\{total\}/);
 
+  // Whitespace guard: multi-line prose next to inline elements must keep its spaces
+  // (Astro 7's default 'jsx' compression drops them: "must behonest", "Source· Method").
+  await expect(page.locator('#problem')).toContainText('the report must be honest under failure');
+  await expect(page.locator('#evaluation')).toContainText('keyed by (generation_id, grader_version, grader_config_hash)');
+  await expect(page.locator('#evaluation')).toContainText('simple and honest: accuracy');
+  await expect(page.getByRole('contentinfo')).toContainText('Built with Astro · Source · Method');
+
   // All five design-doc diagrams render natively through Mermaid, without parse errors.
   await expect(page.locator('html')).toHaveAttribute('data-mermaid', 'rendered', { timeout: 30_000 });
   for (const n of [1, 2, 3, 4, 5]) {

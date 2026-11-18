@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { unified } from '@astrojs/markdown-remark';
 import yaml from '@rollup/plugin-yaml';
 import { loadEnv } from 'vite';
 import remarkMath from 'remark-math';
@@ -62,11 +63,21 @@ export default defineConfig({
       }),
     }),
   ],
+  // Astro 7 changed the default to 'jsx' whitespace rules, which delete the
+  // line-break whitespace between inline elements (for example, the spaces
+  // around the '·' in role headers). `true` is the lossless compression Astro 5
+  // used: it keeps whitespace that affects rendering.
+  compressHTML: true,
   markdown: {
-    // Math in markdown ($...$ inline, $$...$$ display) is rendered by KaTeX at
-    // build time: no math JavaScript ships and no request leaves the site.
-    remarkPlugins: [remarkMath, remarkStudyFigureRefs],
-    rehypePlugins: [[rehypeKatex, { throwOnError: true, output: 'htmlAndMathml' }]],
+    // Astro 7 defaults to the Sätteri Markdown processor, which does not run
+    // remark or rehype plugins. Select the unified processor explicitly: the
+    // figure-reference plugin needs it, and so does math. Math ($...$ inline,
+    // $$...$$ display) is rendered by KaTeX at build time, so no math
+    // JavaScript ships and no request leaves the site.
+    processor: unified({
+      remarkPlugins: [remarkMath, remarkStudyFigureRefs],
+      rehypePlugins: [[rehypeKatex, { throwOnError: true, output: 'htmlAndMathml' }]],
+    }),
   },
   build: {
     // Emit /404.html rather than /404/index.html — GitHub Pages only serves
