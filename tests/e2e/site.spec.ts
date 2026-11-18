@@ -624,7 +624,7 @@ test('eval pipeline design study is linked from the method page and renders', as
   const chapterIds = [
     'problem', 'evaluation', 'baseline', 'boundaries', 'scale-out', 'temporal', 'claims',
     'results', 'issues',
-    'failure', 'metrics', 'validity', 'alignment', 'decisions', 'design-doc',
+    'failure', 'metrics', 'decisions', 'validity', 'alignment', 'design-doc',
   ];
   expect(await page.locator('main > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
@@ -661,7 +661,7 @@ test('eval pipeline design study is linked from the method page and renders', as
   }
   await expect(page.locator('#eval-identity svg')).toContainText('verdict = 0 or 1');
   await expect(page.locator('#data-model svg')).toContainText('GRADING_RESULT');
-  await expect(page.locator('#scale-plane svg')).toContainText('Distributed limiter');
+  await expect(page.locator('#scale-plane svg')).toContainText('Quota limiter');
   await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(8);
 
   // Temporal mini workers: both diagrams render, each reason names what it replaces.
@@ -686,7 +686,17 @@ test('eval pipeline design study is linked from the method page and renders', as
   ]);
   await expect(page.locator('#observability svg')).toContainText('Prometheus');
   await expect(page.locator('#retry-state svg')).toContainText('same pins');
-  await expect(page.locator('#claims .sizing annotation').first()).toHaveText('500 \\times 5 / 20 = 125');
+  await expect(page.locator('#claims .sizing annotation').first()).toHaveText('100 / 5 = 20');
+
+  // Workload model: measured values are labeled, derived values are typeset, and the
+  // first screen states problem, architecture, workload, and trade-offs.
+  await expect(page.locator('.glance > div')).toHaveCount(4);
+  await expect(page.locator('#results table.workload-table tbody tr')).toHaveCount(10);
+  await expect(page.locator('#results .src-measured')).toHaveCount(2);
+  await expect(page.locator('#results table.workload-table')).toContainText('Not published');
+  await expect(page.locator('#temporal table.retry-table tbody tr')).toHaveCount(5);
+  await expect(page.locator('#temporal')).toContainText('Two sources of truth, one each');
+  await expect(page.locator('#temporal-pools svg')).toContainText('Quota limiter');
   await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
 
   // Baseline (v0): architecture and schema render, API and states match it.
