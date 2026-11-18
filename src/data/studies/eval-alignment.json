@@ -1,0 +1,1055 @@
+{
+  "meta": {
+    "judge": "GPT-4 G-Eval, 20 sampled scores per summary (Liu et al. 2023)",
+    "humans": "3 SummEval expert annotators (Fabbri et al. 2021)",
+    "items_per_dimension": 1600,
+    "documents": 100,
+    "systems": 16,
+    "binary_rule": "pass = score >= 4 on 1-5, or 3 on 1-3; judge passes when more than half of its 20 samples pass",
+    "bootstrap": "2000 replicates, resampling documents (cluster bootstrap), seed 20261117",
+    "sources": {
+      "model_annotations.aligned.jsonl": {
+        "url": "https://raw.githubusercontent.com/cambridgeltl/PairS/55ad950e389c87fbcfd29d7b922fb360e7165d02/data/SummEval/model_annotations.aligned.jsonl",
+        "sha256": "f0d4166e0cdeb439b387c4449634b067b7e9f721b9ef4c2b722f6b7550d3d6ab"
+      },
+      "gpt4_coh_detailed.json": {
+        "url": "https://raw.githubusercontent.com/nlpyang/geval/6f84404ce4503d2ba0cde0293c5d402ecf2976a8/results/gpt4_coh_detailed.json",
+        "sha256": "bec62a6a8408b7f0c7a55a665d8c9a44b97eecf671bf0b4319284b192d218508"
+      },
+      "gpt4_con_detailed.json": {
+        "url": "https://raw.githubusercontent.com/nlpyang/geval/6f84404ce4503d2ba0cde0293c5d402ecf2976a8/results/gpt4_con_detailed.json",
+        "sha256": "e09609ab249fc6aa2e4f11b7c16d7531b7036b163c8251e54a04ce4c3efa76ed"
+      },
+      "gpt4_flu_detailed.json": {
+        "url": "https://raw.githubusercontent.com/nlpyang/geval/6f84404ce4503d2ba0cde0293c5d402ecf2976a8/results/gpt4_flu_detailed.json",
+        "sha256": "4f08454a9ac1c3c58f6e4d067a00ed37d83d4de2206b010d8a1ba6ef18ceae7d"
+      },
+      "gpt4_rel_detailed.json": {
+        "url": "https://raw.githubusercontent.com/nlpyang/geval/6f84404ce4503d2ba0cde0293c5d402ecf2976a8/results/gpt4_rel_detailed.json",
+        "sha256": "c222933ff5ba552bb9ec3d2b495022a89b8019cf246710988a4e49804d47585a"
+      }
+    }
+  },
+  "dimensions": {
+    "coherence": {
+      "binary": {
+        "all": {
+          "n": 1600,
+          "hh_agreement": 0.6975000000000001,
+          "hm_agreement": 0.6029166666666668,
+          "random_agreement": 0.5263854166666667,
+          "hh_kappa": 0.4183278523265363,
+          "hm_kappa": 0.16002713734314977,
+          "judge_vs_majority_agreement": 0.60875,
+          "judge_vs_majority_kappa": 0.20113321677875476,
+          "human_pass_rate": 0.48625,
+          "judge_pass_rate": 0.1275,
+          "judge_mean_confidence": 0.9185,
+          "sensitivity": 0.22879177377892032,
+          "specificity": 0.9683698296836983
+        },
+        "unanimous": {
+          "n": 874,
+          "hh_agreement": 1.0,
+          "hm_agreement": 0.683066361556064,
+          "random_agreement": 0.5656808173054265,
+          "hh_kappa": 1.0,
+          "hm_kappa": 0.27027483226129234,
+          "judge_vs_majority_agreement": 0.683066361556064,
+          "judge_vs_majority_kappa": 0.27027483226129234,
+          "human_pass_rate": 0.41533180778032036,
+          "judge_pass_rate": 0.11212814645308924,
+          "judge_mean_confidence": 0.9338672768878717,
+          "sensitivity": 0.2534435261707989,
+          "specificity": 0.9882583170254403
+        },
+        "split": {
+          "n": 726,
+          "hh_agreement": 0.3333333333333333,
+          "hm_agreement": 0.5064279155188246,
+          "random_agreement": 0.4830966818194467,
+          "hh_kappa": -0.13656247012280467,
+          "hm_kappa": 0.011822555435690251,
+          "judge_vs_majority_agreement": 0.5192837465564738,
+          "judge_vs_majority_kappa": 0.1270972142793161,
+          "human_pass_rate": 0.571625344352617,
+          "judge_pass_rate": 0.14600550964187328,
+          "judge_mean_confidence": 0.9000000000000001,
+          "sensitivity": 0.20722891566265061,
+          "specificity": 0.9356913183279743
+        }
+      },
+      "ordinal": {
+        "all": {
+          "n": 1600,
+          "alpha_hh": 0.553687460590107,
+          "alpha_hm_median": 0.33474235513948347,
+          "alpha_hh_pairwise": 0.541693736308455,
+          "alpha_hm_pairwise": 0.28133890975190584,
+          "spearman_hm_median": 0.5409548516367227
+        },
+        "unique_1": {
+          "n": 200,
+          "alpha_hh": 1.0,
+          "alpha_hm_median": 0.26765238168428884,
+          "alpha_hh_pairwise": 1.0,
+          "alpha_hm_pairwise": 0.26765238168428884,
+          "spearman_hm_median": 0.6211655493711205
+        },
+        "unique_2": {
+          "n": 1059,
+          "alpha_hh": 0.5325351679488637,
+          "alpha_hm_median": 0.32915070072581787,
+          "alpha_hh_pairwise": 0.5213005497948785,
+          "alpha_hm_pairwise": 0.2812653104264352,
+          "spearman_hm_median": 0.5251389480955042
+        },
+        "unique_3": {
+          "n": 341,
+          "alpha_hh": 0.18763404574105969,
+          "alpha_hm_median": 0.3316394244161238,
+          "alpha_hh_pairwise": 0.1324237053539137,
+          "alpha_hm_pairwise": 0.1919215035381218,
+          "spearman_hm_median": 0.5528528953058558
+        }
+      },
+      "system": {
+        "systems": 16,
+        "kendall_tau_score": 0.7333333333333334,
+        "kendall_tau_pass_rate": 0.7064405452600029,
+        "pairwise_order_agreement": 0.8319327731092437
+      },
+      "ci95": {
+        "binary.all.hm_agreement": [
+          0.5764583333333334,
+          0.6295833333333333
+        ],
+        "binary.all.hh_agreement": [
+          0.6783333333333333,
+          0.7166666666666667
+        ],
+        "binary.all.hm_kappa": [
+          0.12064187718244489,
+          0.20312320789190105
+        ],
+        "binary.all.hh_kappa": [
+          0.38648026015713943,
+          0.45021450738320545
+        ],
+        "binary.all.judge_vs_majority_kappa": [
+          0.15266104577839076,
+          0.25168001653667477
+        ],
+        "binary.unanimous.hm_agreement": [
+          0.6429390867191477,
+          0.7240987916984464
+        ],
+        "binary.split.hm_agreement": [
+          0.4942521072796935,
+          0.5193476150018206
+        ],
+        "binary.split.hh_agreement": [
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "binary.all.judge_pass_rate": [
+          0.10125,
+          0.1575
+        ],
+        "binary.all.human_pass_rate": [
+          0.454375,
+          0.518125
+        ],
+        "binary.unanimous.sensitivity": [
+          0.19230501392757662,
+          0.3222610400682011
+        ],
+        "binary.unanimous.specificity": [
+          0.976515482905491,
+          0.997979797979798
+        ],
+        "binary.all.hm_minus_hh_agreement": [
+          -0.11854166666666666,
+          -0.07000000000000006
+        ]
+      },
+      "confidence_curve": [
+        {
+          "min_confidence": 0.5,
+          "coverage": 1.0,
+          "agreement_with_majority": 0.60875,
+          "split_share_kept": 0.45375
+        },
+        {
+          "min_confidence": 0.6,
+          "coverage": 0.953125,
+          "agreement_with_majority": 0.6222950819672131,
+          "split_share_kept": 0.45049180327868854
+        },
+        {
+          "min_confidence": 0.7,
+          "coverage": 0.89625,
+          "agreement_with_majority": 0.6283124128312413,
+          "split_share_kept": 0.44142259414225943
+        },
+        {
+          "min_confidence": 0.8,
+          "coverage": 0.82875,
+          "agreement_with_majority": 0.6365007541478129,
+          "split_share_kept": 0.43137254901960786
+        },
+        {
+          "min_confidence": 0.9,
+          "coverage": 0.746875,
+          "agreement_with_majority": 0.6535564853556486,
+          "split_share_kept": 0.4217573221757322
+        },
+        {
+          "min_confidence": 1.0,
+          "coverage": 0.6775,
+          "agreement_with_majority": 0.6715867158671587,
+          "split_share_kept": 0.4040590405904059
+        }
+      ],
+      "perception": [
+        {
+          "human_median": 1,
+          "n": 65,
+          "judge_counts": [
+            17,
+            45,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "human_median": 2,
+          "n": 284,
+          "judge_counts": [
+            21,
+            193,
+            69,
+            1,
+            0
+          ]
+        },
+        {
+          "human_median": 3,
+          "n": 473,
+          "judge_counts": [
+            6,
+            231,
+            206,
+            30,
+            0
+          ]
+        },
+        {
+          "human_median": 4,
+          "n": 387,
+          "judge_counts": [
+            2,
+            79,
+            241,
+            65,
+            0
+          ]
+        },
+        {
+          "human_median": 5,
+          "n": 391,
+          "judge_counts": [
+            5,
+            49,
+            201,
+            136,
+            0
+          ]
+        }
+      ],
+      "discrimination": {
+        "auc_all": 0.7876229836313712,
+        "auc_unanimous": 0.8336109718426032,
+        "auc_split": 0.6923139503351025
+      },
+      "recalibrated": {
+        "hm_agreement_all": 0.6692625000000001,
+        "hm_agreement_unanimous": 0.7693254197056782,
+        "hm_agreement_split": 0.5482803190653392,
+        "hm_kappa_all": 0.3381305025976454,
+        "hm_kappa_split": 0.10414642986792831,
+        "reps": 200
+      },
+      "correction_check": {
+        "reps": 500,
+        "bootstrap_reps": 400,
+        "mean_abs_error_raw": 0.3589875,
+        "mean_abs_error_corrected": 0.12010572384132692,
+        "closed_form_ci95_coverage": 0.69,
+        "closed_form_ci95_mean_width": 0.33043044286387774,
+        "cluster_bootstrap_ci95_coverage": 0.954,
+        "cluster_bootstrap_ci95_mean_width": 0.5704313147467978
+      },
+      "scale": 5
+    },
+    "consistency": {
+      "binary": {
+        "all": {
+          "n": 1600,
+          "hh_agreement": 0.9783333333333334,
+          "hm_agreement": 0.72625,
+          "random_agreement": 0.6033593749999999,
+          "hh_kappa": 0.8872636493035037,
+          "hm_kappa": 0.3097457532486924,
+          "judge_vs_majority_agreement": 0.72125,
+          "judge_vs_majority_kappa": 0.29312940803550186,
+          "human_pass_rate": 0.9025,
+          "judge_pass_rate": 0.63125,
+          "judge_mean_confidence": 0.8889851973684211,
+          "sensitivity": 0.6952908587257618,
+          "specificity": 0.9615384615384616
+        },
+        "unanimous": {
+          "n": 1548,
+          "hh_agreement": 1.0,
+          "hm_agreement": 0.7364341085271318,
+          "random_agreement": 0.6169926687098131,
+          "hh_kappa": 1.0,
+          "hm_kappa": 0.311851575830081,
+          "judge_vs_majority_agreement": 0.7364341085271318,
+          "judge_vs_majority_kappa": 0.311851575830081,
+          "human_pass_rate": 0.9024547803617571,
+          "judge_pass_rate": 0.6453488372093024,
+          "judge_mean_confidence": 0.8888072895416835,
+          "sensitivity": 0.7115246957766643,
+          "specificity": 0.9668874172185431
+        },
+        "split": {
+          "n": 52,
+          "hh_agreement": 0.3333333333333333,
+          "hm_agreement": 0.4230769230769231,
+          "random_agreement": 0.4223372781065089,
+          "hh_kappa": -0.22690024642650353,
+          "hm_kappa": -0.0025835618890632274,
+          "judge_vs_majority_agreement": 0.2692307692307692,
+          "judge_vs_majority_kappa": 0.003027245206861809,
+          "human_pass_rate": 0.9038461538461539,
+          "judge_pass_rate": 0.21153846153846154,
+          "judge_mean_confidence": 0.8942813765182186,
+          "sensitivity": 0.2127659574468085,
+          "specificity": 0.8
+        }
+      },
+      "ordinal": {
+        "all": {
+          "n": 1600,
+          "alpha_hh": 0.7963955469814626,
+          "alpha_hm_median": -0.070782409211962,
+          "alpha_hh_pairwise": 0.7969901775280311,
+          "alpha_hm_pairwise": -0.024966343494472243,
+          "spearman_hm_median": 0.4666976673285674
+        },
+        "unique_1": {
+          "n": 1340,
+          "alpha_hh": 1.0,
+          "alpha_hm_median": -0.38474273688207816,
+          "alpha_hh_pairwise": 1.0,
+          "alpha_hm_pairwise": -0.38474273688207816,
+          "spearman_hm_median": 0.22235230316319754
+        },
+        "unique_2": {
+          "n": 241,
+          "alpha_hh": 0.7174849151562235,
+          "alpha_hm_median": 0.3025203119518578,
+          "alpha_hh_pairwise": 0.7151606376911692,
+          "alpha_hm_pairwise": 0.3561277544390918,
+          "spearman_hm_median": 0.5428202521753676
+        },
+        "unique_3": {
+          "n": 19,
+          "alpha_hh": 0.37666435675630683,
+          "alpha_hm_median": 0.4861765830042043,
+          "alpha_hh_pairwise": 0.23240199108245682,
+          "alpha_hm_pairwise": 0.2908373998744975,
+          "spearman_hm_median": 0.6514073616425738
+        }
+      },
+      "system": {
+        "systems": 16,
+        "kendall_tau_score": 0.5833333333333334,
+        "kendall_tau_pass_rate": 0.39694209301872235,
+        "pairwise_order_agreement": 0.7037037037037037
+      },
+      "ci95": {
+        "binary.all.hm_agreement": [
+          0.694375,
+          0.7589635416666666
+        ],
+        "binary.all.hh_agreement": [
+          0.9725,
+          0.98375
+        ],
+        "binary.all.hm_kappa": [
+          0.2662080189333214,
+          0.3589431526876755
+        ],
+        "binary.all.hh_kappa": [
+          0.8563849986445536,
+          0.9142540826278669
+        ],
+        "binary.all.judge_vs_majority_kappa": [
+          0.24885483311193035,
+          0.3432395436509841
+        ],
+        "binary.unanimous.hm_agreement": [
+          0.7039335345788802,
+          0.7700858476230451
+        ],
+        "binary.split.hm_agreement": [
+          0.3840477167076839,
+          0.4656120895846923
+        ],
+        "binary.split.hh_agreement": [
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "binary.all.judge_pass_rate": [
+          0.59875,
+          0.664375
+        ],
+        "binary.all.human_pass_rate": [
+          0.88875,
+          0.91625
+        ],
+        "binary.unanimous.sensitivity": [
+          0.675883682334766,
+          0.7489146948083272
+        ],
+        "binary.unanimous.specificity": [
+          0.9385405890061383,
+          0.9930567528735632
+        ],
+        "binary.all.hm_minus_hh_agreement": [
+          -0.28312500000000007,
+          -0.21936979166666679
+        ]
+      },
+      "confidence_curve": [
+        {
+          "min_confidence": 0.5,
+          "coverage": 1.0,
+          "agreement_with_majority": 0.72125,
+          "split_share_kept": 0.0325
+        },
+        {
+          "min_confidence": 0.6,
+          "coverage": 0.94875,
+          "agreement_with_majority": 0.7404479578392622,
+          "split_share_kept": 0.03293807641633729
+        },
+        {
+          "min_confidence": 0.7,
+          "coverage": 0.8725,
+          "agreement_with_majority": 0.7571633237822349,
+          "split_share_kept": 0.03151862464183381
+        },
+        {
+          "min_confidence": 0.8,
+          "coverage": 0.784375,
+          "agreement_with_majority": 0.7705179282868526,
+          "split_share_kept": 0.034262948207171316
+        },
+        {
+          "min_confidence": 0.9,
+          "coverage": 0.66375,
+          "agreement_with_majority": 0.7871939736346516,
+          "split_share_kept": 0.032015065913371
+        },
+        {
+          "min_confidence": 1.0,
+          "coverage": 0.451875,
+          "agreement_with_majority": 0.7897648686030428,
+          "split_share_kept": 0.035961272475795295
+        }
+      ],
+      "perception": [
+        {
+          "human_median": 1,
+          "n": 35,
+          "judge_counts": [
+            16,
+            14,
+            5,
+            0,
+            0
+          ]
+        },
+        {
+          "human_median": 2,
+          "n": 75,
+          "judge_counts": [
+            20,
+            44,
+            9,
+            2,
+            0
+          ]
+        },
+        {
+          "human_median": 3,
+          "n": 46,
+          "judge_counts": [
+            4,
+            23,
+            14,
+            4,
+            1
+          ]
+        },
+        {
+          "human_median": 4,
+          "n": 22,
+          "judge_counts": [
+            0,
+            10,
+            10,
+            2,
+            0
+          ]
+        },
+        {
+          "human_median": 5,
+          "n": 1422,
+          "judge_counts": [
+            16,
+            109,
+            272,
+            626,
+            399
+          ]
+        }
+      ],
+      "discrimination": {
+        "auc_all": 0.9290587932381561,
+        "auc_unanimous": 0.9382001166169701,
+        "auc_split": 0.548936170212766
+      },
+      "recalibrated": {
+        "hm_agreement_all": 0.9171520833333333,
+        "hm_agreement_unanimous": 0.9288223405322347,
+        "hm_agreement_split": 0.5683503887756245,
+        "hm_kappa_all": 0.5370552158604137,
+        "hm_kappa_split": 0.014114507692605366,
+        "reps": 200
+      },
+      "correction_check": {
+        "reps": 500,
+        "bootstrap_reps": 400,
+        "mean_abs_error_raw": 0.27083,
+        "mean_abs_error_corrected": 0.040238333412535514,
+        "closed_form_ci95_coverage": 0.844,
+        "closed_form_ci95_mean_width": 0.12786135082967537,
+        "cluster_bootstrap_ci95_coverage": 0.948,
+        "cluster_bootstrap_ci95_mean_width": 0.1731047048641626
+      },
+      "scale": 5
+    },
+    "fluency": {
+      "binary": {
+        "all": {
+          "n": 1600,
+          "hh_agreement": 0.9262499999999999,
+          "hm_agreement": 0.7547916666666667,
+          "random_agreement": 0.6502369791666666,
+          "hh_kappa": 0.6328463261953851,
+          "hm_kappa": 0.29849729592779667,
+          "judge_vs_majority_agreement": 0.75375,
+          "judge_vs_majority_kappa": 0.2811858608893959,
+          "human_pass_rate": 0.90625,
+          "judge_pass_rate": 0.69375,
+          "judge_mean_confidence": 0.9481661184210526,
+          "sensitivity": 0.7468965517241379,
+          "specificity": 0.82
+        },
+        "unanimous": {
+          "n": 1423,
+          "hh_agreement": 1.0,
+          "hm_agreement": 0.7870695713281798,
+          "random_agreement": 0.6964579992681225,
+          "hh_kappa": 1.0,
+          "hm_kappa": 0.2985141161407043,
+          "judge_vs_majority_agreement": 0.7870695713281799,
+          "judge_vs_majority_kappa": 0.2985141161407043,
+          "human_pass_rate": 0.9255094869992972,
+          "judge_pass_rate": 0.7308503162333099,
+          "judge_mean_confidence": 0.9494489033546621,
+          "sensitivity": 0.7798025816249051,
+          "specificity": 0.8773584905660378
+        },
+        "split": {
+          "n": 177,
+          "hh_agreement": 0.3333333333333333,
+          "hm_agreement": 0.49529190207156315,
+          "random_agreement": 0.48248161979848286,
+          "hh_kappa": -0.29247874909355176,
+          "hm_kappa": 0.021633594841840836,
+          "judge_vs_majority_agreement": 0.4858757062146893,
+          "judge_vs_majority_kappa": 0.06955115244642138,
+          "human_pass_rate": 0.751412429378531,
+          "judge_pass_rate": 0.3954802259887006,
+          "judge_mean_confidence": 0.9378531073446328,
+          "sensitivity": 0.42105263157894735,
+          "specificity": 0.6818181818181818
+        }
+      },
+      "ordinal": {
+        "all": {
+          "n": 1600,
+          "alpha_hh": 0.653167758428957,
+          "alpha_hm_median": 0.2790107311568214,
+          "alpha_hh_pairwise": 0.6548431894581885,
+          "alpha_hm_pairwise": 0.308188253048237,
+          "spearman_hm_median": 0.41107336549814155
+        },
+        "unique_1": {
+          "n": 1378,
+          "alpha_hh": 1.0,
+          "alpha_hm_median": 0.17693392155221,
+          "alpha_hh_pairwise": 1.0,
+          "alpha_hm_pairwise": 0.17693392155221,
+          "spearman_hm_median": 0.34928415721304273
+        },
+        "unique_2": {
+          "n": 215,
+          "alpha_hh": 0.09152558953727907,
+          "alpha_hm_median": 0.16455369412217158,
+          "alpha_hh_pairwise": 0.0751575927644857,
+          "alpha_hm_pairwise": 0.17713732932195247,
+          "spearman_hm_median": 0.2753076884207432
+        },
+        "unique_3": {
+          "n": 7,
+          "alpha_hh": -0.4285714285714286,
+          "alpha_hm_median": -0.01948051948051943,
+          "alpha_hh_pairwise": -0.4209331409331409,
+          "alpha_hm_pairwise": 0.04474163402734832,
+          "spearman_hm_median": null
+        }
+      },
+      "system": {
+        "systems": 16,
+        "kendall_tau_score": 0.75,
+        "kendall_tau_pass_rate": 0.800272350735104,
+        "pairwise_order_agreement": 0.9017857142857143
+      },
+      "ci95": {
+        "binary.all.hm_agreement": [
+          0.7226927083333333,
+          0.784796875
+        ],
+        "binary.all.hh_agreement": [
+          0.91375,
+          0.9387500000000001
+        ],
+        "binary.all.hm_kappa": [
+          0.25512872012368837,
+          0.34558020487144603
+        ],
+        "binary.all.hh_kappa": [
+          0.5820314077927132,
+          0.6847755325102227
+        ],
+        "binary.all.judge_vs_majority_kappa": [
+          0.23183878201955127,
+          0.33630280018181974
+        ],
+        "binary.unanimous.hm_agreement": [
+          0.7533339049089759,
+          0.8189622467983354
+        ],
+        "binary.split.hm_agreement": [
+          0.46780079922259243,
+          0.5229218999202552
+        ],
+        "binary.split.hh_agreement": [
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "binary.all.judge_pass_rate": [
+          0.656875,
+          0.72875
+        ],
+        "binary.all.human_pass_rate": [
+          0.891875,
+          0.919375
+        ],
+        "binary.unanimous.sensitivity": [
+          0.742149610269799,
+          0.8144873116929698
+        ],
+        "binary.unanimous.specificity": [
+          0.8165137614678899,
+          0.9304347826086956
+        ],
+        "binary.all.hm_minus_hh_agreement": [
+          -0.2025,
+          -0.14145833333333335
+        ]
+      },
+      "confidence_curve": [
+        {
+          "min_confidence": 0.5,
+          "coverage": 1.0,
+          "agreement_with_majority": 0.75375,
+          "split_share_kept": 0.110625
+        },
+        {
+          "min_confidence": 0.6,
+          "coverage": 0.976875,
+          "agreement_with_majority": 0.7651951375559821,
+          "split_share_kept": 0.11004478566858605
+        },
+        {
+          "min_confidence": 0.7,
+          "coverage": 0.948125,
+          "agreement_with_majority": 0.7758734344100198,
+          "split_share_kept": 0.1074489123269611
+        },
+        {
+          "min_confidence": 0.8,
+          "coverage": 0.900625,
+          "agreement_with_majority": 0.7911172796668979,
+          "split_share_kept": 0.10617626648161
+        },
+        {
+          "min_confidence": 0.9,
+          "coverage": 0.846875,
+          "agreement_with_majority": 0.8073800738007381,
+          "split_share_kept": 0.1077490774907749
+        },
+        {
+          "min_confidence": 1.0,
+          "coverage": 0.723125,
+          "agreement_with_majority": 0.8331892826274849,
+          "split_share_kept": 0.10544511668107173
+        }
+      ],
+      "perception": [
+        {
+          "human_median": 1,
+          "n": 45,
+          "judge_counts": [
+            29,
+            11,
+            5
+          ]
+        },
+        {
+          "human_median": 2,
+          "n": 105,
+          "judge_counts": [
+            22,
+            61,
+            22
+          ]
+        },
+        {
+          "human_median": 3,
+          "n": 1450,
+          "judge_counts": [
+            21,
+            334,
+            1095
+          ]
+        }
+      ],
+      "discrimination": {
+        "auc_all": 0.8700390804597701,
+        "auc_unanimous": 0.9215484018853598,
+        "auc_split": 0.5986842105263158
+      },
+      "recalibrated": {
+        "hm_agreement_all": 0.9049833333333334,
+        "hm_agreement_unanimous": 0.9479725503042767,
+        "hm_agreement_split": 0.5544250312356804,
+        "hm_kappa_all": 0.4752689006770062,
+        "hm_kappa_split": 0.02837329773243952,
+        "reps": 200
+      },
+      "correction_check": {
+        "reps": 500,
+        "bootstrap_reps": 400,
+        "mean_abs_error_raw": 0.2127075,
+        "mean_abs_error_corrected": 0.047141553932970426,
+        "closed_form_ci95_coverage": 0.77,
+        "closed_form_ci95_mean_width": 0.13744220410176805,
+        "cluster_bootstrap_ci95_coverage": 0.934,
+        "cluster_bootstrap_ci95_mean_width": 0.20349114584928737
+      },
+      "scale": 3
+    },
+    "relevance": {
+      "binary": {
+        "all": {
+          "n": 1600,
+          "hh_agreement": 0.6766666666666666,
+          "hm_agreement": 0.5702083333333333,
+          "random_agreement": 0.45057499999999995,
+          "hh_kappa": 0.32938984320730386,
+          "hm_kappa": 0.21568372091673702,
+          "judge_vs_majority_agreement": 0.575625,
+          "judge_vs_majority_kappa": 0.2554498004298435,
+          "human_pass_rate": 0.694375,
+          "judge_pass_rate": 0.32,
+          "judge_mean_confidence": 0.871375,
+          "sensitivity": 0.42484248424842486,
+          "specificity": 0.918200408997955
+        },
+        "unanimous": {
+          "n": 824,
+          "hh_agreement": 1.0,
+          "hm_agreement": 0.6310679611650486,
+          "random_agreement": 0.43849561692902245,
+          "hh_kappa": 1.0,
+          "hm_kappa": 0.34295786469699524,
+          "judge_vs_majority_agreement": 0.6310679611650486,
+          "judge_vs_majority_kappa": 0.34295786469699524,
+          "human_pass_rate": 0.7111650485436893,
+          "judge_pass_rate": 0.35436893203883496,
+          "judge_mean_confidence": 0.8793689320388349,
+          "sensitivity": 0.48976109215017066,
+          "specificity": 0.9789915966386554
+        },
+        "split": {
+          "n": 776,
+          "hh_agreement": 0.3333333333333333,
+          "hm_agreement": 0.5055841924398625,
+          "random_agreement": 0.4745190774790095,
+          "hh_kappa": -0.2051142899222894,
+          "hm_kappa": 0.03265567092696325,
+          "judge_vs_majority_agreement": 0.5167525773195877,
+          "judge_vs_majority_kappa": 0.16167319658907595,
+          "human_pass_rate": 0.6765463917525774,
+          "judge_pass_rate": 0.28350515463917525,
+          "judge_mean_confidence": 0.8628865979381443,
+          "sensitivity": 0.3523809523809524,
+          "specificity": 0.8605577689243028
+        }
+      },
+      "ordinal": {
+        "all": {
+          "n": 1600,
+          "alpha_hh": 0.39669578215239687,
+          "alpha_hm_median": 0.2748945785120879,
+          "alpha_hh_pairwise": 0.3790125045657951,
+          "alpha_hm_pairwise": 0.21850866688999684,
+          "spearman_hm_median": 0.5270985115285894
+        },
+        "unique_1": {
+          "n": 228,
+          "alpha_hh": 1.0,
+          "alpha_hm_median": 0.3256986371698839,
+          "alpha_hh_pairwise": 1.0,
+          "alpha_hm_pairwise": 0.3256986371698839,
+          "spearman_hm_median": 0.6864666006666026
+        },
+        "unique_2": {
+          "n": 1057,
+          "alpha_hh": 0.4040971702485229,
+          "alpha_hm_median": 0.27031082313409815,
+          "alpha_hh_pairwise": 0.38892705165489466,
+          "alpha_hm_pairwise": 0.22199999399705175,
+          "spearman_hm_median": 0.5297716261071724
+        },
+        "unique_3": {
+          "n": 315,
+          "alpha_hh": -0.08774898281972754,
+          "alpha_hm_median": 0.21681023632153018,
+          "alpha_hh_pairwise": -0.18501791689788405,
+          "alpha_hm_pairwise": 0.05927026054882641,
+          "spearman_hm_median": 0.4102161702908232
+        }
+      },
+      "system": {
+        "systems": 16,
+        "kendall_tau_score": 0.8833333333333333,
+        "kendall_tau_pass_rate": 0.7394957983193278,
+        "pairwise_order_agreement": 0.865546218487395
+      },
+      "ci95": {
+        "binary.all.hm_agreement": [
+          0.54040625,
+          0.5985416666666666
+        ],
+        "binary.all.hh_agreement": [
+          0.6587500000000001,
+          0.695
+        ],
+        "binary.all.hm_kappa": [
+          0.17783958652509788,
+          0.2533702114050613
+        ],
+        "binary.all.hh_kappa": [
+          0.2893127376505901,
+          0.36841023644682475
+        ],
+        "binary.all.judge_vs_majority_kappa": [
+          0.20867814344116092,
+          0.3030641499530019
+        ],
+        "binary.unanimous.hm_agreement": [
+          0.5806412273800158,
+          0.6768520991347078
+        ],
+        "binary.split.hm_agreement": [
+          0.4934170200544021,
+          0.5186181006493507
+        ],
+        "binary.split.hh_agreement": [
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        "binary.all.judge_pass_rate": [
+          0.281234375,
+          0.360625
+        ],
+        "binary.all.human_pass_rate": [
+          0.651234375,
+          0.733140625
+        ],
+        "binary.unanimous.sensitivity": [
+          0.4312535796105384,
+          0.5460718541159405
+        ],
+        "binary.unanimous.specificity": [
+          0.959510055626872,
+          0.9956521739130435
+        ],
+        "binary.all.hm_minus_hh_agreement": [
+          -0.1393854166666667,
+          -0.07583333333333331
+        ]
+      },
+      "confidence_curve": [
+        {
+          "min_confidence": 0.5,
+          "coverage": 1.0,
+          "agreement_with_majority": 0.575625,
+          "split_share_kept": 0.485
+        },
+        {
+          "min_confidence": 0.6,
+          "coverage": 0.926875,
+          "agreement_with_majority": 0.5933917734322319,
+          "split_share_kept": 0.480782198246797
+        },
+        {
+          "min_confidence": 0.7,
+          "coverage": 0.8225,
+          "agreement_with_majority": 0.6033434650455927,
+          "split_share_kept": 0.4749240121580547
+        },
+        {
+          "min_confidence": 0.8,
+          "coverage": 0.7275,
+          "agreement_with_majority": 0.6134020618556701,
+          "split_share_kept": 0.47164948453608246
+        },
+        {
+          "min_confidence": 0.9,
+          "coverage": 0.610625,
+          "agreement_with_majority": 0.6110542476970318,
+          "split_share_kept": 0.46673490276356194
+        },
+        {
+          "min_confidence": 1.0,
+          "coverage": 0.506875,
+          "agreement_with_majority": 0.6103575832305795,
+          "split_share_kept": 0.468557336621455
+        }
+      ],
+      "perception": [
+        {
+          "human_median": 1,
+          "n": 15,
+          "judge_counts": [
+            6,
+            8,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "human_median": 2,
+          "n": 124,
+          "judge_counts": [
+            16,
+            79,
+            28,
+            1,
+            0
+          ]
+        },
+        {
+          "human_median": 3,
+          "n": 350,
+          "judge_counts": [
+            9,
+            126,
+            171,
+            44,
+            0
+          ]
+        },
+        {
+          "human_median": 4,
+          "n": 755,
+          "judge_counts": [
+            3,
+            125,
+            357,
+            267,
+            3
+          ]
+        },
+        {
+          "human_median": 5,
+          "n": 356,
+          "judge_counts": [
+            0,
+            12,
+            104,
+            239,
+            1
+          ]
+        }
+      ],
+      "discrimination": {
+        "auc_all": 0.7979362353413255,
+        "auc_unanimous": 0.908850058794849,
+        "auc_split": 0.6667273762094479
+      },
+      "recalibrated": {
+        "hm_agreement_all": 0.6964604166666666,
+        "hm_agreement_unanimous": 0.8326514313906569,
+        "hm_agreement_split": 0.550859066953466,
+        "hm_kappa_all": 0.32578495705553917,
+        "hm_kappa_split": 0.08365621875448034,
+        "reps": 200
+      },
+      "correction_check": {
+        "reps": 500,
+        "bootstrap_reps": 400,
+        "mean_abs_error_raw": 0.3759025,
+        "mean_abs_error_corrected": 0.08954905731668626,
+        "closed_form_ci95_coverage": 0.738,
+        "closed_form_ci95_mean_width": 0.2544417574456745,
+        "cluster_bootstrap_ci95_coverage": 0.94,
+        "cluster_bootstrap_ci95_mean_width": 0.424062322455678
+      },
+      "scale": 5
+    }
+  }
+}

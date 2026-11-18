@@ -5,6 +5,9 @@ import SiteFooter from '../../components/SiteFooter.astro';
 import { withBase } from '../../lib/url';
 import { Content as DesignDoc } from '../../data/studies/eval-pipeline.md';
 import designDocSource from '../../data/studies/eval-pipeline.md?raw';
+import alignment from '../../data/studies/eval-alignment.json';
+import { tex, mathText } from '../../lib/math';
+import 'katex/dist/katex.min.css';
 import '@fontsource-variable/bricolage-grotesque';
 import '@fontsource-variable/source-sans-3';
 
@@ -13,10 +16,10 @@ import '@fontsource-variable/source-sans-3';
 // appendix, the remark plugin in astro.config.mjs swaps each block for a link
 // back to its figure so nothing renders twice.
 const mermaidSources = [...designDocSource.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1].trim());
-if (mermaidSources.length !== 4) {
-  throw new Error(`Expected 4 mermaid diagrams in the eval design doc, found ${mermaidSources.length}`);
+if (mermaidSources.length !== 5) {
+  throw new Error(`Expected 5 mermaid diagrams in the eval design doc, found ${mermaidSources.length}`);
 }
-const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram] = mermaidSources;
+const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram, validationDiagram] = mermaidSources;
 
 // Baseline (v0): one eval pipeline over one metadata table. ER column types
 // are illustrative; Mermaid requires one per column.
@@ -69,7 +72,7 @@ const evalIdentityDiagram = `flowchart LR
     GEN --> ANS[("Stored answers<br/>generation_id")]
     ANS --> GRD["Grade<br/>verdict = 0 or 1"]
     GR --> GRD
-    GRD --> REP["Report at time t<br/>accuracy = Σ verdicts / graded<br/>coverage = graded / total"]
+    GRD --> REP["Report at time t<br/>accuracy = correct / graded<br/>coverage = graded / total"]
     NG["New grader_version"] -.-> RG["Re-grade<br/>no LLM calls"]
     ANS -.-> RG
     RG -.-> REP2["New report at t′<br/>same answers"]`;
@@ -111,7 +114,7 @@ const scalePlaneDiagram = `flowchart TB
     C[Client] -->|"POST /v1/executions"| API[Execution API]
     API -->|"admit, or 429 / 503"| Q[("Execution queue<br/>task = (execution_id, record_id)")]
     Q --> W1 & W2 & WN
-    subgraph WORKERS["Execution workers × N: stateless, competing consumers"]
+    subgraph WORKERS["N execution workers: stateless, competing consumers"]
         direction LR
         W1["Worker 1<br/>generate → grade"]
         W2["Worker 2<br/>generate → grade"]
@@ -180,7 +183,7 @@ const temporalReasons = [
   },
   {
     title: 'The provider limit is enforced by the server',
-    body: "One generate task queue per model, with max_task_queue_activities_per_second set to the provider's rate. Temporal enforces it across every worker on that queue, so adding generate workers cannot exceed it. Concurrency is still capped per worker, so pool size × max_concurrent_activities must stay under the provider's concurrency.",
+    body: "One generate task queue per model, with max_task_queue_activities_per_second set to the provider's rate. Temporal enforces it across every worker on that queue, so adding generate workers cannot exceed it. Concurrency is still capped per worker, so $\\text{pool size} \\times \\texttt{max\\_concurrent\\_activities}$ must stay under the provider's concurrency.",
     replaces: 'Hand-built distributed rate limiter',
   },
   {
@@ -253,7 +256,7 @@ const issues = [
   {
     title: 'Throttling',
     symptom: 'The provider returns 429s. Retries pile on top of new work and the tail stretches.',
-    answer: "One generate task queue per model, with max_task_queue_activities_per_second at the provider's rate, so Temporal holds dispatch under the limit across all workers. Pool size × max_concurrent_activities stays under the provider's concurrency. Retry-After is respected, with exponential backoff and jitter.",
+    answer: "One generate task queue per model, with max_task_queue_activities_per_second at the provider's rate, so Temporal holds dispatch under the limit across all workers. $\\text{Pool size} \\times \\texttt{max\\_concurrent\\_activities}$ stays under the provider's concurrency. Retry-After is respected, with exponential backoff and jitter.",
     signal: 'Provider 429 rate, activity retries per minute, tokens per minute against quota.',
   },
   {
@@ -286,38 +289,38 @@ const claims = [
   {
     claim: 'Generation throughput grows linearly with workers until the provider limit.',
     mechanism: 'Per-question tasks on a shared queue. Workers are stateless and never coordinate with each other.',
-    bound: 'X ≤ min(N · c / W, R), for N workers, c calls each, W seconds per call, R provider rate.',
+    bound: '$X \\le \\min(N c / W,\\ R)$, for $N$ workers, $c$ calls each, $W$ seconds per call, $R$ provider rate.',
     breaks: 'When R binds. More workers then only add 429s, so the limiter caps concurrency instead.',
   },
   {
     claim: 'Ingestion cost does not grow with the number of evaluations.',
     mechanism: 'Datasets are content-addressed snapshots. Equal content is stored once, and executions read Blob directly.',
-    bound: 'One fetch and parse per unique dataset content: O(dataset bytes).',
+    bound: 'One fetch and parse per unique dataset content: $O(\\text{dataset bytes})$.',
     breaks: 'Only first-time content pays. Evaluations never touch ingestion.',
   },
   {
     claim: 'Changing the grader costs no LLM calls.',
     mechanism: 'Answers are stored apart from verdicts, and verdicts are keyed by grader version.',
-    bound: 'Re-grade cost = questions × grader CPU time.',
+    bound: '$\\text{re-grade cost} = \\text{questions} \\times \\text{grader CPU time}$',
     breaks: 'If the grader is itself an LLM judge, it needs its own provider budget and limiter.',
   },
   {
     claim: 'A retry never duplicates a verdict.',
     mechanism: 'Stable task identity, conditional state transitions, idempotent commits, and a deduplicating inbox.',
-    bound: 'LLM calls per question ≤ 1 + the generation retry limit. Grading retries add zero.',
+    bound: '$\\text{LLM calls per question} \\le 1 + \\text{generation retry limit}$. Grading retries add zero.',
     breaks: 'A timed-out call may still be billed by the provider. That costs money, not correctness.',
   },
   {
     claim: 'Aggregation cost per event is constant and independent of model latency.',
     mechanism: 'Insert into the inbox by event_id, then update counters.',
-    bound: 'O(1) work per event and O(tasks) inbox rows per evaluation.',
+    bound: '$O(1)$ work per event and $O(\\text{tasks})$ inbox rows per evaluation.',
     breaks: 'One very large evaluation turns its counter row into a write hotspot. Mitigation: shard counters by task hash and sum on read.',
   },
   {
     claim: 'A burst becomes waiting time, not errors, up to the admission limit.',
     mechanism: 'Durable per-service queues plus admission control.',
-    bound: 'Backlog grows at λ − μ while arrivals exceed capacity. Outstanding work is capped per tenant.',
-    breaks: 'Sustained λ > μ. Then the answer is more safe capacity or 429/503, not a deeper queue.',
+    bound: 'Backlog grows at $\\lambda - \\mu$ while arrivals exceed capacity. Outstanding work is capped per tenant.',
+    breaks: 'Sustained $\\lambda > \\mu$. Then the answer is more safe capacity or 429/503, not a deeper queue.',
   },
   {
     claim: 'Orchestration state stays bounded per workflow, however large the run.',
@@ -328,7 +331,7 @@ const claims = [
   {
     claim: "One tenant's large run cannot starve other tenants.",
     mechanism: 'Per-tenant quotas, per-tenant concurrency limits, and fair scheduling.',
-    bound: "Each tenant's in-flight work ≤ its quota.",
+    bound: "$\\text{tenant in-flight work} \\le \\text{tenant quota}$",
     breaks: 'If quotas add up to more than the provider limit, fairness still holds, but every tenant slows down.',
   },
 ];
@@ -378,7 +381,7 @@ const evolution = [
   },
   {
     sketch: 'JobState: Enqueue, InProcess, Cancelled, Finished',
-    final: 'Execution status plus terminal accounting: graded + failed + cancelled = total.',
+    final: 'Execution status plus terminal accounting: $\\text{graded} + \\text{failed} + \\text{cancelled} = \\text{total}$.',
     why: 'A run can finish with some rows failed. That has to be visible, not hidden inside "Finished".',
   },
   {
@@ -391,6 +394,91 @@ const evolution = [
     final: 'A separate AggregationService counting deduplicated task events, with accuracy and coverage reported separately.',
     why: 'Counting from events survives duplicates and out-of-order delivery.',
   },
+];
+
+
+// ---------------------------------------------------------------------------
+// Judge alignment (section 13). Every number comes from
+// src/data/studies/eval-alignment.json, written by
+// scripts/study-eval-alignment/analyze.py, so the page cannot drift from the data.
+type Dim = keyof typeof alignment.dimensions;
+const dimOrder: Dim[] = ['coherence', 'consistency', 'fluency', 'relevance'];
+const dimLabel: Record<Dim, string> = {
+  coherence: 'Coherence', consistency: 'Consistency', fluency: 'Fluency', relevance: 'Relevance',
+};
+// Avoid printing -0.00 for values that round to zero.
+const fmt = (x: number, digits = 2) => (Math.abs(x) < 0.5 * 10 ** -digits ? 0 : x).toFixed(digits);
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+const range = (values: number[], f: (x: number) => string = (x) => fmt(x)) =>
+  `${f(Math.min(...values))} to ${f(Math.max(...values))}`;
+const dims = dimOrder.map((d) => ({ key: d, label: dimLabel[d], ...alignment.dimensions[d] }));
+
+// Chart colors: validated with the dataviz palette checker against the white
+// chart surface (lightness band, chroma floor, CVD and normal-vision separation, contrast).
+const SERIES = {
+  hh: { label: 'Expert vs expert', color: '#2a78d6' },
+  hm: { label: 'Judge vs expert', color: '#087a55' },
+};
+
+function agreementPanel(stratum: 'unanimous' | 'split'): string {
+  const W = 560, rowH = 46, top = 8, left = 104, right = 56;
+  const plotW = W - left - right;
+  const H = top + dims.length * rowH + 30;
+  const x = (v: number) => left + v * plotW;
+  const parts: string[] = [];
+  for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    parts.push(`<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 26}" class="grid" />`);
+    parts.push(`<text x="${x(t)}" y="${H - 8}" class="tick" text-anchor="middle">${fmt(t)}</text>`);
+  }
+  dims.forEach((d, i) => {
+    const b = d.binary[stratum];
+    const y0 = top + i * rowH + 8;
+    parts.push(`<text x="${left - 10}" y="${y0 + 13}" class="cat" text-anchor="end">${d.label}</text>`);
+    parts.push(`<text x="${left - 10}" y="${y0 + 28}" class="n" text-anchor="end">n = ${b.n}</text>`);
+    (['hh', 'hm'] as const).forEach((k, j) => {
+      const v = k === 'hh' ? b.hh_agreement : b.hm_agreement;
+      const y = y0 + j * 14;
+      const w = Math.max(v * plotW, 2);
+      const tip = `${d.label}, ${stratum} items: ${SERIES[k].label} agreement ${fmt(v)} (n = ${b.n})`;
+      parts.push(`<g class="bar"><title>${tip}</title><rect x="${left}" y="${y}" width="${w}" height="12" rx="2" fill="${SERIES[k].color}" /><rect x="${left}" y="${y - 1}" width="${plotW}" height="14" fill="transparent" /></g>`);
+      parts.push(`<text x="${left + w + 6}" y="${y + 10}" class="val">${fmt(v)}</text>`);
+    });
+    const r = b.random_agreement;
+    parts.push(`<g class="bar"><title>${d.label}, ${stratum} items: random labeler at the judge's pass rate ${fmt(r)}</title><line x1="${x(r)}" x2="${x(r)}" y1="${y0 - 3}" y2="${y0 + 29}" class="random" /></g>`);
+  });
+  const title = stratum === 'unanimous' ? 'Items where all three experts agree' : 'Items where the experts split 2 to 1';
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}: agreement by dimension" class="agreement-svg">${parts.join('')}</svg>`;
+}
+const unanimousPanel = agreementPanel('unanimous');
+const splitPanel = agreementPanel('split');
+
+const split = dims.map((d) => d.binary.split);
+const alignmentFacts = {
+  judgePass: dims.map((d) => d.binary.all.judge_pass_rate),
+  humanPass: dims.map((d) => d.binary.all.human_pass_rate),
+  aucUnanimous: dims.map((d) => d.discrimination.auc_unanimous),
+  aucSplit: dims.map((d) => d.discrimination.auc_split),
+  kappaRaw: dims.map((d) => d.binary.all.hm_kappa),
+  kappaRecal: dims.map((d) => d.recalibrated.hm_kappa_all),
+  kappaHH: dims.map((d) => d.binary.all.hh_kappa),
+  splitHM: split.map((b) => b.hm_agreement),
+  splitRandom: split.map((b) => b.random_agreement),
+  splitKappa: split.map((b) => b.hm_kappa),
+  splitShare: dims.map((d) => d.binary.split.n / d.binary.all.n),
+  tau: dims.map((d) => d.system.kendall_tau_score),
+  rawErr: dims.map((d) => d.correction_check.mean_abs_error_raw),
+  corErr: dims.map((d) => d.correction_check.mean_abs_error_corrected),
+  covClosed: dims.map((d) => d.correction_check.closed_form_ci95_coverage),
+  covBoot: dims.map((d) => d.correction_check.cluster_bootstrap_ci95_coverage),
+};
+
+// Formulas shown in the measurement-validity section, rendered at build time.
+const validityFormulas = [
+  { name: 'Error bar', note: 'Miller 2024', html: tex(String.raw`\mathrm{SE}(\hat{\mu}) = \sqrt{\frac{\hat{\mu}(1-\hat{\mu})}{n}}`, true) },
+  { name: 'Paired difference', note: 'Miller 2024', html: tex(String.raw`\mathrm{SE}(\bar{d}) = \frac{\operatorname{sd}(d_1,\dots,d_n)}{\sqrt{n}}`, true) },
+  { name: 'Corrected accuracy', note: 'Lee et al. 2025', html: tex(String.raw`\hat{\theta} = \frac{\hat{p} + \hat{q}_0 - 1}{\hat{q}_0 + \hat{q}_1 - 1}`, true) },
+  { name: 'Audit sample (PPI)', note: 'Boyeau et al. 2025', html: tex(String.raw`\hat{\theta} = \tfrac{1}{N}\textstyle\sum_i \hat{Z}_i + \tfrac{1}{n}\sum_j (Z_j - \hat{Z}_j)`, true) },
+  { name: 'Trust or escalate', note: 'Jung et al. 2025', html: tex(String.raw`P(\hat{Z} = Z \mid c \ge \lambda) \ge 1 - \alpha`, true) },
 ];
 
 const homeHref = withBase('/');
@@ -409,6 +497,8 @@ const chapters = [
   { id: 'issues', label: 'Main issues' },
   { id: 'failure', label: 'What breaks at scale' },
   { id: 'metrics', label: 'Honest metrics' },
+  { id: 'validity', label: 'Measurement validity' },
+  { id: 'alignment', label: 'Judge alignment' },
   { id: 'decisions', label: 'Decision log' },
   { id: 'design-doc', label: 'Full design doc' },
 ];
@@ -459,6 +549,8 @@ const decisions = [
   { q: 'Why not promise exactly-once?', a: 'An LLM call can succeed on the provider after my worker times out. I make internal state effectively-once instead.' },
   { q: 'Why Temporal mini workers?', a: 'Durable per-question state, declared retries, timeouts, and a server-enforced provider limit, instead of building each by hand. Each small pool scales on its own bottleneck.' },
   { q: 'Why split accuracy from coverage?', a: 'Failed questions are not wrong answers. Mixing them silently moves the denominator.' },
+  { q: 'Why validate the grader by agreement stratum?', a: 'Where experts disagree, any labeler looks as good as a human. Only items where experts agree show real grader error, so the acceptance test runs there.' },
+  { q: 'Why a cluster bootstrap for corrected accuracy?', a: 'Answers from one source document are correlated. On SummEval the closed-form interval covered the truth 69% to 84% of the time; resampling whole documents restored about 95%.' },
 ];
 ---
 
@@ -567,7 +659,9 @@ const decisions = [
         </p>
         <p>
           Binary verdicts keep the arithmetic simple and honest:
-          <code>accuracy = Σ verdicts / graded</code> and <code>coverage = graded / total</code>. A
+          <Fragment set:html={tex(String.raw`\text{accuracy} = \tfrac{1}{g}\sum_{i} v_i`)} /> over the
+          <Fragment set:html={tex('g')} /> graded questions, and
+          <Fragment set:html={tex(String.raw`\text{coverage} = \text{graded} / \text{total}`)} />. A
           question that failed to generate has no verdict. It lowers coverage, not accuracy.
         </p>
       </div>
@@ -640,7 +734,7 @@ const decisions = [
           <thead><tr><th scope="col">Baseline (v0)</th><th scope="col">Scaled design (v1)</th><th scope="col">Why</th></tr></thead>
           <tbody>
             {evolution.map((row) => (
-              <tr><th scope="row">{row.sketch}</th><td>{row.final}</td><td>{row.why}</td></tr>
+              <tr><th scope="row">{row.sketch}</th><td set:html={mathText(row.final)} /><td>{row.why}</td></tr>
             ))}
           </tbody>
         </table>
@@ -760,7 +854,7 @@ const decisions = [
         </article>
         <article>
           <p class="mono-label">Little's Law</p>
-          <h3>L = λ × W</h3>
+          <h3 set:html={tex(String.raw`L = \lambda W`)} />
           <p>
             At 100 tasks per second and 5 seconds in the system, about 500 tasks are in flight.
             That sizes the concurrency I need to hold. It says nothing about what the provider
@@ -819,7 +913,7 @@ const decisions = [
           <li>
             <span class="mono-label">{String(index + 1).padStart(2, '0')}</span>
             <h4>{reason.title}</h4>
-            <p>{reason.body}</p>
+            <p set:html={mathText(reason.body)} />
             <p class="replaces"><strong>Replaces:</strong> {reason.replaces}</p>
           </li>
         ))}
@@ -864,7 +958,7 @@ const decisions = [
           <thead><tr><th scope="col">Claim</th><th scope="col">Mechanism</th><th scope="col">Bound</th><th scope="col">Breaks when</th></tr></thead>
           <tbody>
             {claims.map((row) => (
-              <tr><th scope="row">{row.claim}</th><td>{row.mechanism}</td><td>{row.bound}</td><td>{row.breaks}</td></tr>
+              <tr><th scope="row">{row.claim}</th><td>{row.mechanism}</td><td set:html={mathText(row.bound)} /><td set:html={mathText(row.breaks)} /></tr>
             ))}
           </tbody>
         </table>
@@ -875,8 +969,8 @@ const decisions = [
         <h3>The ceiling is the provider, not the worker count.</h3>
         <p>
           Assume 5 seconds per generation and 20 concurrent calls per run. One 500-question run
-          needs about 500 × 5 / 20 = 125 seconds of generation. Ten runs at once hold
-          10 × 20 = 200 calls in flight, which by Little's Law is 40 calls per second. If the
+          needs about <Fragment set:html={tex(String.raw`500 \times 5 / 20 = 125`)} /> seconds of generation. Ten runs at once hold
+          <Fragment set:html={tex(String.raw`10 \times 20 = 200`)} /> calls in flight, which by Little's Law is 40 calls per second. If the
           provider allows 100 calls in flight, five such runs is the ceiling, however many workers
           are added. So the platform's job at scale is to queue fairly and never exceed that limit.
         </p>
@@ -930,7 +1024,7 @@ const decisions = [
             <h3>{issue.title}</h3>
             <dl>
               <div><dt>Symptom</dt><dd>{issue.symptom}</dd></div>
-              <div><dt>Design answer</dt><dd>{issue.answer}</dd></div>
+              <div><dt>Design answer</dt><dd set:html={mathText(issue.answer)} /></div>
               <div><dt>Signal</dt><dd>{issue.signal}</dd></div>
             </dl>
           </li>
@@ -1025,9 +1119,9 @@ const decisions = [
         </p>
       </div>
       <dl class="formula-grid">
-        <div><dt>accuracy</dt><dd>correct / graded</dd></div>
-        <div><dt>coverage</dt><dd>graded / total</dd></div>
-        <div><dt>terminal invariant</dt><dd>graded + failed + cancelled = total</dd></div>
+        <div><dt>accuracy</dt><dd set:html={tex(String.raw`\frac{\text{correct}}{\text{graded}}`, true)} /></div>
+        <div><dt>coverage</dt><dd set:html={tex(String.raw`\frac{\text{graded}}{\text{total}}`, true)} /></div>
+        <div><dt>terminal invariant</dt><dd set:html={tex(String.raw`\text{graded} + \text{failed} + \text{cancelled} = \text{total}`, true)} /></div>
       </dl>
       <div class="prose">
         <p>
@@ -1045,9 +1139,170 @@ const decisions = [
       </div>
     </section>
 
+
+    <section id="validity" class="study-section tinted" aria-labelledby="validity-title">
+      <div class="section-intro">
+        <p class="eyebrow">12 / Measurement validity</p>
+        <h2 id="validity-title">A score is a measurement: it needs an error bar and a validated grader.</h2>
+        <p>
+          The sections above make the numbers correct under failure. This one makes them mean
+          something. Every report carries a standard error, names the grader version it was
+          measured under, and links to evidence of how well that grader agrees with humans. It
+          adds no service: calibration sets are datasets, validation is a grade-only execution,
+          and every statistic is an aggregation.
+        </p>
+      </div>
+
+      <figure class="diagram fit" id="figure-5">
+        <div class="diagram-scroll"><pre class="mermaid">{validationDiagram}</pre></div>
+        <figcaption><span class="mono-label">Figure 5</span> <span>Grader validation and statistical reporting, inside the same three services.</span></figcaption>
+      </figure>
+
+      <ul class="formula-cards">
+        {validityFormulas.map((f) => (
+          <li>
+            <p class="mono-label">{f.name}</p>
+            <div class="formula" set:html={f.html} />
+            <p class="formula-note">{f.note}</p>
+          </li>
+        ))}
+      </ul>
+
+      <div class="prose">
+        <p>
+          Here <Fragment set:html={tex(String.raw`\hat{Z}`)} /> is the grader's 0/1 verdict and
+          <Fragment set:html={tex('Z')} /> the human one. Sensitivity
+          <Fragment set:html={tex(String.raw`q_1 = P(\hat{Z} = 1 \mid Z = 1)`)} /> and specificity
+          <Fragment set:html={tex(String.raw`q_0 = P(\hat{Z} = 0 \mid Z = 0)`)} /> come from a
+          human-labeled calibration set. A grader version can be pinned only after it has a
+          validation report, and the report is stratified by how much the humans agree with each
+          other. The next section shows why that stratification is not optional.
+        </p>
+      </div>
+    </section>
+
+    <section id="alignment" class="study-section" aria-labelledby="alignment-title">
+      <div class="section-intro">
+        <p class="eyebrow">13 / Judge alignment</p>
+        <h2 id="alignment-title">Does an LLM judge agree with humans? Split the question first.</h2>
+        <p>
+          I tested the validation rules on public data: GPT-4 as a judge (G-Eval, 20 sampled
+          scores per item) against the three SummEval expert annotators. That is
+          {alignment.meta.items_per_dimension.toLocaleString('en-US')} summaries of
+          {alignment.meta.documents} news articles from {alignment.meta.systems} systems, on four
+          dimensions. Scores become 0/1 verdicts as on this platform: pass means 4 or 5 out of 5
+          (3 out of 3 for fluency).
+        </p>
+      </div>
+
+      <dl class="alignment-defs">
+        <div><dt>Calibration</dt><dd>Does the judge pass items as often as humans do? Pass rate, sensitivity, specificity.</dd></div>
+        <div><dt>Discrimination</dt><dd>Does it rank clearly good items above clearly bad ones? AUC on items all experts agree on.</dd></div>
+        <div><dt>Rater equivalence</dt><dd>Could it replace one expert? Judge-expert vs expert-expert agreement, per agreement stratum.</dd></div>
+      </dl>
+
+      <figure class="agreement-figure" id="agreement-chart">
+        <ul class="chart-legend" aria-label="Legend">
+          <li><span class="swatch" style={`background:${SERIES.hh.color}`}></span>{SERIES.hh.label}</li>
+          <li><span class="swatch" style={`background:${SERIES.hm.color}`}></span>{SERIES.hm.label}</li>
+          <li><span class="swatch tick-swatch"></span>Random labeler at the judge's pass rate</li>
+        </ul>
+        <div class="agreement-scroll"><div class="agreement-panels">
+          <div>
+            <h3 class="panel-title">All three experts agree</h3>
+            <Fragment set:html={unanimousPanel} />
+          </div>
+          <div>
+            <h3 class="panel-title">Experts split 2 to 1</h3>
+            <Fragment set:html={splitPanel} />
+          </div>
+        </div></div>
+        <figcaption>
+          <span class="mono-label">Figure 6</span>
+          <span>Share of verdicts that match one expert. On split items two experts agree 1/3 of the time by construction, so any labeler near the random line looks "better than human".</span>
+        </figcaption>
+        <details class="chart-data">
+          <summary>Data table</summary>
+          <div class="table-wrap tight">
+            <table class="alignment-table">
+              <thead><tr><th scope="col">Dimension</th><th scope="col">Items</th><th scope="col">n</th><th scope="col">Expert vs expert</th><th scope="col">Judge vs expert</th><th scope="col">Random labeler</th><th scope="col">Judge <Fragment set:html={tex(String.raw`\kappa`)} /></th></tr></thead>
+              <tbody>
+                {dims.flatMap((d) => (['unanimous', 'split'] as const).map((st) => (
+                  <tr><th scope="row">{d.label}</th><td>{st === 'unanimous' ? 'Agree' : 'Split'}</td><td>{d.binary[st].n}</td><td>{fmt(d.binary[st].hh_agreement)}</td><td>{fmt(d.binary[st].hm_agreement)}</td><td>{fmt(d.binary[st].random_agreement)}</td><td>{fmt(d.binary[st].hm_kappa)}</td></tr>
+                )))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </figure>
+
+      <ol class="finding-list">
+        <li>
+          <h3>Pooled numbers mix two regimes.</h3>
+          <p>
+            On split items the judge matches one expert {range(alignmentFacts.splitHM)} of the
+            time, above expert-expert agreement of 0.33. A random labeler with the judge's pass
+            rate scores {range(alignmentFacts.splitRandom)}, and the judge's <Fragment set:html={tex(String.raw`\kappa`)} /> there is
+            {range(alignmentFacts.splitKappa)}. The "advantage" is arithmetic, not skill. Split
+            items are {range(alignmentFacts.splitShare, pct)} of each dimension, so a pooled
+            agreement is not comparable across dimensions.
+          </p>
+        </li>
+        <li>
+          <h3>Calibration fails; discrimination mostly holds.</h3>
+          <p>
+            The judge passes {range(alignmentFacts.judgePass, pct)} of items where the experts pass
+            {range(alignmentFacts.humanPass, pct)}. Yet on items all experts agree on, its AUC is
+            {range(alignmentFacts.aucUnanimous)}. With the threshold refit on half the documents
+            and tested on the other half, judge-expert <Fragment set:html={tex(String.raw`\kappa`)} /> rises from {range(alignmentFacts.kappaRaw)}
+            to {range(alignmentFacts.kappaRecal)}, against expert-expert <Fragment set:html={tex(String.raw`\kappa`)} /> of {range(alignmentFacts.kappaHH)}.
+            On split items the AUC is only {range(alignmentFacts.aucSplit)}.
+          </p>
+        </li>
+        <li>
+          <h3>Rankings survive where item verdicts do not.</h3>
+          <p>
+            Kendall's <Fragment set:html={tex(String.raw`\tau`)} /> between judge and expert rankings of the 16 systems is
+            {range(alignmentFacts.tau)}, while item-level <Fragment set:html={tex(String.raw`\kappa`)} /> is {range(alignmentFacts.kappaRaw)}. A
+            judge can be fit to rank systems and unfit to grade single answers.
+          </p>
+        </li>
+      </ol>
+
+      <div class="table-wrap">
+        <table class="alignment-table">
+          <caption>Correcting the pass rate with sensitivity and specificity from a calibration half of the documents ({alignment.dimensions.coherence.correction_check.reps} random splits). Coverage is how often the 95% interval contains the true human pass rate.</caption>
+          <thead><tr><th scope="col">Dimension</th><th scope="col">Error, raw</th><th scope="col">Error, corrected</th><th scope="col">Coverage, closed form</th><th scope="col">Coverage, cluster bootstrap</th></tr></thead>
+          <tbody>
+            {dims.map((d) => (
+              <tr><th scope="row">{d.label}</th><td>{fmt(d.correction_check.mean_abs_error_raw)}</td><td>{fmt(d.correction_check.mean_abs_error_corrected)}</td><td>{pct(d.correction_check.closed_form_ci95_coverage)}</td><td>{pct(d.correction_check.cluster_bootstrap_ci95_coverage)}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose">
+        <p>
+          The correction works: error falls from {range(alignmentFacts.rawErr)} to
+          {range(alignmentFacts.corErr)}. Its closed-form interval does not: it covers the truth
+          only {range(alignmentFacts.covClosed, pct)} of the time, because summaries of one
+          article are correlated and the judge's error rates move from article to article.
+          Resampling whole documents restores {range(alignmentFacts.covBoot, pct)}. The design
+          now requires that interval, and a stratified validation report before a grader can be
+          pinned.
+        </p>
+        <p class="method-note">
+          Method and data: <code>scripts/study-eval-alignment/analyze.py</code> downloads the
+          inputs from pinned commits, checks their SHA-256, and writes
+          <code>src/data/studies/eval-alignment.json</code>. Bootstrap:
+          {alignment.meta.bootstrap}. Method after Elangovan et al. (ICLR 2025).
+        </p>
+      </div>
+    </section>
+
     <section id="decisions" class="study-section tinted" aria-labelledby="decisions-title">
       <div class="section-intro">
-        <p class="eyebrow">12 / Decision log</p>
+        <p class="eyebrow">14 / Decision log</p>
         <h2 id="decisions-title">The trade-offs, in one place.</h2>
       </div>
       <dl class="decision-grid">
@@ -1070,12 +1325,12 @@ const decisions = [
 
     <section id="design-doc" class="study-section" aria-labelledby="design-doc-title">
       <div class="section-intro">
-        <p class="eyebrow">13 / Full design doc</p>
+        <p class="eyebrow">15 / Full design doc</p>
         <h2 id="design-doc-title">The complete design, as written.</h2>
         <p>
           Everything above is my reading of this document. Here is the source in full: APIs,
           request and response shapes, SSRF rules, grader safety, retry policy, and data model.
-          Its diagrams are the four figures above.
+          Its diagrams are the five figures above.
         </p>
       </div>
       <article class="design-doc">
@@ -1709,7 +1964,104 @@ const decisions = [
 
   .formula-grid div { padding: 20px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
   .formula-grid dt { color: var(--accent-strong); font-family: var(--mono); font-size: 12px; font-weight: 700; text-transform: uppercase; }
-  .formula-grid dd { margin: 8px 0 0; font-family: var(--mono); font-size: 16px; }
+  .formula-grid dd { margin: 8px 0 0; font-size: 16px; overflow-x: auto; }
+
+  /* ---------- math ---------- */
+  :global(.katex) { font-size: 1.05em; }
+  :global(.katex-display) { margin: 12px 0; overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+  .design-doc :global(.katex-display) { margin: 18px 0; }
+
+  /* ---------- measurement validity ---------- */
+  .formula-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+    margin: 36px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .formula-cards > li {
+    padding: 18px 20px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    min-width: 0;
+  }
+  .formula { overflow-x: auto; }
+  .formula-note { margin: 0; color: var(--ink-faint); font-size: 13px; }
+
+  /* ---------- judge alignment ---------- */
+  .alignment-defs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 36px 0 0;
+  }
+  .alignment-defs div { padding: 18px 0 0; border-top: 3px solid var(--ink); }
+  .alignment-defs dt { font-family: var(--display); font-size: 19px; font-weight: 650; }
+  .alignment-defs dd { margin: 6px 0 0; color: var(--ink-soft); line-height: 1.55; }
+
+  .agreement-figure { margin: 48px 0 0; }
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+  .chart-legend li { display: inline-flex; align-items: center; gap: 8px; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+  .tick-swatch { width: 2px; height: 16px; border-radius: 0; background: repeating-linear-gradient(to bottom, var(--ink-soft) 0 3px, transparent 3px 5px); }
+  .agreement-scroll { overflow-x: auto; }
+  .agreement-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; min-width: 0; }
+  .panel-title { margin: 0 0 6px; font-size: 16px; font-weight: 650; }
+  .agreement-panels :global(.agreement-svg) { display: block; width: 100%; height: auto; }
+  .agreement-panels :global(.agreement-svg .grid) { stroke: var(--line); stroke-width: 1; }
+  .agreement-panels :global(.agreement-svg .tick) { fill: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+  .agreement-panels :global(.agreement-svg .cat) { fill: var(--ink); font-size: 13px; font-weight: 600; font-family: var(--sans); }
+  .agreement-panels :global(.agreement-svg .n) { fill: var(--ink-faint); font-size: 11px; font-family: var(--sans); }
+  .agreement-panels :global(.agreement-svg .val) { fill: var(--ink-soft); font-size: 11px; font-family: var(--sans); }
+  .agreement-panels :global(.agreement-svg .random) { stroke: var(--ink-soft); stroke-width: 2; stroke-dasharray: 3 2; }
+  .agreement-panels :global(.agreement-svg .bar:hover rect:first-of-type) { opacity: 0.8; }
+  .agreement-figure figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    align-items: baseline;
+    margin-top: 12px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .chart-data { margin-top: 12px; }
+  .chart-data summary { cursor: pointer; color: var(--accent-strong); font-size: 14px; font-weight: 600; }
+  .chart-data .table-wrap { margin-top: 12px; }
+
+  table.alignment-table caption { caption-side: top; padding: 0 0 10px; text-align: left; color: var(--ink-soft); font-size: 14px; }
+  table.alignment-table td { font-variant-numeric: tabular-nums; }
+
+  .finding-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 40px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .finding-list > li { padding: 20px; border: 1px solid var(--line-strong); border-top: 3px solid var(--accent); border-radius: var(--radius-sm); }
+  .finding-list h3 { margin: 0 0 10px; font-size: 19px; }
+  .finding-list p { margin: 0; color: var(--ink-soft); line-height: 1.6; font-size: 15px; }
+  .method-note { color: var(--ink-soft); font-size: 14px; }
+
+  @media (max-width: 860px) {
+    .alignment-defs,
+    .finding-list,
+    .agreement-panels { grid-template-columns: minmax(0, 1fr); }
+    .agreement-panels { min-width: 460px; }
+  }
 
   .decision-grid {
     display: grid;

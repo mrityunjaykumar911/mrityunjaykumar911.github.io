@@ -3,6 +3,8 @@ import sitemap from '@astrojs/sitemap';
 import { unified } from '@astrojs/markdown-remark';
 import yaml from '@rollup/plugin-yaml';
 import { loadEnv } from 'vite';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 /**
  * In design-study markdown under src/data/studies/, replace each ```mermaid
@@ -68,9 +70,14 @@ export default defineConfig({
   compressHTML: true,
   markdown: {
     // Astro 7 defaults to the Sätteri Markdown processor, which does not run
-    // remark plugins. The figure-reference plugin needs the unified
-    // (remark/rehype) processor, so select it explicitly.
-    processor: unified({ remarkPlugins: [remarkStudyFigureRefs] }),
+    // remark or rehype plugins. Select the unified processor explicitly: the
+    // figure-reference plugin needs it, and so does math. Math ($...$ inline,
+    // $$...$$ display) is rendered by KaTeX at build time, so no math
+    // JavaScript ships and no request leaves the site.
+    processor: unified({
+      remarkPlugins: [remarkMath, remarkStudyFigureRefs],
+      rehypePlugins: [[rehypeKatex, { throwOnError: true, output: 'htmlAndMathml' }]],
+    }),
   },
   build: {
     // Emit /404.html rather than /404/index.html — GitHub Pages only serves
