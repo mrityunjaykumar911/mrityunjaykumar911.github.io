@@ -75,7 +75,7 @@ const evalIdentityDiagram = `flowchart LR
     ANS --> GRD["Grade<br/>verdict = 0 or 1"]
     GR --> GRD
     GRD --> REP["Report at time t<br/>accuracy = correct / graded<br/>coverage = graded / total"]
-    NG["New grader_version"] -.-> RG["Re-grade<br/>no LLM calls"]
+    NG["New grader_version"] -.-> RG["Re-grade<br/>no generation calls"]
     ANS -.-> RG
     RG -.-> REP2["New report at t′<br/>same answers"]`;
 
@@ -231,7 +231,7 @@ const retryStateDiagram = `flowchart TB
     R1["Run 1<br/>pins: snapshot hash, model version, grader version"] -->|"some tasks failed"| R2["Retry run 2<br/>parent = run 1, same pins"]
     R2 --> Q{"For each task:<br/>what is already saved?"}
     Q -->|"verdict exists"| A["Reuse the verdict<br/>0 LLM calls"]
-    Q -->|"answer stored, no verdict"| B["Re-grade the stored answer<br/>0 LLM calls"]
+    Q -->|"answer stored, no verdict"| B["Re-grade the stored answer<br/>0 generation calls"]
     Q -->|"no answer"| C["Generate, then grade"]
     A & B & C --> REP["Report for run 2"]
     REP -.->|"lineage"| L["report → run → task → attempt → verdict"]`;
@@ -308,15 +308,15 @@ const claims = [
     breaks: 'Only first-time content pays. Evaluations never touch ingestion.',
   },
   {
-    claim: 'Changing the grader costs no LLM calls.',
+    claim: 'Changing the grader costs no generation calls.',
     mechanism: 'Answers are stored apart from verdicts, and verdicts are keyed by grader version.',
-    bound: '$\\text{re-grade cost} = \\text{questions} \\times \\text{grader CPU time}$',
+    bound: '$\\text{re-grade cost} = \\text{questions} \\times \\text{cost per grade}$: CPU time for a deterministic grader, one judge call for an LLM grader.',
     breaks: 'If the grader is itself an LLM judge, it needs its own provider budget and limiter.',
   },
   {
     claim: 'A retry never duplicates a verdict.',
     mechanism: 'Stable task identity, conditional state transitions, idempotent commits, and a deduplicating inbox.',
-    bound: '$\\text{LLM calls per question} \\le 1 + \\text{generation retry limit}$. Grading retries add zero.',
+    bound: '$\\text{generation calls per question} \\le 1 + \\text{generation retry limit}$. Grading retries add no generation calls; an LLM judge makes its own grading calls.',
     breaks: 'A timed-out call may still be billed by the provider. That costs money, not correctness.',
   },
   {
@@ -386,7 +386,7 @@ const evolution = [
   {
     sketch: 'EvalState: NotProcessed, InProgress, Finished',
     final: 'Task lifecycle with ANSWER_PERSISTED, two retry-wait states, and FAILED (Figure 3).',
-    why: 'The answer is stored before grading, so a grading retry never calls the LLM again. Failure is a state, not a missing row.',
+    why: 'The answer is stored before grading, so a grading retry never calls the evaluated model again. Failure is a state, not a missing row.',
   },
   {
     sketch: 'JobState: Enqueue, InProcess, Cancelled, Finished',
@@ -510,7 +510,8 @@ const workloadRows = [
   { q: 'One evaluation', v: `A full run of about ${RUN_QUESTIONS} questions (Math500-sized)`, src: 'Definition' },
   { q: 'Target throughput', v: `${RUNS_PER_HOUR.toLocaleString('en-US')} evaluations per hour`, src: 'Estimate' },
   { q: 'Estimated latency per evaluation', v: '24 min P50, 26 min P95, 60 min P99', src: 'Estimate' },
-  { q: 'Model calls per evaluation', v: `About ${RUN_QUESTIONS}, at most ${CALLS_PER_RUN} in flight`, src: 'Design default' },
+  { q: 'Generation calls per evaluation', v: `About ${RUN_QUESTIONS}, at most ${CALLS_PER_RUN} in flight`, src: 'Design default' },
+  { q: 'Grader', v: 'Deterministic answer match, CPU only. An LLM judge would add up to one grading call per question, against its own quota.', src: 'Design assumption' },
   { q: 'Questions per second', v: tex(String.raw`\tfrac{1000 \times 500}{3600} \approx ${t0(questionsPerSecond)}`), src: 'Derived', math: true },
   { q: 'Evaluations in flight', v: tex(String.raw`L = \lambda W = \tfrac{1000}{60} \times 24 \approx ${t0(runsInFlight)}`), src: "Derived (Little's Law)", math: true },
   { q: 'Model calls in flight', v: tex(String.raw`${t0(runsInFlight)} \times ${CALLS_PER_RUN} \approx ${t0(callsInFlight)}`), src: 'Derived', math: true },
@@ -736,8 +737,8 @@ const decisions = [
           Answers and verdicts are stored separately. A grading result is keyed by
           <code>(generation_id, grader_version, grader_config_hash)</code>, so one stored answer can
           carry verdicts from several graders. Re-grading a finished run with a new grader version
-          costs grader CPU and no LLM calls, and it produces a new point-in-time report over the
-          same answers.
+          makes no generation calls and produces a new point-in-time report over the same answers.
+          A deterministic grader costs only CPU; an LLM judge still makes one grading call per answer.
         </p>
         <p>
           Binary verdicts keep the arithmetic simple and honest:

@@ -252,7 +252,7 @@ Do not put `model_config` or `grader_uuid` in this request. Ingestion is model- 
 - Call the external LLM API for answer generation.
 - Run the Python grading library inside the worker environment.
 - Persist generated answers, generation attempts, grading results, and task states.
-- Run grade-only executions over stored answers (calibration sets and re-grades) without calling the LLM.
+- Run grade-only executions over stored answers (calibration sets and re-grades) without new generation calls. A deterministic grader makes no model calls; an LLM judge still makes grading calls.
 - Accept human labels for audited or escalated tasks (sections 7.4 and 7.5).
 - Publish progress/completion events to AggregationService through its API.
 
@@ -323,7 +323,7 @@ stateDiagram-v2
     FAILED --> [*]
 ```
 
-Persist the generated answer before grading. If grading fails transiently, retry grading against the stored answer instead of calling the LLM again. Persist generation attempts separately because model calls may be nondeterministic. `ESCALATED` is not terminal: the task stays open until a stronger grader or a human returns a verdict (section 7.5).
+Persist the generated answer before grading. If grading fails transiently, retry grading against the stored answer instead of calling the evaluated model again. Persist generation attempts separately because model calls may be nondeterministic. `ESCALATED` is not terminal: the task stays open until a stronger grader or a human returns a verdict (section 7.5).
 
 **Grader UUID safety**
 
@@ -587,7 +587,7 @@ flowchart LR
         CALSET[Calibration set<br/>answers + 3 or more human labels]
     end
     subgraph EXE["ExecutionService"]
-        GO[Grade-only execution<br/>no LLM calls]
+        GO[Grade-only execution<br/>no generation calls]
         REG[(Grader registry<br/>version, family,<br/>threshold, validation_id)]
         RUN[Evaluation execution]
         AUD[Human audit sample<br/>and escalation queue]
@@ -682,7 +682,7 @@ A verdict means "correct under the selected grader version". That grader can be 
 **How a validation runs.**
 
 1. Ingest a calibration set (section 4.1): stored model answers, each with at least three independent human labels. The answers should come from the same kinds of models the grader will judge. The best source is the human audit samples from real executions (7.4).
-2. ExecutionService runs the grader in grade-only mode on those stored answers. No LLM calls are made.
+2. ExecutionService runs the grader in grade-only mode on those stored answers. No generation calls are made; a deterministic grader makes no model calls at all, while an LLM judge makes one grading call per answer.
 3. AggregationService produces a `GraderValidationReport` keyed by `(grader_uuid, grader_version, grader_config_hash, calibration_snapshot_hash)`.
 4. The registry records the report ID and the calibrated confidence threshold. A new grader version needs a new report.
 

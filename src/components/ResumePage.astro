@@ -63,7 +63,7 @@ const title = `${profile.name} | ${profile.role}`;
 const description = stripMarkup(profile.tagline);
 const buildYear = new Date().getFullYear();
 const isPublicationHome = canonicalPath === '/' && !preview.active;
-const leadStudy = isPublicationHome
+const featuredStudy = isPublicationHome
   ? research.notes.find((note) => note.href === withBase('/studies/eval-pipeline.html'))
   : undefined;
 
@@ -175,9 +175,9 @@ const consoleHint = `
   <SiteHeader name={profile.name} resumePdf={profile.resumePdf} nav={nav} />
 
   <main id="main">
-    <Hero profile={profile} leadStudy={leadStudy} />
+    <Hero profile={profile} />
     {isPublicationHome ? <SelectedWork /> : <><SignalStrip signals={profile.signals} /><Work id="work" roles={experience} /></>}
-    <Research id="research" research={research} featuredHref={leadStudy?.href} />
+    <Research id="research" research={research} featuredStudy={featuredStudy} />
     <About id="about" paragraphs={profile.about} capabilities={capabilities} education={education} compact={isPublicationHome} />
     <Contact links={links} />
   </main>
