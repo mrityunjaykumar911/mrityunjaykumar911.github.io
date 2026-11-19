@@ -134,19 +134,27 @@ test('email link degrades gracefully without JavaScript', async ({ browser }) =>
   await context.close();
 });
 
-test('homepage leads with the author and a readable linked design proposal', async ({ page }) => {
+test('homepage leads with the author and features the design proposal under Research', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
   const heroHeading = page.getByRole('heading', { level: 1 });
   await expect(heroHeading).toHaveText('Mrityunjay Kumar');
+  await expect(page.locator('.hero-headline')).toHaveText(
+    'I build distributed infrastructure that makes LLM agents reliable in production.'
+  );
+  await expect(page.locator('.hero-headline')).toBeInViewport({ ratio: 1 });
   await expect(page.getByText('Member of Technical Staff', { exact: false }).first()).toBeInViewport();
-  const feature = page.getByRole('article', { name: 'Scaling out a distributed LLM evaluation pipeline' });
-  await expect(feature.getByText('Proposed architecture')).toBeInViewport();
-  await expect(feature).toContainText('reuse the answer');
+  // The proposal is research, not identity: it must not sit in the hero.
+  await expect(page.locator('.hero').getByRole('link', { name: /evaluation pipeline/ })).toHaveCount(0);
+  const feature = page.locator('#research').getByRole('article', {
+    name: 'Scaling out a distributed LLM evaluation pipeline',
+  });
+  await expect(feature).toContainText('Architecture study · Proposed design');
+  await expect(feature).toContainText('stored answer');
   const study = feature.getByRole('link', { name: 'Scaling out a distributed LLM evaluation pipeline' });
   await expect(study).toHaveAttribute('href', '/studies/eval-pipeline.html');
-  await expect(study).toBeInViewport({ ratio: 1 });
+  await expect(page.locator('#research .research-note a[href="/studies/eval-pipeline.html"]')).toHaveCount(0);
   expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
     'Bricolage Grotesque'
   );
@@ -187,7 +195,9 @@ test('ultrawide view preserves a bounded editorial reading width', async ({ page
   for (const [selector, minimum] of [
     ['.site-nav', 14],
     ['.work-summary', 18],
-    ['.lead-study div > p', 18],
+    ['.hero-headline', 26],
+    ['.hero-intro', 18],
+    ['.featured-summary', 18],
     ['.research-note h3', 20],
     ['.backstory p', 18],
     ['.site-footer', 14],
@@ -218,7 +228,7 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   const metadataSelectors = [
     '.wordmark',
     '.site-nav',
-    '.study-label',
+    '.featured-study .note-type',
     '.contact-links a',
     '.site-footer',
   ];
@@ -468,7 +478,7 @@ test('mobile navigation works without horizontal overflow', async ({ page }) => 
   await page.goto('/');
 
   const menu = page.locator('[data-menu-button]');
-  await expect(page.getByRole('link', { name: 'Scaling out a distributed LLM evaluation pipeline' })).toBeInViewport({ ratio: 1 });
+  await expect(page.locator('.hero-headline')).toBeInViewport({ ratio: 1 });
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAccessibleName('Open navigation');
   await menu.click();
@@ -662,7 +672,10 @@ test('eval pipeline design study is linked from the method page and renders', as
   // Workload model: estimates are labeled, derived values are typeset, and the
   // first screen states problem, architecture, workload, and trade-offs.
   await expect(page.locator('.glance > div')).toHaveCount(4);
-  await expect(page.locator('#results table.workload-table tbody tr')).toHaveCount(10);
+  await expect(page.locator('#results table.workload-table tbody tr')).toHaveCount(11);
+  // Generation and grading costs are stated separately; a judge call is never counted as free.
+  await expect(page.locator('#results table.workload-table')).toContainText('Generation calls per evaluation');
+  await expect(page.locator('#results table.workload-table')).toContainText('An LLM judge would add up to one grading call');
   await expect(page.locator('#results .src-estimate')).toHaveCount(2);
   await expect(page.locator('#results .src-measured')).toHaveCount(0);
   await expect(page.locator('#results table.workload-table')).toContainText('Not published');

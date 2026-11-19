@@ -7,10 +7,12 @@ import type { Research } from '../data/schema';
 interface Props {
   id: string;
   research: Research;
-  featuredHref?: string | null;
+  /** Homepage only: the architecture study shown first, ahead of the index. */
+  featuredStudy?: Research['notes'][number];
 }
 
-const { id, research, featuredHref } = Astro.props;
+const { id, research, featuredStudy } = Astro.props;
+const featuredHref = featuredStudy?.href;
 const { feature } = research;
 const notes = featuredHref
   ? [
@@ -37,6 +39,14 @@ const notes = featuredHref
         )
       }
     </article>
+    )}
+
+    {featuredStudy?.href && (
+      <article class="featured-study" aria-labelledby="featured-study-title">
+        <p class="note-type">Architecture study · Proposed design</p>
+        <h3 id="featured-study-title"><a href={featuredStudy.href}>{featuredStudy.title}</a></h3>
+        <p class="featured-summary">A timed-out model call leaves the grader nothing to score. This proposal reports accuracy and coverage separately, and retries a failed grade on the stored answer instead of generating a new one.</p>
+      </article>
     )}
 
     <ol class="research-notes" aria-label="Research and writing index">
@@ -76,10 +86,47 @@ const notes = featuredHref
   /* On the homepage, Rolis leads Selected engineering work, so this section is the index alone. */
   .research-grid.is-index {
     grid-template-columns: minmax(0, 1fr);
+    row-gap: 28px;
   }
 
-  .research-grid.is-index .research-notes {
+  .research-grid.is-index .research-notes,
+  .featured-study {
     max-width: 760px;
+  }
+
+  .featured-study {
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .featured-study h3 {
+    margin-top: 6px;
+    font: 580 32px/1.15 var(--display);
+  }
+
+  .featured-study h3 a {
+    color: var(--ink);
+    text-decoration-color: var(--line-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: .14em;
+  }
+
+  .featured-study h3 a:hover {
+    color: var(--accent-strong);
+    text-decoration-color: currentColor;
+  }
+
+  .featured-summary {
+    max-width: 62ch;
+    margin-top: 10px;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 700px) {
+    .featured-study h3 { font-size: 26px; }
+    .featured-summary { font-size: 17px; }
   }
 
   .story-label,

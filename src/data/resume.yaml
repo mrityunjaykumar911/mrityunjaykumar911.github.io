@@ -27,9 +27,9 @@ profile:
 
   headline: I build distributed infrastructure that makes *LLM agents reliable* in production.
   intro: >-
-    I build execution and evaluation systems for PowerPoint's AI agents.
-    Before Microsoft, I worked on metadata repair and crash recovery for
-    VMware's distributed storage.
+    At Microsoft, I build execution and evaluation systems for PowerPoint's AI
+    agents. Earlier, I worked on crash recovery in VMware's distributed storage
+    and on replicated transactions at Stony Brook.
   signals:
     - value: Millions-scale
       label: request workloads
@@ -53,14 +53,14 @@ profile:
 
   # <meta description> / OpenGraph / JSON-LD — plain text, no markup.
   tagline: >-
-    Senior ML engineer building production ML systems, agent infrastructure,
-    evaluation pipelines, and reliable, high-throughput distributed serving
-    systems.
+    Member of Technical Staff at Microsoft. I build distributed infrastructure
+    for LLM agents: agent execution, evaluation pipelines, and reliable
+    distributed systems.
   summary: >-
-    Senior ML engineer with 12+ years across production ML systems, agent
-    infrastructure, distributed serving and execution systems, and storage.
-    Builds model evaluation, fine-tuning, data, and observability platforms for
-    PowerPoint. Led early-stage development and evaluation of **Rolis** (EuroSys
+    Engineer with 12+ years across production ML systems, agent
+    infrastructure, distributed execution, and storage. Member of Technical
+    Staff at Microsoft, building model evaluation, fine-tuning, data, and
+    observability platforms for PowerPoint. Led early-stage development and evaluation of **Rolis** (EuroSys
     2022). Patent holder in snapshot
     metadata verification.
 

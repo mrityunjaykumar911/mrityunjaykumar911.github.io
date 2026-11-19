@@ -1,18 +1,19 @@
 ---
 import Icon from './Icon.astro';
 import { withBase } from '../lib/url';
+import { inlineMarkup } from '../lib/text';
 import type { Resume } from '../data/schema';
 
 interface Props {
   profile: Resume['profile'];
-  leadStudy?: Resume['research']['notes'][number];
 }
 
-const { profile, leadStudy } = Astro.props;
+const { profile } = Astro.props;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
   <h1 id="hero-title">{profile.name}</h1>
+  <p class="hero-headline" set:html={inlineMarkup(profile.headline)} />
   <div class="hero-bottom">
     <div class="hero-identity">
       <img src={profile.avatar} alt={`Portrait of ${profile.name}`} width="72" height="90" loading="eager" decoding="async" />
@@ -20,24 +21,17 @@ const { profile, leadStudy } = Astro.props;
     </div>
     <div class="hero-copy">
       <p class="hero-intro">{profile.intro}</p>
-      {!leadStudy && <a class="method-signal" href={withBase('/method.html')}>Engineering notes <Icon name="arrow-up-right" size={16} /></a>}
+      <a class="method-signal" href={withBase('/method.html')}>Engineering notes <Icon name="arrow-up-right" size={16} /></a>
     </div>
   </div>
-  {leadStudy?.href && (
-    <article class="lead-study" aria-labelledby="lead-study-title">
-      <p class="study-label">Design study <span>Proposed architecture</span></p>
-      <div>
-        <h2 id="lead-study-title"><a href={leadStudy.href}>{leadStudy.title}</a></h2>
-        <p>When a grader fails, should the system pay for another model call? The proposal separates generation from grading so a run can retry the failed step and reuse the answer.</p>
-      </div>
-    </article>
-  )}
 </section>
 
 <style>
   .hero { width: var(--content); margin: 0 auto; padding: 48px 0 36px; }
   .method-signal { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; margin-top: 8px; font-size: 16px; color: var(--accent-strong); text-underline-offset: 4px; }
   h1 { font-family: var(--display); font-size: 80px; font-weight: 580; line-height: 1.08; letter-spacing: 0; }
+  .hero-headline { max-width: 30ch; margin-top: 16px; font: 500 30px/1.25 var(--display); color: var(--ink-soft); }
+  .hero-headline em { font-style: normal; color: var(--ink); }
   .hero-bottom { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; margin-top: 28px; }
   .hero-identity { display: flex; align-items: flex-start; gap: 16px; }
   .hero-identity img { width: 72px; height: 90px; object-fit: cover; filter: grayscale(1); }
@@ -45,30 +39,17 @@ const { profile, leadStudy } = Astro.props;
   .hero-identity strong { color: var(--ink); font-weight: 600; }
   .hero-identity span { display: block; margin-top: 12px; font-size: 14px; }
   .hero-copy { min-width: 0; }
-  .hero-intro { max-width: 49ch; font-size: 25px; line-height: 1.42; }
-  .lead-study { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; margin-top: 32px; border-top: 1px solid var(--line-strong); padding-top: 24px; }
-  .study-label { color: var(--ink-soft); font: 600 15px/1.5 var(--sans); }
-  .study-label span { display: block; font-weight: 400; color: var(--ink-soft); }
-  .lead-study h2 { max-width: 28ch; font: 580 40px/1.12 var(--display); }
-  .lead-study h2 a { color: var(--ink); text-decoration-color: var(--line-strong); text-decoration-thickness: 1px; text-underline-offset: .14em; }
-  .lead-study h2 a:hover { color: var(--accent-strong); text-decoration-color: currentColor; }
-  .lead-study div > p { max-width: 60ch; margin-top: 12px; font-size: 19px; }
-  @media (max-width: 1000px) { h1 { font-size: 64px; } .hero-bottom { grid-template-columns: 180px minmax(0, 1fr); } .hero-intro { font-size: 22px; } }
+  .hero-intro { max-width: 52ch; font-size: 21px; line-height: 1.5; }
+  @media (max-width: 1000px) { h1 { font-size: 64px; } .hero-bottom { grid-template-columns: 180px minmax(0, 1fr); } .hero-intro { font-size: 19px; } .hero-headline { font-size: 26px; } }
   @media (max-width: 700px) {
     .hero { padding: 26px 0 16px; }
     h1 { font-size: 44px; }
+    .hero-headline { margin-top: 10px; font-size: 21px; }
     .hero-bottom { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 18px; }
     .hero-identity img { width: 48px; height: 60px; }
     .hero-identity p { font-size: 14px; }
     .hero-identity span { margin-top: 3px; }
-    .hero-intro { font-size: 20px; line-height: 1.45; }
+    .hero-intro { font-size: 18px; line-height: 1.5; }
   }
   @media (max-width: 370px) { h1 { font-size: 39px; } }
-  @media (min-width: 701px) and (max-width: 1000px) { .lead-study { grid-template-columns: 180px minmax(0, 1fr); } }
-  @media (max-width: 700px) {
-    .lead-study { grid-template-columns: 1fr; gap: 8px; margin: 20px 0 8px; padding-top: 16px; }
-    .study-label span { display: inline; margin-left: 12px; }
-    .lead-study h2 { font-size: 30px; }
-    .lead-study div > p { font-size: 17px; }
-  }
 </style>
