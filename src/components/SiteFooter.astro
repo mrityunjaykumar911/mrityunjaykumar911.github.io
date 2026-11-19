@@ -1,5 +1,4 @@
 ---
-import Icon from './Icon.astro';
 import { withBase } from '../lib/url';
 
 interface Props {
@@ -8,79 +7,47 @@ interface Props {
 }
 
 const { name, year } = Astro.props;
-const methodHref = withBase('/method.html');
 ---
 
 <footer class="site-footer">
   <p>© {year} {name}</p>
-  <p>
-    Built with Astro · <a href="https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io" target="_blank" rel="noreferrer">Source</a>
-    · <a href={methodHref}>Method</a>
-  </p>
-  <a class="to-top" href="#top">Back to top <Icon name="arrow-up" size={14} /></a>
+  <nav aria-label="Footer">
+    <a href={withBase('/')}>Home</a>
+    <a href={withBase('/method.html')}>Research notes</a>
+    <a href="https://github.com/mrityunjaykumar911/mrityunjaykumar911.github.io" target="_blank" rel="noreferrer">Source</a>
+  </nav>
 </footer>
 
 <style>
   .site-footer {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    min-height: 88px;
-    padding: 20px var(--gutter);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    background: var(--ink-deep);
-    color: rgba(255, 255, 255, 0.62);
-    font-family: var(--sans);
-    font-size: 13px;
+    justify-content: space-between;
+    gap: 8px 24px;
+    width: var(--content);
+    margin: 0 auto;
+    padding: 24px 0 40px;
+    border-top: 1px solid var(--line-strong);
+    color: var(--ink-soft);
+    font: 15px/1.5 var(--sans);
   }
 
-  .site-footer p {
-    margin: 0;
-  }
-
-  .site-footer p:nth-child(2) {
-    text-align: center;
+  .site-footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
   }
 
   .site-footer a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.16s ease;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink-soft);
+    text-underline-offset: 4px;
   }
 
   .site-footer a:hover {
-    color: var(--accent-on-dark);
-  }
-
-  .site-footer .to-top {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    justify-self: end;
-  }
-
-  @media (min-width: 1800px) {
-    .site-footer {
-      min-height: 110px;
-      font-size: 14px;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .site-footer {
-      grid-template-columns: 1fr;
-      gap: 10px;
-      padding: 30px 20px;
-      justify-items: center;
-      text-align: center;
-    }
-
-    .site-footer p:nth-child(2) {
-      text-align: center;
-    }
-
-    .site-footer .to-top {
-      justify-self: center;
-    }
+    color: var(--ink);
   }
 </style>

@@ -4,6 +4,7 @@ import SiteHeader from './SiteHeader.astro';
 import Hero from './Hero.astro';
 import SignalStrip from './SignalStrip.astro';
 import Work from './Work.astro';
+import SelectedWork from './SelectedWork.astro';
 import Research from './Research.astro';
 import About from './About.astro';
 import Contact from './Contact.astro';
@@ -38,11 +39,22 @@ const links = resolved.links.map((link) => ({
   ...link,
   href: withBase(link.href),
 }));
-const { capabilities, skills, experience, research, education } = resolved;
+const { capabilities, skills, experience, education } = resolved;
+const researchHref = (href: string) => {
+  const url = new URL(href, Astro.site);
+  return url.origin === Astro.site?.origin || url.origin === 'https://mrityunjaykumar911.github.io'
+    ? withBase(`${url.pathname}${url.search}${url.hash}`)
+    : href;
+};
+const { feature, notes } = resolved.research;
+const research = {
+  feature: { ...feature, link: feature.link && { ...feature.link, href: researchHref(feature.link.href) } },
+  notes: notes.map((note) => ({ ...note, href: note.href && researchHref(note.href) })),
+};
 
 const nav = [
-  { href: '#work', label: 'Work' },
-  { href: '#research', label: 'Research' },
+  { href: '#work', label: 'Engineering' },
+  { href: '#research', label: 'Writing' },
   { href: '#about', label: 'About' },
   { href: '#contact', label: 'Contact' },
 ];
@@ -50,7 +62,10 @@ const nav = [
 const title = `${profile.name} | ${profile.role}`;
 const description = stripMarkup(profile.tagline);
 const buildYear = new Date().getFullYear();
-const linkedin = links.find((link) => link.icon === 'linkedin')?.href ?? null;
+const isPublicationHome = canonicalPath === '/' && !preview.active;
+const leadStudy = isPublicationHome
+  ? research.notes.find((note) => note.href === withBase('/studies/eval-pipeline.html'))
+  : undefined;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -160,36 +175,17 @@ const consoleHint = `
   <SiteHeader name={profile.name} resumePdf={profile.resumePdf} nav={nav} />
 
   <main id="main">
-    <Hero profile={profile} linkedin={linkedin} />
-    <SignalStrip signals={profile.signals} />
-    <Work id="work" roles={experience} />
-    <Research id="research" research={research} />
-    <About id="about" paragraphs={profile.about} capabilities={capabilities} education={education} />
-    <Contact heading={profile.contactHeading} areas={profile.contactAreas} links={links} />
+    <Hero profile={profile} leadStudy={leadStudy} />
+    {isPublicationHome ? <SelectedWork /> : <><SignalStrip signals={profile.signals} /><Work id="work" roles={experience} /></>}
+    <Research id="research" research={research} featuredHref={leadStudy?.href} />
+    <About id="about" paragraphs={profile.about} capabilities={capabilities} education={education} compact={isPublicationHome} />
+    <Contact links={links} />
   </main>
 
   <SiteFooter name={profile.name} year={buildYear} />
 </Base>
 
 <script>
-  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
-  const navigation = document.querySelector<HTMLElement>('[data-site-nav]');
-
-  if (menuButton && navigation) {
-    const setOpen = (open: boolean) => {
-      menuButton.setAttribute('aria-expanded', String(open));
-      navigation.classList.toggle('is-open', open);
-      const label = menuButton.querySelector('.sr-only');
-      if (label) label.textContent = open ? 'Close navigation' : 'Open navigation';
-    };
-    menuButton.addEventListener('click', () =>
-      setOpen(menuButton.getAttribute('aria-expanded') !== 'true')
-    );
-    navigation
-      .querySelectorAll('a')
-      .forEach((link) => link.addEventListener('click', () => setOpen(false)));
-  }
-
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const reveals = document.querySelectorAll('.reveal');
   if (reduceMotion || !('IntersectionObserver' in window)) {

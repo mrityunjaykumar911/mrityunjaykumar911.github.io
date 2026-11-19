@@ -1,5 +1,12 @@
 # Handoff — site rebuilt as Astro
 
+> Historical migration notes. For the current runtime, Microsoft npm proxy,
+> build-time environment variables, and CI/CD setup, follow
+> [README.md](README.md#local-development) and
+> [the build environment contract](README.md#build-environment-contract).
+> The runtime is pinned in [.node-version](.node-version). The older Node and
+> deployment-status statements below are not current setup instructions.
+
 Everything below is yours to run. Nothing has been pushed. Git is untouched
 (still just the pre-existing `D create_backup99.sh`). No GitHub Actions exist
 yet. The old site is still live and still in git history.

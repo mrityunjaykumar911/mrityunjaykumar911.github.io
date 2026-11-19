@@ -1,437 +1,74 @@
 ---
 import Icon from './Icon.astro';
-import { escapeHtml } from '../lib/text';
 import { withBase } from '../lib/url';
 import type { Resume } from '../data/schema';
 
 interface Props {
   profile: Resume['profile'];
-  linkedin: string | null;
+  leadStudy?: Resume['research']['notes'][number];
 }
 
-const { profile, linkedin } = Astro.props;
-const methodHref = withBase('/method.html');
-
-// The headline allows one emphasized phrase wrapped in asterisks.
-const headlineHtml = escapeHtml(profile.headline).replace(
-  /\*([^*]+)\*/,
-  '<em class="hero-mark">$1</em>'
-);
-
+const { profile, leadStudy } = Astro.props;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <div class="hero-copy reveal">
-    <a class="method-signal" href={methodHref} aria-label="Read how I build reliable ML systems">
-      <span class="method-signal-badge">New</span>
-      <span class="method-signal-copy">
-        <strong>Engineering method</strong>
-        <span>How I build reliable ML systems</span>
-      </span>
-      <span class="method-signal-action" aria-hidden="true">
-        <Icon name="arrow-up-right" size={14} />
-      </span>
-    </a>
-    <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> {profile.role} at {profile.company}</p>
-    <h1 id="hero-title" set:html={headlineHtml} />
-    <div class="hero-intro-group">
+  <h1 id="hero-title">{profile.name}</h1>
+  <div class="hero-bottom">
+    <div class="hero-identity">
+      <img src={profile.avatar} alt={`Portrait of ${profile.name}`} width="72" height="90" loading="eager" decoding="async" />
+      <p>{profile.role}<br /><strong>{profile.company}</strong><span>{profile.location}</span></p>
+    </div>
+    <div class="hero-copy">
       <p class="hero-intro">{profile.intro}</p>
-    </div>
-    <div class="hero-actions">
-      <a class="button button-primary" href="#work">
-        View selected work <Icon name="arrow-down-right" size={16} />
-      </a>
-      {
-        linkedin && (
-          <a class="button button-secondary" href="#contact">
-            Start a conversation <Icon name="arrow-down-right" size={16} />
-          </a>
-        )
-      }
+      {!leadStudy && <a class="method-signal" href={withBase('/method.html')}>Engineering notes <Icon name="arrow-up-right" size={16} /></a>}
     </div>
   </div>
-
-  <div class="hero-visual reveal" data-delay="1">
-    <div class="portrait-frame">
-      <img
-        src={profile.avatar}
-        alt={`Portrait of ${profile.name}`}
-        width="480"
-        height="600"
-        loading="eager"
-        decoding="async"
-      />
-    </div>
-    <p class="portrait-note"><span>Based in</span> {profile.location}</p>
-  </div>
-
+  {leadStudy?.href && (
+    <article class="lead-study" aria-labelledby="lead-study-title">
+      <p class="study-label">Design study <span>Proposed architecture</span></p>
+      <div>
+        <h2 id="lead-study-title"><a href={leadStudy.href}>{leadStudy.title}</a></h2>
+        <p>When a grader fails, should the system pay for another model call? The proposal separates generation from grading so a run can retry the failed step and reuse the answer.</p>
+      </div>
+    </article>
+  )}
 </section>
 
 <style>
-  .hero {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr);
-    grid-template-areas: 'copy visual';
-    align-items: center;
-    gap: clamp(36px, 5vw, 68px);
-    width: var(--content);
-    min-height: min(620px, calc(100svh - 120px));
-    margin: 0 auto;
-    padding: clamp(24px, 3vh, 40px) 0 20px;
+  .hero { width: var(--content); margin: 0 auto; padding: 48px 0 36px; }
+  .method-signal { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; margin-top: 8px; font-size: 16px; color: var(--accent-strong); text-underline-offset: 4px; }
+  h1 { font-family: var(--display); font-size: 80px; font-weight: 580; line-height: 1.08; letter-spacing: 0; }
+  .hero-bottom { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; margin-top: 28px; }
+  .hero-identity { display: flex; align-items: flex-start; gap: 16px; }
+  .hero-identity img { width: 72px; height: 90px; object-fit: cover; filter: grayscale(1); }
+  .hero-identity p { font-size: 15px; line-height: 1.45; color: var(--ink-soft); }
+  .hero-identity strong { color: var(--ink); font-weight: 600; }
+  .hero-identity span { display: block; margin-top: 12px; font-size: 14px; }
+  .hero-copy { min-width: 0; }
+  .hero-intro { max-width: 49ch; font-size: 25px; line-height: 1.42; }
+  .lead-study { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; margin-top: 32px; border-top: 1px solid var(--line-strong); padding-top: 24px; }
+  .study-label { color: var(--ink-soft); font: 600 15px/1.5 var(--sans); }
+  .study-label span { display: block; font-weight: 400; color: var(--ink-soft); }
+  .lead-study h2 { max-width: 28ch; font: 580 40px/1.12 var(--display); }
+  .lead-study h2 a { color: var(--ink); text-decoration-color: var(--line-strong); text-decoration-thickness: 1px; text-underline-offset: .14em; }
+  .lead-study h2 a:hover { color: var(--accent-strong); text-decoration-color: currentColor; }
+  .lead-study div > p { max-width: 60ch; margin-top: 12px; font-size: 19px; }
+  @media (max-width: 1000px) { h1 { font-size: 64px; } .hero-bottom { grid-template-columns: 180px minmax(0, 1fr); } .hero-intro { font-size: 22px; } }
+  @media (max-width: 700px) {
+    .hero { padding: 26px 0 16px; }
+    h1 { font-size: 44px; }
+    .hero-bottom { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+    .hero-identity img { width: 48px; height: 60px; }
+    .hero-identity p { font-size: 14px; }
+    .hero-identity span { margin-top: 3px; }
+    .hero-intro { font-size: 20px; line-height: 1.45; }
   }
-
-  .hero-copy {
-    grid-area: copy;
-    min-width: 0;
-    padding-bottom: 12px;
-  }
-
-  .method-signal {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    width: fit-content;
-    max-width: 100%;
-    min-height: 50px;
-    margin-bottom: 24px;
-    padding: 5px 7px 5px 6px;
-    border: 1px solid rgba(11, 12, 14, 0.24);
-    border-radius: 999px;
-    background: var(--paper);
-    color: var(--ink);
-    font-size: 15px;
-    font-weight: 560;
-    line-height: 1.2;
-    text-decoration: none;
-    box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px rgba(11, 12, 14, 0.12);
-    transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease,
-      transform 0.18s ease;
-  }
-
-  .method-signal:hover {
-    border-color: var(--accent);
-    background: var(--accent-tint);
-    transform: translateY(-1px);
-    box-shadow: 0 0 0 3px var(--paper), 0 0 0 4px var(--accent);
-  }
-
-  .method-signal-badge {
-    flex: none;
-    padding: 7px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(168, 64, 10, 0.32);
-    background: #ffe7d6;
-    color: #a8400a;
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .method-signal-copy {
-    display: flex;
-    align-items: baseline;
-    gap: 7px;
-    min-width: 0;
-  }
-
-  .method-signal-copy strong {
-    flex: none;
-    font-family: var(--display);
-    font-weight: 680;
-  }
-
-  .method-signal-copy > span {
-    overflow: hidden;
-    color: var(--ink-soft);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .method-signal-action {
-    display: grid;
-    flex: none;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: #fff;
-  }
-
-  .method-signal-action :global(svg) {
-    flex: none;
-  }
-
-  .hero .eyebrow {
-    margin-bottom: 22px;
-    color: var(--ink-soft);
-  }
-
-  .status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 8px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-tint);
-  }
-
-  .hero h1 {
-    max-width: 17ch;
-    font-family: var(--display);
-    font-size: clamp(29px, 1.2rem + 2.7vw, 58px);
-    font-weight: 680;
-    line-height: 1.08;
-    letter-spacing: -0.028em;
-    overflow-wrap: break-word;
-  }
-
-  .hero h1 :global(.hero-mark) {
-    position: relative;
-    font-style: normal;
-    color: var(--accent);
-  }
-
-  .hero-intro-group {
-    max-width: 62ch;
-    margin-top: 20px;
-  }
-
-  .hero-intro {
-    color: var(--ink-soft);
-    font-size: clamp(16px, 1.4vw, 19px);
-  }
-
-  .hero-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
-  }
-
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 46px;
-    padding: 0 22px;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    font-weight: 560;
-    text-decoration: none;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
-      box-shadow 0.18s ease, transform 0.18s ease;
-  }
-
-  .button-primary {
-    background: var(--ink);
-    color: #fff;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .button-primary:hover {
-    background: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-
-  .button-secondary {
-    border-color: var(--line-strong);
-    background: var(--paper);
-  }
-
-  .button-secondary:hover {
-    border-color: var(--ink);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .hero-visual {
-    grid-area: visual;
-    position: relative;
-    align-self: center;
-    width: min(100%, 350px);
-    justify-self: end;
-  }
-
-  .portrait-frame {
-    position: relative;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radius-lg);
-    background: var(--panel);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-  }
-
-  .portrait-frame::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 55%, rgba(11, 12, 14, 0.28));
-    pointer-events: none;
-  }
-
-  .portrait-frame img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 22%;
-    filter: saturate(0.85) contrast(1.02);
-  }
-
-  .portrait-note {
-    margin-top: 18px;
-    font-family: var(--sans);
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
-
-  .portrait-note span {
-    color: var(--ink-faint);
-    margin-right: 6px;
-  }
-
-  @media (min-width: 1800px) {
-    .hero {
-      grid-template-columns: minmax(0, 1.35fr) minmax(440px, 0.65fr);
-      gap: clamp(80px, 6vw, 160px);
-      min-height: min(1040px, calc(100svh - 112px));
-      padding: clamp(52px, 5vh, 84px) 0 36px;
-    }
-
-    .hero .eyebrow {
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-
-    .method-signal {
-      min-height: 52px;
-      margin-bottom: 28px;
-      font-size: 17px;
-    }
-
-    .hero h1 {
-      max-width: 15ch;
-      font-size: clamp(96px, 3vw, 116px);
-    }
-
-    .hero-intro-group {
-      max-width: 66ch;
-      margin-top: 30px;
-    }
-
-    .hero-intro {
-      font-size: 22px;
-    }
-
-    .hero-actions {
-      margin-top: 34px;
-    }
-
-    .button {
-      min-height: 52px;
-      padding: 0 24px;
-      font-size: 17px;
-    }
-
-    .hero-visual {
-      width: min(100%, 520px);
-    }
-
-    .portrait-note {
-      font-size: 14px;
-    }
-
-  }
-
-  @media (max-width: 900px) {
-    .hero {
-      grid-template-columns: 1fr;
-      grid-template-areas: 'copy' 'visual';
-      min-height: auto;
-      max-height: none;
-      padding-top: 56px;
-    }
-
-    .hero-visual {
-      display: grid;
-      grid-template-columns: minmax(0, 420px);
-      justify-content: start;
-      width: 100%;
-      justify-self: start;
-    }
-
-  }
-
-  @media (max-width: 620px) {
-    .portrait-frame {
-      aspect-ratio: 4 / 3;
-    }
-
-    .hero-copy {
-      text-align: center;
-    }
-
-    .method-signal {
-      margin-bottom: 18px;
-      font-size: 14px;
-    }
-
-    .method-signal-copy {
-      display: grid;
-      gap: 1px;
-    }
-
-    .method-signal-copy > span {
-      max-width: 22ch;
-      font-size: 13px;
-    }
-
-    .hero {
-      gap: 28px;
-      padding-top: 40px;
-    }
-
-    .hero h1 {
-      max-width: 15ch;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.1;
-    }
-
-    .hero-actions,
-    .hero-actions .button {
-      width: 100%;
-    }
-
-    .hero .eyebrow {
-      margin-bottom: 18px;
-    }
-
-    .hero-intro-group {
-      margin-top: 18px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hero-intro {
-      font-size: 16px;
-      line-height: 1.55;
-    }
-
-    .hero-actions {
-      margin-top: 20px;
-    }
-
-    .hero-visual {
-      grid-template-columns: minmax(0, 360px);
-      justify-content: center;
-      justify-self: center;
-    }
+  @media (max-width: 370px) { h1 { font-size: 39px; } }
+  @media (min-width: 701px) and (max-width: 1000px) { .lead-study { grid-template-columns: 180px minmax(0, 1fr); } }
+  @media (max-width: 700px) {
+    .lead-study { grid-template-columns: 1fr; gap: 8px; margin: 20px 0 8px; padding-top: 16px; }
+    .study-label span { display: inline; margin-left: 12px; }
+    .lead-study h2 { font-size: 30px; }
+    .lead-study div > p { font-size: 17px; }
   }
 </style>

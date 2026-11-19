@@ -22,38 +22,27 @@ test('published page stays generic and exposes complete metadata', async ({ page
   await page.goto('/');
 
   await expect(page).toHaveTitle('Mrityunjay Kumar | Member of Technical Staff');
-  const thesis = 'I build distributed infrastructure that makes LLM agents reliable in production';
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(thesis);
-  await expect(page.getByText(thesis, { exact: false })).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Mrityunjay Kumar');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
   await expect(page.getByRole('status')).toHaveCount(0);
   for (const marker of previewOnlyMarkers) {
     await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
   }
 
-  const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
+  const microsoftRole = page.locator('.work-entry').filter({ hasText: 'Microsoft' }).first();
   await expect(
-    microsoftRole.getByText('reduced evaluation time by 4.6x', { exact: false })
+    microsoftRole.getByText('4.6x reduction in evaluation time', { exact: false })
   ).toBeVisible();
-  for (const tag of [
-    'ML systems',
-    'Inference & serving infrastructure',
-    'Model evaluation',
-    'Fine-tuning & MLOps',
-  ]) {
-    await expect(microsoftRole.getByText(tag, { exact: true })).toBeVisible();
-  }
-  await expect(
-    page.getByRole('heading', {
-      name: "Let's talk about production AI infrastructure.",
-    })
-  ).toBeVisible();
-  const focusAreas = page.getByRole('list', { name: 'Areas of focus' });
-  for (const area of ['Inference engines', 'Rigorous evals', 'RL systems at scale']) {
-    await expect(focusAreas.getByRole('listitem').filter({ hasText: area })).toBeVisible();
-  }
-  await expect(
-    page.locator('p').filter({ hasText: 'I take complex systems from 0 → 1' })
-  ).toBeVisible();
+  await expect(microsoftRole).toContainText('benchmark methodology is not public');
+  const contact = page.getByRole('region', { name: 'Contact' });
+  await expect(contact.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute('href', 'https://www.linkedin.com/in/mrkumar20/');
+  await expect(contact.getByRole('link', { name: 'GitHub' })).toHaveAttribute('href', 'https://github.com/mrityunjaykumar911');
+  const download = contact.getByRole('link', { name: 'Résumé' });
+  await expect(download).toHaveAttribute('href', '/cv/MrityunjayKumar-CV.pdf');
+  await expect(download).toHaveAttribute('download', '');
+  const background = page.getByRole('region', { name: 'Background' });
+  await expect(background).toContainText('Stony Brook');
+  await expect(background.getByRole('link', { name: 'Detailed résumé' })).toHaveAttribute('href', '/latest.html');
 
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
@@ -92,9 +81,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
       exact: false,
     })
   ).toBeVisible();
-  const researchAssistantRole = page.locator('.experience').filter({
-    hasText: 'Graduate Research Assistant',
-  });
+  const researchAssistantRole = page.locator('.feature-story');
   await expect(
     researchAssistantRole.getByText('Led early-stage development and evaluation', { exact: false })
   ).toBeVisible();
@@ -116,7 +103,7 @@ test('published page stays generic and exposes complete metadata', async ({ page
 });
 
 test('email link degrades gracefully without JavaScript', async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   await page.goto('/');
 
@@ -125,90 +112,63 @@ test('email link degrades gracefully without JavaScript', async ({ browser }) =>
   await expect(emailLink).toHaveAttribute('id', 'contact-email');
   const noscriptText = await page.locator('.contact-links noscript').textContent();
   expect(noscriptText).toContain('Enable JavaScript to reveal my email address');
+  await expect(page.getByRole('navigation', { name: 'Primary' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Engineering' })).toBeVisible();
 
   await context.close();
 });
 
-test('landing viewport presents a clear thesis and proof', async ({ page }) => {
+test('homepage leads with the author and a readable linked design proposal', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
 
   const heroHeading = page.getByRole('heading', { level: 1 });
-  await expect(heroHeading).toContainText(
-    'distributed infrastructure that makes LLM agents reliable in production'
-  );
-  await expect(page.locator('.hero-intro')).toContainText(
-    'latency, throughput, and fault recovery'
-  );
-  const methodSignal = page.getByRole('link', { name: 'Read how I build reliable ML systems' });
-  await expect(methodSignal).toBeVisible();
-  await expect(methodSignal).toHaveAttribute('href', '/method.html');
-  await expect(methodSignal.getByText('New', { exact: true })).toBeVisible();
-  await expect(methodSignal.getByText('New', { exact: true })).toHaveCSS('color', 'rgb(168, 64, 10)');
-  await expect(methodSignal.getByText('Engineering method', { exact: true })).toBeVisible();
-  await expect(methodSignal.getByText('How I build reliable ML systems', { exact: true })).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Delivery path' })).toHaveCount(0);
+  await expect(heroHeading).toHaveText('Mrityunjay Kumar');
+  await expect(page.getByText('Member of Technical Staff', { exact: false }).first()).toBeInViewport();
+  const feature = page.getByRole('article', { name: 'Scaling out a distributed LLM evaluation pipeline' });
+  await expect(feature.getByText('Proposed architecture')).toBeInViewport();
+  await expect(feature).toContainText('reuse the answer');
+  const study = feature.getByRole('link', { name: 'Scaling out a distributed LLM evaluation pipeline' });
+  await expect(study).toHaveAttribute('href', '/studies/eval-pipeline.html');
+  await expect(study).toBeInViewport({ ratio: 1 });
   expect(await heroHeading.evaluate((element) => getComputedStyle(element).fontFamily)).toContain(
-    'Inter'
+    'Bricolage Grotesque'
   );
 
-  const signalStrip = page.getByRole('region', { name: 'Selected evidence' });
-  for (const [value, label] of [
-    ['Millions-scale', 'request workloads'],
-    ['100M+', 'Weekly documents generated'],
-    ['Applied science', 'evaluation · ML · systems'],
-  ]) {
-    const signal = signalStrip.locator('.signal').filter({ hasText: value });
-    await expect(signal.locator('strong')).toHaveText(value);
-    await expect(signal.locator('span')).toHaveText(label);
-  }
-  const signalBox = await signalStrip.boundingBox();
-  expect(signalBox).not.toBeNull();
-  expect(signalBox!.y).toBeLessThan(900);
-
-  const [methodSignalBox, headlineBox, introBox, firstSignalBox] = await Promise.all([
-    methodSignal.boundingBox(),
-    heroHeading.boundingBox(),
-    page.locator('.hero-intro').boundingBox(),
-    signalStrip.locator('.signal strong').first().boundingBox(),
-  ]);
-  expect(methodSignalBox).not.toBeNull();
-  expect(headlineBox).not.toBeNull();
-  expect(introBox).not.toBeNull();
-  expect(firstSignalBox).not.toBeNull();
-  expect(methodSignalBox!.y + methodSignalBox!.height).toBeLessThan(headlineBox!.y);
-  expect(methodSignalBox!.width).toBeGreaterThanOrEqual(360);
-  expect(methodSignalBox!.height).toBeGreaterThanOrEqual(48);
-  expect(methodSignalBox!.y).toBeLessThan(900);
-  expect(introBox!.x).toBeCloseTo(headlineBox!.x, 0);
-  expect(firstSignalBox!.x).toBeCloseTo(headlineBox!.x, 0);
-
-  await expect(page.locator('.experience-number')).toHaveCount(0);
+  await expect(page.locator('.signal-strip')).toHaveCount(0);
+  const workBox = await page.locator('#work').boundingBox();
+  expect(workBox).not.toBeNull();
+  expect(workBox!.y).toBeLessThan(900);
+  await expect(page.locator('.work-entry')).toHaveCount(2);
+  await expect(page.getByRole('link', { name: 'Full experience' })).toHaveAttribute('href', '/latest.html');
+  await study.click();
+  await expect(page).toHaveURL(/\/studies\/eval-pipeline\.html$/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('LLM evaluation pipeline');
 });
 
-test('ultrawide view uses the available canvas without shrinking the portfolio', async ({ page }) => {
+test('ultrawide view preserves a bounded editorial reading width', async ({ page }) => {
   await page.setViewportSize({ width: 3840, height: 1600 });
   await page.goto('/');
 
   const hero = await page.locator('.hero').boundingBox();
-  const portrait = await page.locator('.hero-visual').boundingBox();
+  const portrait = await page.locator('.hero-identity img').boundingBox();
   const headingSize = await page
     .getByRole('heading', { level: 1 })
     .evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize));
 
   expect(hero).not.toBeNull();
   expect(portrait).not.toBeNull();
-  expect(hero!.width).toBeGreaterThanOrEqual(2000);
-  expect(portrait!.width).toBeGreaterThanOrEqual(440);
-  expect(headingSize).toBeGreaterThanOrEqual(96);
+  expect(hero!.width).toBeGreaterThanOrEqual(1120);
+  expect(hero!.width).toBeLessThanOrEqual(1440);
+  expect(portrait!.width).toBe(72);
+  expect(headingSize).toBeGreaterThanOrEqual(76);
 
   for (const [selector, minimum] of [
     ['.site-nav', 14],
-    ['.signal strong', 32],
-    ['.experience-summary', 20],
-    ['.experience-lead li', 18],
+    ['.work-summary', 18],
+    ['.lead-study div > p', 18],
     ['.research-note h3', 22],
-    ['.capability dd', 18],
+    ['.backstory p', 18],
     ['.site-footer', 14],
   ] as const) {
     const fontSize = await page.locator(selector).first().evaluate((element) =>
@@ -226,12 +186,10 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
     await page.locator('body').evaluate((element) => getComputedStyle(element, '::before').display)
   ).toBe('none');
 
-  const signalStrip = page.getByRole('region', { name: 'Selected evidence' });
-  expect(await signalStrip.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(255, 255, 255)'
-  );
+  const engineering = page.locator('.selected-work');
+  expect(await engineering.evaluate((element) => getComputedStyle(element).borderTopStyle)).toBe('solid');
   expect(
-    await signalStrip.locator('.signal span').first().evaluate((element) =>
+    await engineering.locator('.work-context').first().evaluate((element) =>
       Number.parseFloat(getComputedStyle(element).fontSize)
     )
   ).toBeGreaterThanOrEqual(13);
@@ -239,8 +197,8 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   const metadataSelectors = [
     '.wordmark-role',
     '.site-nav',
-    '.evidence-label',
-    '.contact-areas',
+    '.study-label',
+    '.contact-links a',
     '.site-footer',
   ];
   for (const selector of metadataSelectors) {
@@ -266,25 +224,22 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   );
 });
 
-test('experience and research read as an evidence system', async ({ page }) => {
+test('production accounts cite their sources and writing links to the studies and publications', async ({ page }) => {
   await page.goto('/');
 
-  const microsoftRole = page.locator('.experience').filter({ hasText: 'Microsoft' }).first();
-  await expect(microsoftRole.getByText('Accomplishments', { exact: true })).toBeVisible();
-  await expect(microsoftRole.locator('.experience-head .company')).toHaveText('Microsoft');
-  await expect(microsoftRole.locator('.experience-head .role')).toHaveText('Member of Technical Staff');
-  await expect(microsoftRole.locator('.experience-head .org')).toContainText(
-    'May 2022 to Present · Mountain View, CA'
-  );
+  const microsoftRole = page.getByRole('article', { name: /PowerPoint agents/ });
+  await expect(microsoftRole).toContainText('2022 to present');
+  await expect(microsoftRole.getByRole('link')).toHaveAttribute('href', '/latest.html#work');
+  const storage = page.getByRole('article', { name: /crash recovery in vSAN/ });
+  await expect(storage.getByRole('link')).toHaveAttribute('href', 'https://patents.google.com/patent/US11573860B1');
 
-  const proofRegistry = page.getByRole('list', { name: 'Research proof registry' });
-  await expect(proofRegistry).toBeVisible();
-  await expect(proofRegistry.getByRole('listitem')).toHaveCount(10);
-  await expect(proofRegistry.getByRole('link', { name: 'Open: Scaling out a distributed LLM evaluation pipeline' }))
-    .toHaveAttribute('href', 'https://mrityunjaykumar911.github.io/studies/eval-pipeline.html');
+  const writing = page.getByRole('list', { name: 'Research and writing index' });
+  await expect(writing.getByRole('link', { name: /passing check/ })).toHaveAttribute('href', '/method.html#case-studies');
+  await expect(writing.getByRole('link', { name: /^Rolis:/ })).toHaveAttribute('href', 'https://dl.acm.org/doi/10.1145/3492321.3519576');
+  await expect(writing.getByRole('link', { name: /question articulation/ })).toHaveAttribute('href', 'https://ieeexplore.ieee.org/document/8614044');
 
-  await proofRegistry.scrollIntoViewIfNeeded();
   const researchLink = page.locator('.site-nav a[href="#research"]');
+  await researchLink.click();
   await expect(researchLink).toHaveAttribute('aria-current', 'true');
   await expect.poll(() => page.locator('.site-header').evaluate((element) =>
     getComputedStyle(element).color
@@ -293,7 +248,6 @@ test('experience and research read as an evidence system', async ({ page }) => {
     getComputedStyle(element).backgroundColor
   )).toBe('rgb(11, 12, 14)');
 
-  await researchLink.click();
   await expect.poll(async () => {
     const [headerBox, researchBox] = await Promise.all([
       page.locator('.site-header').boundingBox(),
@@ -301,12 +255,6 @@ test('experience and research read as an evidence system', async ({ page }) => {
     ]);
     return Math.abs(researchBox!.y - (headerBox!.y + headerBox!.height));
   }).toBeLessThanOrEqual(1);
-
-  const capabilityMatrix = page.getByRole('group', { name: 'Core capability matrix' });
-  await expect(capabilityMatrix).toBeVisible();
-  expect(
-    await capabilityMatrix.evaluate((element) => getComputedStyle(element).borderLeftWidth)
-  ).toBe('0px');
 });
 
 test('fast navigation never leaves content hidden', async ({ page }) => {
@@ -328,6 +276,7 @@ test('published HTML protects contact details and retires the stale CV route', a
   const publishedResponse = await request.get('/');
   expect(publishedResponse.ok()).toBe(true);
   const publishedHtml = await publishedResponse.text();
+  for (const marker of previewOnlyMarkers) expect(publishedHtml).not.toContain(marker);
   expect(publishedHtml).not.toContain('mjay.cse@gmail.com');
   expect(publishedHtml).not.toContain('cut sync-server load by <strong>200%</strong>');
   expect(publishedHtml).not.toContain('sbu-musicx.up.railway.app');
@@ -397,7 +346,7 @@ test('normal URL does not load the detailed resume', async ({ page }) => {
   await expect(page).toHaveURL((url) => url.pathname === '/' && url.search === '');
   await expect(page.getByRole('status')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'I build distributed infrastructure that makes LLM agents reliable in production'
+    'Mrityunjay Kumar'
   );
   for (const marker of previewOnlyMarkers) {
     await expect(page.getByText(marker, { exact: false })).toHaveCount(0);
@@ -412,9 +361,10 @@ test('normal URL prints the console greeting and preview link', async ({ page })
   await page.waitForLoadState('networkidle');
 
   expect(messages.some((message) => message.includes('MRITYUNJAY KUMAR'))).toBe(true);
+  const previewURL = new URL('/?preview', page.url()).href;
   expect(
     messages.some((message) =>
-      message.includes('→ http://127.0.0.1:4173/?preview')
+      message.includes(`→ ${previewURL}`)
     )
   ).toBe(true);
 
@@ -447,7 +397,7 @@ for (const query of ['?flags=latest', '?preview']) {
     ).toBeVisible();
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText(
-      'RL Infrastructure and Applied AI'
+      'Mrityunjay Kumar'
     );
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
       'content',
@@ -495,6 +445,7 @@ test('mobile navigation works without horizontal overflow', async ({ page }) => 
   await page.goto('/');
 
   const menu = page.locator('[data-menu-button]');
+  await expect(page.getByRole('link', { name: 'Scaling out a distributed LLM evaluation pipeline' })).toBeInViewport({ ratio: 1 });
   await expect(menu).toBeVisible();
   await expect(menu).toHaveAccessibleName('Open navigation');
   await menu.click();
@@ -509,16 +460,17 @@ test('mobile navigation works without horizontal overflow', async ({ page }) => 
   ).toBe(true);
 });
 
-test('portrait sits above its caption without overlap', async ({ page }) => {
+test('portrait and identity remain aligned without overlap', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 768 });
   await page.goto('/?flags=latest');
 
-  const frame = await page.locator('.portrait-frame').boundingBox();
-  const caption = await page.locator('.portrait-note').boundingBox();
+  const frame = await page.locator('.hero-identity img').boundingBox();
+  const caption = await page.locator('.hero-identity p').boundingBox();
 
   expect(frame).not.toBeNull();
   expect(caption).not.toBeNull();
-  expect(caption!.y).toBeGreaterThanOrEqual(frame!.y + frame!.height - 1);
+  expect(caption!.x).toBeGreaterThanOrEqual(frame!.x + frame!.width);
+  expect(Math.abs(caption!.y - frame!.y)).toBeLessThanOrEqual(2);
 });
 
 test('method page presents staff-level ML systems judgment with bounded research evidence', async ({ page, request }) => {

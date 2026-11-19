@@ -1,28 +1,30 @@
 ---
 import Icon from './Icon.astro';
+import { resume } from '../data/resume';
+import { withBase } from '../lib/url';
 
 interface Props {
-  name: string;
-  resumePdf: string;
-  nav: { href: string; label: string }[];
+  name?: string;
+  resumePdf?: string;
+  nav?: { href: string; label: string }[];
+  homeHref?: string;
 }
 
-const { name, resumePdf, nav } = Astro.props;
-const initials = name
-  .split(/\s+/)
-  .map((w) => w[0])
-  .slice(0, 2)
-  .join('');
+const {
+  name = resume.profile.name,
+  resumePdf = withBase(resume.profile.resumePdf),
+  nav = [
+    { href: withBase('/#work'), label: 'Engineering' },
+    { href: withBase('/#research'), label: 'Writing' },
+    { href: withBase('/#about'), label: 'About' },
+    { href: withBase('/#contact'), label: 'Contact' },
+  ],
+  homeHref = '#top',
+} = Astro.props;
 ---
 
 <header class="site-header" id="top">
-  <a class="wordmark" href="#top" aria-label={`${name}, home`}>
-    <span class="wordmark-mark">{initials}</span>
-    <span class="wordmark-copy">
-      <span class="wordmark-name">{name}</span>
-      <span class="wordmark-role">ML systems · production infrastructure</span>
-    </span>
-  </a>
+  <a class="wordmark" href={homeHref}>{name}</a>
 
   <button
     class="menu-button"
@@ -37,228 +39,120 @@ const initials = name
 
   <nav class="site-nav" id="site-nav" aria-label="Primary" data-site-nav>
     {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-    <a class="nav-resume" href={resumePdf} download target="_blank" rel="noreferrer">
-      Résumé <Icon name="download" size={15} />
-    </a>
+    <a href={resumePdf} download target="_blank" rel="noreferrer">Résumé</a>
   </nav>
 </header>
 
+<noscript>
+  <style is:inline>
+    .site-header .menu-button { display: none !important; }
+    .site-header .site-nav { position: static !important; display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 8px 20px !important; padding: 0 !important; border: 0 !important; background: transparent !important; }
+  </style>
+</noscript>
+
+<script>
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-button]');
+  const navigation = document.querySelector<HTMLElement>('[data-site-nav]');
+
+  if (menuButton && navigation) {
+    const setOpen = (open: boolean) => {
+      menuButton.setAttribute('aria-expanded', String(open));
+      navigation.classList.toggle('is-open', open);
+      const label = menuButton.querySelector('.sr-only');
+      if (label) label.textContent = open ? 'Close navigation' : 'Open navigation';
+    };
+    menuButton.addEventListener('click', () =>
+      setOpen(menuButton.getAttribute('aria-expanded') !== 'true')
+    );
+    navigation.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && menuButton.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        menuButton.focus();
+      }
+    });
+  }
+</script>
+
 <style>
   .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
+    position: relative;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    height: 68px;
-    padding: 0 var(--gutter);
-    border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--paper) 72%, transparent);
-    backdrop-filter: blur(20px) saturate(1.4);
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) {
-    color: #fff;
-    border-bottom-color: rgba(255, 255, 255, 0.12);
-    background: var(--ink-deep);
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .wordmark-mark {
-    background: #fff;
-    color: var(--ink);
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .wordmark-role,
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a {
-    color: rgba(255, 255, 255, 0.68);
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a:hover,
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .site-nav a[aria-current='true'] {
-    color: #fff;
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .nav-resume {
-    border-color: rgba(255, 255, 255, 0.28);
-  }
-
-  .site-header:has(.site-nav a[href='#research'][aria-current='true']) .nav-resume:hover {
-    background: #fff;
-    color: var(--ink);
-    border-color: #fff;
+    gap: 8px 24px;
+    width: var(--content);
+    min-height: 72px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--line-strong);
   }
 
   .wordmark {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    font-weight: 700;
+    min-height: 44px;
+    color: var(--ink);
+    font: 600 18px/1.2 var(--display);
     text-decoration: none;
-  }
-
-  .wordmark-mark {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--ink);
-    color: #fff;
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .wordmark-copy {
-    display: grid;
-    line-height: 1.15;
-  }
-
-  .wordmark-name {
-    font-family: var(--display);
-    font-size: 15px;
-    font-weight: 620;
-    letter-spacing: -0.01em;
-  }
-
-  .wordmark-role {
-    margin-top: 2px;
-    color: var(--ink-faint);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 500;
   }
 
   .site-nav {
     display: flex;
     align-items: center;
-    gap: 30px;
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 500;
+    gap: 28px;
+    font: 500 15px/1.4 var(--sans);
   }
 
   .site-nav a {
-    text-decoration: none;
-    color: var(--ink-soft);
-    transition: color 0.16s ease;
-  }
-
-  .site-nav a:not(.nav-resume) {
-    position: relative;
-  }
-
-  .site-nav a:not(.nav-resume):hover,
-  .site-nav a:not(.nav-resume)[aria-current='true'] {
-    color: var(--ink);
-  }
-
-  .site-nav a:not(.nav-resume)::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: -6px;
-    left: 0;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.25s ease;
-  }
-
-  .site-nav a:not(.nav-resume):hover::after,
-  .site-nav a:not(.nav-resume)[aria-current='true']::after {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-
-  .nav-resume {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 0 16px;
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    color: var(--ink);
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+    min-height: 44px;
+    color: var(--ink-soft);
+    text-decoration: none;
   }
 
-  .nav-resume:hover {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
+  .site-nav a:hover,
+  .site-nav a[aria-current='true'] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
   }
 
   .menu-button {
     display: none;
     place-items: center;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    border: 1px solid var(--line-strong);
-    border-radius: 10px;
+    border: 0;
     background: transparent;
     cursor: pointer;
   }
 
-  @media (min-width: 1800px) {
-    .site-header {
-      height: 84px;
-    }
-
-    .wordmark-name {
-      font-size: 18px;
-    }
-
-    .wordmark-role,
-    .site-nav {
-      font-size: 14px;
-    }
-  }
-
-  @media (max-width: 900px) {
-    .site-header {
-      background: var(--paper);
-      backdrop-filter: none;
-    }
-
+  @media (max-width: 760px) {
     .menu-button {
       display: grid;
     }
 
     .site-nav {
       position: absolute;
-      top: calc(100% + 1px);
+      top: 100%;
       right: 0;
       left: 0;
+      z-index: 20;
       display: none;
       flex-direction: column;
       align-items: stretch;
-      gap: 20px;
-      padding: 28px 20px;
-      border-bottom: 1px solid var(--ink);
-      background: var(--paper-bright);
-      box-shadow: var(--shadow-md);
-      max-height: calc(100svh - 69px);
-      overflow-y: auto;
+      gap: 0;
+      padding: 8px 0 16px;
+      border-bottom: 1px solid var(--line-strong);
+      background: var(--paper);
     }
 
     .site-nav.is-open {
       display: flex;
-    }
-
-    .nav-resume {
-      align-self: flex-start;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .wordmark-role {
-      display: none;
     }
   }
 </style>

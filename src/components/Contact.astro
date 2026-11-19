@@ -3,12 +3,10 @@ import Icon from './Icon.astro';
 import type { Link } from '../data/schema';
 
 interface Props {
-  heading: string;
-  areas: string[];
   links: Link[];
 }
 
-const { heading, areas, links } = Astro.props;
+const { links } = Astro.props;
 const isExternal = (href: string) => href.startsWith('http');
 const opensNewTab = (href: string) => isExternal(href) || href.endsWith('.pdf');
 const iconFor = (label: string) => (label === 'Résumé' ? 'download' : 'arrow-up-right');
@@ -25,20 +23,7 @@ const orderedLinks = [...links].sort(
 ---
 
 <section class="contact-section" id="contact" aria-labelledby="contact-title">
-  <p class="eyebrow">Contact</p>
-  <div class="contact-pitch">
-    <h2 id="contact-title">{heading}</h2>
-    <ol class="contact-areas" aria-label="Areas of focus">
-      {
-        areas.map((area, index) => (
-          <li>
-            <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-            {area}
-          </li>
-        ))
-      }
-    </ol>
-  </div>
+  <h2 id="contact-title">Contact</h2>
 
   <div class="contact-links">
     {
@@ -72,102 +57,39 @@ const orderedLinks = [...links].sort(
 
 <style>
   .contact-section {
-    position: relative;
-    overflow: hidden;
-    padding: clamp(72px, 9vw, 120px) var(--gutter);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    width: var(--content);
+    margin: 0 auto;
+    padding: 40px 0;
     border-top: 1px solid var(--line-strong);
-    background: var(--panel);
     color: var(--ink);
   }
 
-  .contact-section::after {
-    content: none;
-  }
-
-  .contact-section .eyebrow {
-    margin-bottom: 16px;
-    color: var(--accent);
-  }
-
-  .contact-pitch {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-  }
-
   .contact-section h2 {
-    max-width: 20ch;
-    font-family: var(--display);
-    font-size: clamp(30px, 3.4vw, 46px);
-    font-weight: 660;
-    line-height: 1.1;
-    letter-spacing: -0.028em;
-  }
-
-  .contact-areas {
-    display: flex;
-    list-style: none;
-    width: 100%;
-    margin-top: 40px;
-    border-top: 1px solid var(--line-strong);
-    border-bottom: 1px solid var(--line-strong);
-    font-family: var(--sans);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .contact-areas li {
-    display: flex;
-    gap: 10px;
-    flex: 1;
-    padding: 16px 24px;
-    border-right: 1px solid var(--line-strong);
-  }
-
-  .contact-areas li:first-child {
-    padding-left: 0;
-  }
-
-  .contact-areas li:last-child {
-    border-right: 0;
-  }
-
-  .contact-areas span {
-    color: var(--accent);
+    font: 580 30px/1.2 var(--display);
   }
 
   .contact-links {
-    position: relative;
-    z-index: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 44px;
+    gap: 0 24px;
   }
 
   .contact-links a {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    min-height: 46px;
-    padding: 0 22px;
-    border: 1px solid var(--line-strong);
-    border-radius: 999px;
-    font-weight: 540;
-    text-decoration: none;
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-  }
-
-  .contact-links #contact-email {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
+    min-height: 44px;
+    color: var(--accent-strong);
+    text-underline-offset: 4px;
   }
 
   .contact-links a:hover {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
+    text-decoration-thickness: 2px;
   }
 
   .contact-noscript {
@@ -177,49 +99,4 @@ const orderedLinks = [...links].sort(
     font-size: 14px;
   }
 
-  @media (min-width: 1800px) {
-    .contact-section h2 {
-      font-size: 60px;
-    }
-
-    .contact-areas {
-      font-size: 16px;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .contact-section {
-      text-align: center;
-    }
-
-    .contact-section h2 {
-      max-width: none;
-    }
-
-    .contact-areas {
-      display: grid;
-      margin-top: 32px;
-    }
-
-    .contact-areas li,
-    .contact-areas li:first-child {
-      justify-content: center;
-      padding: 14px 0;
-      border-right: 0;
-      border-bottom: 1px solid var(--line-strong);
-    }
-
-    .contact-areas li:last-child {
-      border-bottom: 0;
-    }
-
-    .contact-links,
-    .contact-links a {
-      width: 100%;
-    }
-
-    .contact-links a {
-      justify-content: space-between;
-    }
-  }
 </style>
