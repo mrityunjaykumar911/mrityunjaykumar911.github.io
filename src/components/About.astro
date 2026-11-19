@@ -18,7 +18,8 @@ const { id, paragraphs, capabilities, education, compact = false } = Astro.props
   <section class="backstory" id={id} aria-labelledby={`${id}-title`}>
     <h2 id={`${id}-title`}>Background</h2>
     <div>
-      <p>I started out writing audio-player software for feature phones at MediaTek. At Talentica I worked on file sync and financial-document search, then studied replicated transactions at Stony Brook before moving into distributed storage at VMware.</p>
+      <p>I have worked across the stack for more than ten years. At MediaTek I wrote embedded audio and Bluetooth software for feature phones. At Talentica I built data and ML systems: a C++ delta-sync service, a financial-document search engine, and real-time ML pipelines on Storm and Kafka.</p>
+      <p>A master's at Stony Brook turned that into distributed systems research. That led to storage recovery at VMware, and now to infrastructure for AI agents at Microsoft.</p>
       <a href={withBase('/latest.html')}>Detailed résumé</a>
     </div>
   </section>
@@ -72,6 +73,7 @@ const { id, paragraphs, capabilities, education, compact = false } = Astro.props
   .backstory { width: var(--content); margin: 0 auto; padding: 48px 0; border-top: 1px solid var(--line-strong); display: grid; grid-template-columns: minmax(160px, .42fr) minmax(0, 1fr); gap: var(--grid-gap); }
   .backstory h2 { font: 580 30px/1.2 var(--display); }
   .backstory p { max-width: 62ch; font-size: 19px; line-height: 1.5; }
+  .backstory p + p { margin-top: 12px; }
   .backstory a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 6px; color: var(--accent-strong); text-underline-offset: 4px; }
   @media (max-width: 700px) { .backstory { grid-template-columns: 1fr; gap: 12px; padding: 32px 0; } }
 
