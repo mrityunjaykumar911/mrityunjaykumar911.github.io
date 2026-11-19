@@ -19,7 +19,9 @@ const mermaidSources = [...designDocSource.matchAll(/```mermaid\r?\n([\s\S]*?)``
 if (mermaidSources.length !== 5) {
   throw new Error(`Expected 5 mermaid diagrams in the eval design doc, found ${mermaidSources.length}`);
 }
-const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram, validationDiagram] = mermaidSources;
+const [architectureDiagram, endToEndDiagram, lifecycleSource, outboxDiagram, validationDiagram] = mermaidSources;
+// SVG text wraps long state IDs mid-word; this cluster-free diagram measures HTML labels correctly.
+const lifecycleDiagram = `---\nconfig:\n  htmlLabels: true\n---\n${lifecycleSource}`;
 
 // Baseline (v0): one eval pipeline over one metadata table. ER column types
 // are illustrative; Mermaid requires one per column.
@@ -1517,8 +1519,9 @@ const decisions = [
     securityLevel: 'strict',
     theme: 'neutral',
     htmlLabels: false,
+    markdownAutoWrap: false,
     fontFamily: "'Source Sans 3 Variable', sans-serif",
-    flowchart: { useMaxWidth: false },
+    flowchart: { useMaxWidth: false, wrappingWidth: 320 },
     sequence: { useMaxWidth: false, wrap: true, width: 140, actorMargin: 40 },
     state: { useMaxWidth: false },
     er: { useMaxWidth: false },

@@ -17,20 +17,9 @@ test('first viewport remains visually stable', async ({ page }) => {
   });
 });
 
-test('contact transition and focus rail remain visually stable', async ({ page }) => {
+test('contact section remains visually stable', async ({ page }) => {
   const contact = page.locator('.contact-section');
   await contact.scrollIntoViewIfNeeded();
-
-  const rail = page.locator('.contact-areas');
-  const [contactBox, railBox] = await Promise.all([
-    contact.boundingBox(),
-    rail.boundingBox(),
-  ]);
-
-  expect(contactBox).not.toBeNull();
-  expect(railBox).not.toBeNull();
-  expect(railBox!.x).toBeCloseTo(contactBox!.x + 160, 0);
-  expect(railBox!.x + railBox!.width).toBeCloseTo(contactBox!.x + contactBox!.width - 160, 0);
 
   await expect(contact).toHaveScreenshot('contact-section-1440.png', {
     animations: 'disabled',

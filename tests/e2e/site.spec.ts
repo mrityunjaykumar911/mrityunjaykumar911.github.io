@@ -1,4 +1,17 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+// SVG labels wrap into one tspan per line; textContent would join wrapped words without spaces.
+const diagramText = (page: Page, id: string) =>
+  page.locator(`#${id} svg`).evaluate((svg) =>
+    [...svg.querySelectorAll('text, foreignObject')]
+      .map((label) => {
+        if (label.localName === 'foreignObject') return label.textContent;
+        const lines = [...label.querySelectorAll('tspan')].filter((span) => !span.querySelector('tspan'));
+        return lines.length ? lines.map((line) => line.textContent).join(' ') : label.textContent;
+      })
+      .join(' ')
+      .replace(/\s+/g, ' ')
+  );
 
 const privateMarker = '7,000 containers';
 const previewOnlyMarkers = [
@@ -167,7 +180,7 @@ test('ultrawide view preserves a bounded editorial reading width', async ({ page
     ['.site-nav', 14],
     ['.work-summary', 18],
     ['.lead-study div > p', 18],
-    ['.research-note h3', 22],
+    ['.research-note h3', 20],
     ['.backstory p', 18],
     ['.site-footer', 14],
   ] as const) {
@@ -195,7 +208,7 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
   ).toBeGreaterThanOrEqual(13);
 
   const metadataSelectors = [
-    '.wordmark-role',
+    '.wordmark',
     '.site-nav',
     '.study-label',
     '.contact-links a',
@@ -213,15 +226,27 @@ test('visual system stays readable and color-coherent', async ({ page }) => {
 
   const contact = page.locator('.contact-section');
   const footer = page.locator('.site-footer');
-  expect(await contact.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(246, 247, 248)'
-  );
-  expect(await footer.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(11, 12, 14)'
-  );
+  for (const frame of [page.locator('.site-header'), contact, footer]) {
+    expect(await frame.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+      'rgba(0, 0, 0, 0)'
+    );
+  }
   expect(await contact.evaluate((element) => getComputedStyle(element, '::after').content)).toBe(
     'none'
   );
+
+  const families = await page.locator('body').evaluate((body) => [
+    ...new Set(
+      [...body.querySelectorAll('*')]
+        .filter((element) =>
+          [...element.childNodes].some((node) => node.nodeType === 3 && node.textContent?.trim()) &&
+          element.getClientRects().length > 0 &&
+          !element.closest('script, style, noscript, code, pre')
+        )
+        .map((element) => getComputedStyle(element).fontFamily.split(',')[0].replace(/["']/g, '').trim())
+    ),
+  ].sort());
+  expect(families).toEqual(['Bricolage Grotesque Variable', 'Source Sans 3 Variable']);
 });
 
 test('production accounts cite their sources and writing links to the studies and publications', async ({ page }) => {
@@ -241,20 +266,10 @@ test('production accounts cite their sources and writing links to the studies an
   const researchLink = page.locator('.site-nav a[href="#research"]');
   await researchLink.click();
   await expect(researchLink).toHaveAttribute('aria-current', 'true');
-  await expect.poll(() => page.locator('.site-header').evaluate((element) =>
-    getComputedStyle(element).color
-  )).toBe('rgb(255, 255, 255)');
-  await expect.poll(() => page.locator('.site-header').evaluate((element) =>
+  expect(await page.locator('.site-header').evaluate((element) =>
     getComputedStyle(element).backgroundColor
-  )).toBe('rgb(11, 12, 14)');
-
-  await expect.poll(async () => {
-    const [headerBox, researchBox] = await Promise.all([
-      page.locator('.site-header').boundingBox(),
-      page.locator('#research').boundingBox(),
-    ]);
-    return Math.abs(researchBox!.y - (headerBox!.y + headerBox!.height));
-  }).toBeLessThanOrEqual(1);
+  )).toBe('rgba(0, 0, 0, 0)');
+  await expect.poll(async () => (await page.locator('#research').boundingBox())!.y).toBeLessThanOrEqual(30);
 });
 
 test('fast navigation never leaves content hidden', async ({ page }) => {
@@ -473,73 +488,39 @@ test('portrait and identity remain aligned without overlap', async ({ page }) =>
   expect(Math.abs(caption!.y - frame!.y)).toBeLessThanOrEqual(2);
 });
 
-test('method page presents staff-level ML systems judgment with bounded research evidence', async ({ page, request }) => {
+test('research notes read as one article with correctly scoped evidence', async ({ page, request }) => {
   await page.goto('/');
-  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Method' })).toHaveAttribute(
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Research notes' })).toHaveAttribute(
     'href',
     '/method.html'
   );
 
   await page.goto('/method.html');
 
-  await expect(page).toHaveTitle('How I Build ML Systems | Mrityunjay Kumar');
+  await expect(page).toHaveTitle('Engineering Evidence & Its Limits | Mrityunjay Kumar');
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     'href',
     'https://mrityunjaykumar911.github.io/method.html'
   );
-  await expect(page.getByRole('heading', {
-    level: 1,
-    name: 'Mrityunjay Kumar',
-  })).toBeVisible();
-  await expect(page.getByText('I build ML systems that remain useful after the demo.', { exact: true })).toBeVisible();
-  await expect(page.getByRole('figure', { name: "Mrityunjay's operating model for production ML systems" })).toContainText('Team leverage');
-  await expect(page.locator('.hero-portrait')).toHaveCount(0);
-  await expect(page.locator('.operating-brief')).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('What does the evidence establish?');
+  await expect(page.locator('.site-header .wordmark')).toHaveAttribute('href', '/');
+  await expect(page.locator('main')).not.toContainText(/staff role I am growing toward|Staff lesson/);
 
-  const chapterIds = ['mandate', 'judgment', 'development', 'scale', 'case-studies'];
-  expect(await page.locator('main > section[id]').evaluateAll(
-    (sections) => sections.map((section) => section.id)
-  )).toEqual(chapterIds);
-  await expect(page.locator('main h2')).toHaveText([
-    'Capability matters. Durable value matters more.',
-    'Make the system legible before making it larger.',
-    'Move from uncertain capability to an operable system.',
-    'Scale the learning system, not only the inference fleet.',
-    'Evidence changed the conclusion each time.',
-  ]);
-  const chapters = page.getByRole('navigation', { name: 'Method chapters' });
-  expect(await chapters.getByRole('link').evaluateAll(
-    (links) => links.map((link) => link.getAttribute('href'))
-  )).toEqual(chapterIds.map((id) => `#${id}`));
-  await expect(page.locator('.method-hero')).not.toContainText('28.07%');
-  await expect(page.locator('#mandate .mandate-list > li')).toHaveCount(4);
-  await expect(page.locator('#judgment .reasoning-chain > li')).toHaveCount(5);
-  await expect(page.locator('#judgment .judgment-notes > article')).toHaveCount(3);
-  await expect(page.locator('#development .delivery-rail > li')).toHaveCount(5);
-  await expect(page.locator('#scale .scale-map > div')).toHaveCount(5);
-  await expect(page.locator('#scale')).toContainText('From owning components to improving how teams make technical decisions.');
-
-  await chapters.getByRole('link', { name: 'Three studies', exact: true }).click();
-  await expect(page).toHaveURL(/#case-studies$/);
   await expect(page.locator('#case-studies > article')).toHaveCount(3);
-  for (const id of ['study-a', 'study-b', 'study-c']) {
-    await expect(page.locator(`#${id} .case-story dt`)).toHaveText([
-      'Decision', 'Finding', 'Staff lesson',
-    ]);
-  }
   const studyA = page.locator('#study-a');
   await expect(studyA).toContainText('Bounded positive result');
-  await expect(studyA.getByText('45.76%', { exact: true })).toBeVisible();
-  await expect(studyA.getByText('28.07%', { exact: true })).toBeVisible();
+  await expect(studyA).toContainText('45.76% of 2,255 eligible flex containers');
+  await expect(studyA.locator('figcaption')).toHaveText('Share of 2,255 eligible flex containers');
+  await expect(studyA.locator('meter')).toHaveCount(2);
   await expect(studyA).toContainText('maximal on eight checked finite domains');
   const studyB = page.locator('#study-b');
   await expect(studyB).toContainText('Single-repository finding');
   await expect(studyB).toContainText('The case establishes existence, not prevalence.');
   const studyC = page.locator('#study-c');
   await expect(studyC).toContainText('Negative feasibility result');
-  await expect(studyC.getByText('349,968', { exact: true })).toBeVisible();
+  await expect(studyC).toContainText('349,968');
   await expect(studyC).toContainText('remained unscored');
-  await expect(studyC.locator('.case-lesson')).toContainText('Stop an expensive direction');
+  await expect(studyC).toContainText('Stop an expensive direction');
 
   const tlaSpec = page.getByRole('link', { name: 'Inspect the TLA+ model' });
   await expect(tlaSpec).toHaveAttribute('href', '/research/FlexFacets.tla');
@@ -557,13 +538,11 @@ test('method page presents staff-level ML systems judgment with bounded research
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth), `${width}px`).toBe(width);
   }
-  await chapters.getByRole('link', { name: 'How I think', exact: true }).click();
-  await expect(page).toHaveURL(/#judgment$/);
 });
 
 test('eval pipeline design study is linked from the method page and renders', async ({ page, request }) => {
   await page.goto('/method.html');
-  const studyLink = page.locator('#scale').getByRole('link', { name: /Scaling out an LLM evaluation pipeline/ });
+  const studyLink = page.locator('.related-study').getByRole('link', { name: /Scaling out an LLM evaluation pipeline/ });
   await expect(studyLink).toHaveAttribute('href', '/studies/eval-pipeline.html');
   await studyLink.click();
 
@@ -578,9 +557,12 @@ test('eval pipeline design study is linked from the method page and renders', as
     'results', 'issues',
     'failure', 'metrics', 'decisions', 'validity', 'alignment', 'design-doc',
   ];
-  expect(await page.locator('main > section[id]').evaluateAll(
+  expect(await page.locator('#reference > section[id]').evaluateAll(
     (sections) => sections.map((section) => section.id)
   )).toEqual(chapterIds);
+  await expect(page.locator('#reference')).not.toHaveAttribute('open', '');
+  await expect(page.locator('pre.mermaid svg')).toHaveCount(0);
+  await page.locator('#reference > summary').click();
   await expect(page.locator('.arch-services > li')).toHaveCount(3);
   await expect(page.locator('#failure tbody tr')).toHaveCount(5);
   // Formulas are typeset by KaTeX at build time; the TeX source travels in the MathML annotation.
@@ -588,40 +570,51 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#metrics annotation').last()).toHaveText(/\\text\{graded\} \+ \\text\{failed\} \+ \\text\{cancelled\} = \\text\{total\}/);
 
   // Whitespace guard: multi-line prose next to inline elements must keep its spaces
-  // (Astro 7's default 'jsx' compression drops them: "must behonest", "Source· Method").
+  // (Astro 7's default 'jsx' compression drops them: "must behonest").
   await expect(page.locator('#problem')).toContainText('the report must be honest under failure');
   await expect(page.locator('#evaluation')).toContainText('keyed by (generation_id, grader_version, grader_config_hash)');
   await expect(page.locator('#evaluation')).toContainText('simple and honest: accuracy');
-  await expect(page.getByRole('contentinfo')).toContainText('Built with Astro · Source · Method');
+  await expect(page.getByRole('contentinfo').getByRole('link')).toHaveText(['Home', 'Research notes', 'Source']);
 
   // All five design-doc diagrams render natively through Mermaid, without parse errors.
   await expect(page.locator('html')).toHaveAttribute('data-mermaid', 'rendered', { timeout: 30_000 });
+  // Mermaid's HTML-label measurement once inflated layouts to ~16,000 units; labels must stay SVG text.
+  const diagramSizes = await page.locator('pre.mermaid svg').evaluateAll((svgs) =>
+    svgs.map((svg) => ({ box: svg.getAttribute('viewBox'), labels: svg.querySelectorAll('text, foreignObject').length }))
+  );
+  expect(diagramSizes).toHaveLength(15);
+  for (const { box, labels } of diagramSizes) {
+    const [, , width, height] = (box ?? '').split(/\s+/).map(Number);
+    expect(width, box ?? '').toBeLessThan(10_000);
+    expect(height, box ?? '').toBeLessThan(10_000);
+    expect(labels).toBeGreaterThan(0);
+  }
   for (const n of [1, 2, 3, 4, 5]) {
     await expect(page.locator(`#figure-${n} pre.mermaid svg`)).toHaveCount(1);
   }
   expect(await page.locator('pre.mermaid').evaluateAll(
     (blocks) => blocks.filter((block) => /Syntax error|Parse error/i.test(block.textContent ?? '')).length
   )).toBe(0);
-  await expect(page.locator('#figure-1 svg')).toContainText('Transactional Outbox');
-  await expect(page.locator('#figure-3 svg')).toContainText('GRADE_RETRY_WAIT');
-  await expect(page.locator('#figure-3 svg')).toContainText('ESCALATED');
-  await expect(page.locator('#figure-5 svg')).toContainText('Grader validation report');
+  expect(await diagramText(page, 'figure-1')).toContain('Transactional Outbox');
+  expect(await diagramText(page, 'figure-3')).toContain('GRADE_RETRY_WAIT');
+  expect(await diagramText(page, 'figure-3')).toContain('ESCALATED');
+  expect(await diagramText(page, 'figure-5')).toContain('Grader validation report');
 
   // Study diagrams: point-in-time binary eval, scaled data model, scale-out plane.
   for (const id of ['eval-identity', 'data-model', 'scale-plane']) {
     await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
   }
-  await expect(page.locator('#eval-identity svg')).toContainText('verdict = 0 or 1');
-  await expect(page.locator('#data-model svg')).toContainText('GRADING_RESULT');
-  await expect(page.locator('#scale-plane svg')).toContainText('Quota limiter');
+  expect(await diagramText(page, 'eval-identity')).toContain('verdict = 0 or 1');
+  expect(await diagramText(page, 'data-model')).toContain('GRADING_RESULT');
+  expect(await diagramText(page, 'scale-plane')).toContain('Quota limiter');
   await expect(page.locator('#claims table.claims tbody tr')).toHaveCount(8);
 
   // Temporal mini workers: both diagrams render, each reason names what it replaces.
   for (const id of ['temporal-pools', 'temporal-flow']) {
     await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
   }
-  await expect(page.locator('#temporal-pools svg')).toContainText('Grade workers');
-  await expect(page.locator('#temporal-flow svg')).toContainText('BatchWorkflow');
+  expect(await diagramText(page, 'temporal-pools')).toContain('Grade workers');
+  expect(await diagramText(page, 'temporal-flow')).toContain('BatchWorkflow');
   await expect(page.locator('#temporal .reason-grid > li')).toHaveCount(7);
   await expect(page.locator('#temporal .reason-grid .replaces')).toHaveCount(7);
   await expect(page.locator('#temporal')).toContainText('51,200 events');
@@ -642,8 +635,8 @@ test('eval pipeline design study is linked from the method page and renders', as
     'Backed-up queue', 'Throttling', 'Retry and lineage tracking',
     'Retry from saved state', 'Analytics integration', 'Telemetry and observability',
   ]);
-  await expect(page.locator('#observability svg')).toContainText('Prometheus');
-  await expect(page.locator('#retry-state svg')).toContainText('same pins');
+  expect(await diagramText(page, 'observability')).toContain('Prometheus');
+  expect(await diagramText(page, 'retry-state')).toContain('same pins');
   await expect(page.locator('#claims .sizing annotation').first()).toHaveText('100 / 5 = 20');
 
   // Workload model: estimates are labeled, derived values are typeset, and the
@@ -655,15 +648,15 @@ test('eval pipeline design study is linked from the method page and renders', as
   await expect(page.locator('#results table.workload-table')).toContainText('Not published');
   await expect(page.locator('#temporal table.retry-table tbody tr')).toHaveCount(5);
   await expect(page.locator('#temporal')).toContainText('Two sources of truth, one each');
-  await expect(page.locator('#temporal-pools svg')).toContainText('Quota limiter');
+  expect(await diagramText(page, 'temporal-pools')).toContain('Quota limiter');
   await expect(page.locator('main')).not.toContainText(/interview|whiteboard/i);
 
   // Baseline (v0): architecture and schema render, API and states match it.
   for (const id of ['sketch-1', 'sketch-2']) {
     await expect(page.locator(`#${id} pre.mermaid svg`)).toHaveCount(1);
   }
-  await expect(page.locator('#sketch-1 svg')).toContainText('LLMGeneration Pipeline');
-  await expect(page.locator('#sketch-2 svg')).toContainText('ModelParameterJson');
+  expect(await diagramText(page, 'sketch-1')).toContain('LLMGeneration Pipeline');
+  expect(await diagramText(page, 'sketch-2')).toContain('ModelParameterJson');
   const sketch = page.locator('#baseline');
   await expect(sketch).toContainText('ArtifactLink, GraderIID, ttl');
   await expect(sketch).toContainText('Job_UUID_1 (same ID)');
