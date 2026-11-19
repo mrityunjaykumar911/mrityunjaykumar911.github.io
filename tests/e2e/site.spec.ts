@@ -89,19 +89,22 @@ test('published page stays generic and exposes complete metadata', async ({ page
   expect(structuredData).toContain('Azure Machine Learning');
   expect(structuredData).not.toContain('"email"');
 
+  // Distributed-systems research with Prof. Shuai Mu leads alongside the industry work.
+  const researchAssistantRole = page.getByRole('article', { name: /Replicating multi-core transactions/ });
+  await expect(researchAssistantRole).toContainText('Stony Brook University / 2020');
   await expect(
-    page.getByText('Graduate Research Assistant · Stony Brook University · 2020', {
-      exact: false,
-    })
+    researchAssistantRole.getByText('led early-stage development and evaluation of Rolis', { exact: false })
   ).toBeVisible();
-  const researchAssistantRole = page.locator('.feature-story');
-  await expect(
-    researchAssistantRole.getByText('Led early-stage development and evaluation', { exact: false })
-  ).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Visit the research group' })).toHaveAttribute(
+  await expect(researchAssistantRole).toContainText('EuroSys 2022');
+  await expect(researchAssistantRole.getByRole('link', { name: "Prof. Shuai Mu's group" })).toHaveAttribute(
     'href',
     'https://mpaxos.com/'
   );
+  await expect(researchAssistantRole.getByRole('link', { name: /Rolis paper/ })).toHaveAttribute(
+    'href',
+    'https://dl.acm.org/doi/10.1145/3492321.3519576'
+  );
+  await expect(page.locator('#research .feature-story')).toHaveCount(0);
   await expect(page.locator('a[href*="sbu-musicx"]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Email' })).toHaveAttribute(
     'href',
@@ -152,7 +155,12 @@ test('homepage leads with the author and a readable linked design proposal', asy
   const workBox = await page.locator('#work').boundingBox();
   expect(workBox).not.toBeNull();
   expect(workBox!.y).toBeLessThan(900);
-  await expect(page.locator('.work-entry')).toHaveCount(2);
+  await expect(page.locator('.work-entry')).toHaveCount(3);
+  await expect(page.locator('.work-entry h3')).toHaveText([
+    'Running and evaluating PowerPoint agents',
+    'Metadata repair and crash recovery in vSAN',
+    'Replicating multi-core transactions with Rolis',
+  ]);
   await expect(page.getByRole('link', { name: 'Full experience' })).toHaveAttribute('href', '/latest.html');
   await study.click();
   await expect(page).toHaveURL(/\/studies\/eval-pipeline\.html$/);
@@ -588,6 +596,18 @@ test('eval pipeline design study is linked from the method page and renders', as
     expect(width, box ?? '').toBeLessThan(10_000);
     expect(height, box ?? '').toBeLessThan(10_000);
     expect(labels).toBeGreaterThan(0);
+  }
+  // Legibility: by default a diagram shrinks only to the column width, never to a height cap.
+  // A height cap once rendered Figure 2 at 27% of its size, with 5px labels.
+  const fits = await page.locator('pre.mermaid').evaluateAll((blocks) =>
+    blocks.map((pre) => {
+      const svg = pre.querySelector('svg')!;
+      const natural = Number((svg.getAttribute('viewBox') ?? '').split(/\s+/)[2]);
+      return { id: pre.closest('figure')?.id, natural, column: pre.clientWidth, rendered: svg.getBoundingClientRect().width };
+    })
+  );
+  for (const { id, natural, column, rendered } of fits) {
+    expect(rendered, `${id} renders at the column width or its natural width`).toBeGreaterThanOrEqual(Math.min(natural, column) - 2);
   }
   for (const n of [1, 2, 3, 4, 5]) {
     await expect(page.locator(`#figure-${n} pre.mermaid svg`)).toHaveCount(1);

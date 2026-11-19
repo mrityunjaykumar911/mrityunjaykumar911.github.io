@@ -23,7 +23,8 @@ const notes = featuredHref
 <section class="research-section" id={id} aria-labelledby={`${id}-title`}>
   <h2 id={`${id}-title`}>Research &amp; writing</h2>
 
-  <div class="research-grid">
+  <div class:list={['research-grid', { 'is-index': featuredHref }]}>
+    {!featuredHref && (
     <article class="feature-story">
       <p class="story-label">{feature.label}</p>
       <h3>{feature.title}</h3>
@@ -36,6 +37,7 @@ const notes = featuredHref
         )
       }
     </article>
+    )}
 
     <ol class="research-notes" aria-label="Research and writing index">
       {
@@ -69,6 +71,15 @@ const notes = featuredHref
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     gap: var(--grid-gap);
     align-items: start;
+  }
+
+  /* On the homepage, Rolis leads Selected engineering work, so this section is the index alone. */
+  .research-grid.is-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .research-grid.is-index .research-notes {
+    max-width: 760px;
   }
 
   .story-label,

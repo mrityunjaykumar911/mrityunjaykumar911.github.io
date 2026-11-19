@@ -1605,7 +1605,6 @@ const decisions = [
 
   .diagram-scroll {
     overflow: auto;
-    max-height: min(65svh, 600px);
     padding: 16px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-sm);
@@ -1628,9 +1627,10 @@ const decisions = [
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: min(58svh, 540px);
   }
 
+  /* Default view fits width only: a height cap shrank tall diagrams to unreadable text. */
+  .diagram .diagram-scroll[data-expanded='true'] { max-height: min(80svh, 900px); }
   .diagram .diagram-scroll[data-expanded='true'] pre.mermaid { width: max-content; max-width: none; overflow: visible; }
   .diagram .diagram-scroll[data-expanded='true'] pre.mermaid :global(svg) { max-width: none; max-height: none; }
   .diagram figcaption :global([data-diagram-size]) { min-height: 44px; margin-left: auto; padding: 4px 0; border: 0; background: transparent; color: var(--accent-strong); font: inherit; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }

@@ -272,9 +272,11 @@ unlisted URLs are not access controls.
     `npm ci`. Local proxy installs may rewrite these public hosts at runtime.
 - A 404 at a canonical proxy URL can also mean the locked version is unavailable.
     Do not assume every tarball 404 is a routing defect.
-- The pinned Astro patches and transitive overrides currently compensate for
-    versions absent from the proxy. Reassess them during dependency maintenance;
-    do not remove them without a successful clean install and build.
+- The repository tracks current public npm releases. If the Microsoft proxy
+    lacks a locked version, install locally against the public registry instead
+    of pinning older versions or adding `overrides`; older pins can drop
+    security fixes (for example a DOMPurify sanitizer fix) and conflict with
+    Dependabot.
 - A missing Chromium executable is fixed by `npx playwright install chromium`
     locally, or `npx playwright install --with-deps chromium` on Linux CI.
 
