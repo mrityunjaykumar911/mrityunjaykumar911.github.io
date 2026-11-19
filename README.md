@@ -92,12 +92,47 @@ For an uncommitted development override, create `src/data/resume.local.yaml`. It
 
 ## Local Development
 
-Requires Node.js 22.
+Use Node.js **26.13.0**, recorded in [`.node-version`](.node-version), and npm
+(validated locally with npm **11.20.0**). GitHub Actions reads the same Node
+version file. Astro requires at least Node 22.23.4; an arbitrary older Node 22
+installation is not sufficient. Install or select the recorded version with your
+Node version manager before running the commands below.
+
+Run all website commands from the repository root, not the nested deck project.
+The committed lockfile uses public npm tarball URLs so GitHub-hosted runners work
+without a Microsoft-only package feed. Microsoft proxy routing is a local
+machine environment choice, not a repository-wide CI setting.
 
 ```powershell
-npm install
+node --version
+npm --version
+npm config get registry
+npm config get replace-registry-host
+Copy-Item .env.example .env
+npm ci
+npx playwright install chromium
 npm run dev
 ```
+
+On a Microsoft-proxy-enabled workstation, set both variables for the current
+PowerShell session before dependency commands:
+
+```powershell
+$env:NPM_CONFIG_REGISTRY = 'https://packagefeedproxy.microsoft.io/npm/'
+$env:NPM_CONFIG_REPLACE_REGISTRY_HOST = 'always'
+npm config get registry
+npm config get replace-registry-host
+```
+
+Do not add a repository `.npmrc` for the proxy. The proxy is intentionally
+machine-local, and GitHub Actions must use `https://registry.npmjs.org/`.
+A clean local install should still pass with `npm ci` after the two environment
+variables are set.
+
+Create `.env` only on initial setup; do not overwrite an existing local file.
+`npm ci` installs the committed dependency graph without re-resolving versions.
+Use `npm install` only for intentional dependency changes, and commit the updated
+manifest and lockfile together after validating a clean `npm ci`.
 
 Open:
 
@@ -180,6 +215,70 @@ flowchart LR
 ```
 
 A deployment cannot start unless the browser tests pass. Failed runs retain the Playwright HTML report for seven days.
+
+### Build Environment Contract
+
+Both CI installation jobs use [`.node-version`](.node-version), `npm ci`, and
+the public npm registry. GitHub-hosted runners must not use the Microsoft
+employee/package-feed proxy. The test job also installs Temurin Java 21 for the
+TLA+ checks and Chromium with its Linux dependencies. A runner must be able to
+reach npmjs, the Playwright browser CDN, and the sources used by the existing
+TLA+ checks. A warm dependency cache is not a substitute for network access.
+
+For another CI runner, reproduce the setup in this order:
+
+```sh
+export NPM_CONFIG_REGISTRY=https://registry.npmjs.org/
+export NPM_CONFIG_REPLACE_REGISTRY_HOST=npmjs
+export SITE_URL=https://mrityunjaykumar911.github.io
+npm ci
+npx playwright install --with-deps chromium
+npm run test:tla
+npm run test:study-c:offline
+npm run test:e2e
+npm run build
+```
+
+Select the Node version from `.node-version` and install Java 21 before these
+commands. Upload only `dist/` as the Pages artifact after validation succeeds.
+Do not publish the source workspace, `.env`, or local resume overlays.
+
+### Build-Time Variables
+
+| Variable | Local Setup | CI/CD |
+| --- | --- | --- |
+| `SITE_URL` | `.env`, using `.env.example` | Optional GitHub Actions repository variable `SITE_URL`; the workflow defaults to the current public URL |
+| `PUBLIC_GA_ID` | `.env`; an empty value disables the existing analytics | Optional workflow environment setting; unset uses the existing code default, explicitly empty disables analytics |
+| `DEV_ALLOWED_HOST` | Optional hostname in `.env` for a remote dev preview | Not needed for static build or Pages deployment |
+| `NPM_CONFIG_REGISTRY` | Microsoft proxy shell override; public registry otherwise | Explicitly set to `https://registry.npmjs.org/` in the workflow |
+| `NPM_CONFIG_REPLACE_REGISTRY_HOST` | `always` for proxy routing | Explicitly set to `npmjs` in the workflow |
+
+Vite's `PUBLIC_*` values are public, not a secret store. Credentials for optional
+paid research runs belong outside the repository and normal CI; no provider key
+is needed to build, test, or deploy this website. Do not set `PREVIEW_FLAGS` for
+a release build. The detailed resume is intentionally public; preview flags and
+unlisted URLs are not access controls.
+
+### Dependency Proxy Troubleshooting
+
+- `ETARGET` means the proxy cannot resolve the requested version. Check it with
+    `npm view <package> versions --json`; do not delete the lockfile or change
+    registries. Choose a compatible available version only as an intentional,
+    reviewed dependency update.
+- A tarball 404 containing `/_packaging/` or an internal Azure Feed hostname
+    in CI means a private feed URL leaked into the lockfile or environment.
+    Remove that URL and restore `https://registry.npmjs.org/<package>/-/<tarball>.tgz`
+    for GitHub Actions. Keep integrity hashes intact and verify with public
+    `npm ci`. Local proxy installs may rewrite these public hosts at runtime.
+- A 404 at a canonical proxy URL can also mean the locked version is unavailable.
+    Do not assume every tarball 404 is a routing defect.
+- The repository tracks current public npm releases. If the Microsoft proxy
+    lacks a locked version, install locally against the public registry instead
+    of pinning older versions or adding `overrides`; older pins can drop
+    security fixes (for example a DOMPurify sanitizer fix) and conflict with
+    Dependabot.
+- A missing Chromium executable is fixed by `npx playwright install chromium`
+    locally, or `npx playwright install --with-deps chromium` on Linux CI.
 
 GitHub Pages must be configured once under **Settings → Pages → Build and deployment → Source → GitHub Actions**.
 

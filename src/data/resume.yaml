@@ -27,9 +27,9 @@ profile:
 
   headline: I build distributed infrastructure that makes *LLM agents reliable* in production.
   intro: >-
-    Senior ML systems engineer with 12+ years building distributed execution,
-    model serving, evaluation, and data platforms. I focus on latency,
-    throughput, and fault recovery for agent and post-training workloads.
+    I build execution and evaluation systems for PowerPoint's AI agents.
+    Before Microsoft, I worked on metadata repair and crash recovery for
+    VMware's distributed storage.
   signals:
     - value: Millions-scale
       label: request workloads
@@ -39,13 +39,12 @@ profile:
       label: evaluation · ML · systems
   about:
     - >-
-      I care about systems that remain understandable under pressure: explicit
-      tradeoffs, useful observability, and designs that account for failure
-      from the start.
+      My work spans production ML at Microsoft, distributed storage at VMware,
+      and replicated transaction research at Stony Brook University.
     - >-
-      I take complex systems from **0 → 1**: turning ambiguous problems into
-      clear architectures, building the critical path, and carrying them into
-      production with measurable outcomes.
+      Earlier work covered data platforms, search, model delivery, and embedded
+      systems. Today my focus is distributed execution, evaluation, and reliable
+      model-serving workflows.
   contactHeading: Let's talk about production AI infrastructure.
   contactAreas:
     - Inference engines

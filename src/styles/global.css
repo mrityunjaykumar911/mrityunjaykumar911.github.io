@@ -1,23 +1,23 @@
 /* ===========================================================================
-   Monochrome premium — a restrained, Inter-based visual system.
+  Engineering publication: open grids, evidence rows, and quiet reading surfaces.
    ========================================================================= */
 
 :root {
-  --paper: #ffffff;
+  --paper: #fafbf9;
   --paper-bright: #ffffff;
   --panel: #f6f7f8;
   --panel-2: #f0f1f3;
   --ink: #0b0c0e;
-  --ink-soft: #62666d;
-  --ink-faint: #6b7078;
+  --ink-soft: #515960;
+  --ink-faint: #606870;
   --line: rgba(11, 12, 14, 0.09);
   --line-strong: rgba(11, 12, 14, 0.16);
 
-  /* One green hue, tuned separately for light and dark surfaces. */
-  --accent: #087a55;
-  --accent-strong: #066747;
-  --accent-on-dark: #5bd5a5;
-  --accent-tint: rgba(8, 122, 85, 0.11);
+  /* Link accent, tuned separately for light and dark surfaces. */
+  --accent: #244bc0;
+  --accent-strong: #1c3d9d;
+  --accent-on-dark: #a6c4ff;
+  --accent-tint: rgba(36, 75, 192, 0.07);
 
   /* Dark surfaces (contact / footer). */
   --ink-deep: #0b0c0e;
@@ -30,17 +30,17 @@
   --blue: var(--accent);
   --fog: var(--panel);
 
-  --display: 'Inter Variable', system-ui, -apple-system, sans-serif;
-  --sans: 'Inter Variable', system-ui, -apple-system, sans-serif;
+  --display: 'Bricolage Grotesque Variable', sans-serif;
+  --sans: 'Source Sans 3 Variable', sans-serif;
   --mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --serif: var(--display);
 
-  --radius: 14px;
-  --radius-sm: 10px;
-  --radius-lg: 20px;
-  --shadow-sm: 0 1px 2px rgba(11, 12, 14, 0.06), 0 1px 3px rgba(11, 12, 14, 0.05);
-  --shadow-md: 0 4px 12px rgba(11, 12, 14, 0.07), 0 2px 6px rgba(11, 12, 14, 0.05);
-  --shadow-lg: 0 20px 48px rgba(11, 12, 14, 0.12);
+  --radius: 4px;
+  --radius-sm: 2px;
+  --radius-lg: 6px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 
   --content: min(1120px, calc(100vw - 80px));
   --gutter: max(40px, calc((100vw - 1120px) / 2));
@@ -75,7 +75,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 68px;
+  scroll-padding-top: 24px;
 }
 
 body {
@@ -86,7 +86,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   font-feature-settings: 'cv11', 'ss01';
-  letter-spacing: -0.011em;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
@@ -96,12 +96,6 @@ body::before {
   display: none;
 }
 
-@media (min-width: 1800px) {
-  html {
-    scroll-padding-top: 84px;
-  }
-}
-
 h1,
 h2,
 h3,
@@ -109,7 +103,7 @@ h4 {
   margin: 0;
   font-weight: 640;
   line-height: 1.08;
-  letter-spacing: -0.022em;
+  letter-spacing: 0;
   text-wrap: balance;
 }
 
@@ -131,6 +125,13 @@ img {
 button {
   font: inherit;
   color: inherit;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--mono);
 }
 
 ul,
@@ -167,10 +168,10 @@ ol {
 .mono-label {
   margin: 0;
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .sr-only {
@@ -228,10 +229,10 @@ ol {
 
 .section-heading h2 {
   font-family: var(--display);
-  font-size: clamp(30px, 3.2vw, 44px);
+  font-size: 40px;
   font-weight: 660;
   line-height: 1.08;
-  letter-spacing: -0.028em;
+  letter-spacing: 0;
 }
 
 .section-lede {
@@ -265,6 +266,89 @@ ol {
   background: var(--panel-2);
 }
 
+/* Article pages: a 680px reading measure, with figures and tables allowed up to 960px. */
+.article-shell {
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(20px, 1fr)
+    [wide-start] minmax(0, 140px)
+    [text-start] min(680px, calc(100% - 40px))
+    [text-end] minmax(0, 140px)
+    [wide-end] minmax(20px, 1fr)
+    [full-end];
+}
+
+.article-shell > * {
+  grid-column: text;
+  min-width: 0;
+}
+
+.article-shell > .wide {
+  grid-column: wide;
+}
+
+.article-head {
+  padding: 56px 0 8px;
+}
+
+.article-kicker {
+  color: var(--ink-soft);
+  font: 600 15px/1.5 var(--sans);
+}
+
+.article-title {
+  margin-top: 12px;
+  font: 620 52px/1.08 var(--display);
+}
+
+.article-byline {
+  margin-top: 18px;
+  color: var(--ink-soft);
+  font: 16px/1.5 var(--sans);
+}
+
+.article-byline a,
+.article-body a {
+  color: var(--accent-strong);
+  text-underline-offset: 0.18em;
+}
+
+.article-deck {
+  margin-top: 24px;
+  color: var(--ink-soft);
+  font: 22px/1.55 var(--sans);
+}
+
+.article-body > p,
+.article-body > ul > li,
+.article-body > ol > li {
+  font: 20px/1.65 var(--sans);
+}
+
+.article-body > p {
+  margin-top: 22px;
+}
+
+.article-body > h2 {
+  margin-top: 48px;
+  font: 600 28px/1.25 var(--display);
+  text-wrap: pretty;
+}
+
+.article-body > h2 + p {
+  margin-top: 12px;
+}
+
+@media (max-width: 620px) {
+  .article-head { padding-top: 32px; }
+  .article-title { font-size: 36px; line-height: 1.12; }
+  .article-deck { font-size: 21px; }
+  .article-body > p,
+  .article-body > ul > li,
+  .article-body > ol > li { font-size: 19px; line-height: 1.65; }
+  .article-body > h2 { margin-top: 40px; font-size: 25px; }
+}
+
 /* Scroll-reveal is progressive enhancement: content is never hidden by motion. */
 .reveal {
   opacity: 1;
@@ -295,8 +379,8 @@ ol {
 
 @media (min-width: 1800px) {
   :root {
-    --content: min(2200px, calc(100vw - 192px));
-    --gutter: max(96px, calc((100vw - 2200px) / 2));
+    --content: min(1440px, calc(100vw - 192px));
+    --gutter: max(96px, calc((100vw - 1440px) / 2));
     --grid-col: 360px;
     --grid-gap: 96px;
   }
@@ -315,7 +399,7 @@ ol {
   }
 
   .section-heading h2 {
-    font-size: clamp(52px, 2vw, 64px);
+    font-size: 48px;
   }
 
   .section-lede {
@@ -338,7 +422,7 @@ ol {
 @media (max-width: 620px) {
   .section-heading {
     gap: var(--s2);
-    text-align: center;
+    text-align: left;
   }
 
   .section-heading .heading-body,

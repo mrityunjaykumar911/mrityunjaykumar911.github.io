@@ -1,56 +1,51 @@
 ---
 import Icon from './Icon.astro';
 import { inlineMarkup } from '../lib/text';
+import { withBase } from '../lib/url';
 import type { Research } from '../data/schema';
 
 interface Props {
   id: string;
   research: Research;
+  featuredHref?: string | null;
 }
 
-const { id, research } = Astro.props;
-const { feature, notes } = research;
+const { id, research, featuredHref } = Astro.props;
+const { feature } = research;
+const notes = featuredHref
+  ? [
+      { type: 'Engineering notes', title: 'What does a passing check actually establish?', meta: 'Three studies on layout, publication disclosure, and the limits of formal feedback.', href: withBase('/method.html#case-studies') },
+      ...research.notes.filter((note) => note.href && note.href !== featuredHref),
+    ]
+  : research.notes;
 ---
 
-<section class="section research-section" id={id} aria-labelledby={`${id}-title`}>
-  <div class="section-heading light reveal">
-    <p class="eyebrow">Research &amp; systems</p>
-    <div class="heading-body">
-      <h2 id={`${id}-title`}>Ideas tested in code.</h2>
-      <p class="section-lede">
-        My academic work sharpened the same questions I bring to production: where
-        contention appears, what failure means, and how correctness is verified.
-      </p>
-    </div>
-  </div>
+<section class="research-section" id={id} aria-labelledby={`${id}-title`}>
+  <h2 id={`${id}-title`}>Research &amp; writing</h2>
 
-  <div class="research-grid">
-    <article class="feature-story reveal">
-      <p class="story-label mono-label">{feature.label}</p>
+  <div class:list={['research-grid', { 'is-index': featuredHref }]}>
+    {!featuredHref && (
+    <article class="feature-story">
+      <p class="story-label">{feature.label}</p>
       <h3>{feature.title}</h3>
       <p class="prose" set:html={inlineMarkup(feature.body)} />
       {
         feature.link && (
-          <a href={feature.link.href} target="_blank" rel="noreferrer">
+          <a href={feature.link.href}>
             {feature.link.text} <Icon name="arrow-up-right" size={15} />
           </a>
         )
       }
     </article>
+    )}
 
-    <ol class="research-notes" aria-label="Research proof registry">
+    <ol class="research-notes" aria-label="Research and writing index">
       {
-        notes.map((note, index) => (
-          <li class="research-note reveal">
-            <span class="proof-index" aria-hidden="true">P-{String(index + 1).padStart(2, '0')}</span>
-            <p class="note-type mono-label">{note.type}</p>
-            <h3>{note.title}</h3>
+        notes.map((note) => (
+          <li class="research-note">
+            <p class="note-type">{note.type === 'Design study' ? 'Proposed architecture' : note.type}</p>
+            <h3>{note.href ? <a href={note.href}>{note.title}</a> : note.title}</h3>
             <p class="note-meta">{note.meta}</p>
-            {note.href && (
-              <a href={note.href} target="_blank" rel="noreferrer" aria-label={`Open: ${note.title}`}>
-                <Icon name="arrow-up-right" size={15} />
-              </a>
-            )}
           </li>
         ))
       }
@@ -60,171 +55,100 @@ const { feature, notes } = research;
 
 <style>
   .research-section {
-    position: relative;
-    overflow: hidden;
-    background: var(--ink-deep);
-    color: #fff;
+    width: var(--content);
+    margin: 0 auto;
+    padding: 48px 0 56px;
+    border-top: 1px solid var(--line-strong);
   }
 
-  .research-section::before {
-    content: none;
-  }
-
-  .research-section .section-heading h2 {
-    color: #fff;
-  }
-
-  .section-heading.light .eyebrow {
-    color: var(--accent-on-dark);
-  }
-
-  .section-heading.light .section-lede {
-    color: rgba(255, 255, 255, 0.68);
+  .research-section > h2 {
+    margin-bottom: 28px;
+    font: 580 30px/1.2 var(--display);
   }
 
   .research-grid {
-    position: relative;
-    z-index: 1;
     display: grid;
-    grid-template-columns: minmax(0, 0.85fr) minmax(360px, 1.15fr);
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     gap: var(--grid-gap);
+    align-items: start;
   }
 
-  .feature-story {
-    position: sticky;
-    top: 92px;
-    align-self: start;
-    padding: 28px 0 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  /* On the homepage, Rolis leads Selected engineering work, so this section is the index alone. */
+  .research-grid.is-index {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .feature-story .story-label {
-    color: var(--accent-on-dark);
-    margin-bottom: 18px;
+  .research-grid.is-index .research-notes {
+    max-width: 760px;
+  }
+
+  .story-label,
+  .note-type {
+    color: var(--ink-soft);
+    font: 500 15px/1.45 var(--sans);
   }
 
   .feature-story h3 {
-    font-family: var(--display);
-    font-size: clamp(28px, 3.2vw, 42px);
-    font-weight: 640;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin-bottom: 14px;
+    margin: 10px 0 12px;
+    font: 560 26px/1.22 var(--display);
   }
 
-  .feature-story p:not(.story-label) {
-    color: rgba(255, 255, 255, 0.72);
+  .feature-story .prose {
+    color: var(--ink);
+    font-size: 18px;
+    line-height: 1.6;
   }
 
   .feature-story a {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    margin-top: 22px;
-    color: #fff;
-    font-weight: 560;
-    text-decoration: underline;
-    text-decoration-color: var(--accent-on-dark);
-    text-underline-offset: 5px;
+    min-height: 44px;
+    margin-top: 8px;
+    color: var(--accent-strong);
+    text-underline-offset: 4px;
   }
 
   .research-notes {
     list-style: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .research-note {
-    position: relative;
-    display: grid;
-    grid-template-columns: 52px 1fr 42px;
-    column-gap: 14px;
-    padding: 20px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
   }
 
-  .research-note .note-type {
-    grid-column: 2;
-    margin-bottom: 8px;
-    color: var(--accent-on-dark);
+  .research-note:first-child {
+    padding-top: 0;
+    border-top: 0;
   }
 
   .research-note h3 {
-    grid-column: 2;
-    font-family: var(--display);
-    font-size: 19px;
-    font-weight: 600;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    margin-bottom: 6px;
-  }
-
-  .note-meta {
-    grid-column: 2;
-    margin: 0;
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 13px;
+    margin: 4px 0 4px;
+    font: 560 20px/1.3 var(--display);
   }
 
   .research-note a {
-    grid-column: 3;
-    grid-row: 1 / span 3;
-    display: grid;
-    place-items: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
-  }
-
-  .proof-index {
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    color: rgba(255, 255, 255, 0.38);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 500;
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
   }
 
   .research-note a:hover {
-    background: #fff;
-    color: var(--ink);
-    border-color: #fff;
+    color: var(--accent-strong);
+    text-decoration-color: currentColor;
   }
 
-  @media (min-width: 1800px) {
-    .research-section::before,
-    .proof-index {
-      font-size: 14px;
-    }
-
-    .feature-story h3 {
-      font-size: 56px;
-    }
-
-    .feature-story p:not(.story-label) {
-      font-size: 20px;
-    }
-
-    .research-note h3 {
-      font-size: 24px;
-    }
-
-    .note-meta {
-      font-size: 16px;
-    }
+  .note-meta {
+    color: var(--ink-soft);
+    font-size: 16px;
   }
 
   @media (max-width: 900px) {
     .research-grid {
       grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 620px) {
-    .feature-story {
-      padding: 30px 0 0;
-      text-align: center;
     }
   }
 </style>

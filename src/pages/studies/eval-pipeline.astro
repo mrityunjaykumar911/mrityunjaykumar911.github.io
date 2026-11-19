@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Icon from '../../components/Icon.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
 import SiteFooter from '../../components/SiteFooter.astro';
 import { withBase } from '../../lib/url';
 import { Content as DesignDoc } from '../../data/studies/eval-pipeline.md';
@@ -15,11 +15,13 @@ import '@fontsource-variable/source-sans-3';
 // pulled out here and rendered natively by Mermaid in the browser. In the
 // appendix, the remark plugin in astro.config.mjs swaps each block for a link
 // back to its figure so nothing renders twice.
-const mermaidSources = [...designDocSource.matchAll(/```mermaid\n([\s\S]*?)```/g)].map((m) => m[1].trim());
+const mermaidSources = [...designDocSource.matchAll(/```mermaid\r?\n([\s\S]*?)```/g)].map((m) => m[1].trim());
 if (mermaidSources.length !== 5) {
   throw new Error(`Expected 5 mermaid diagrams in the eval design doc, found ${mermaidSources.length}`);
 }
-const [architectureDiagram, endToEndDiagram, lifecycleDiagram, outboxDiagram, validationDiagram] = mermaidSources;
+const [architectureDiagram, endToEndDiagram, lifecycleSource, outboxDiagram, validationDiagram] = mermaidSources;
+// SVG text wraps long state IDs mid-word; this cluster-free diagram measures HTML labels correctly.
+const lifecycleDiagram = `---\nconfig:\n  htmlLabels: true\n---\n${lifecycleSource}`;
 
 // Baseline (v0): one eval pipeline over one metadata table. ER column types
 // are illustrative; Mermaid requires one per column.
@@ -534,7 +536,6 @@ const glance = [
 ];
 
 const homeHref = withBase('/');
-const methodHref = withBase('/method.html');
 const year = new Date().getFullYear();
 
 const chapters = [
@@ -613,29 +614,52 @@ const decisions = [
   description="How Mrityunjay Kumar reasoned about service boundaries, scale-out, backpressure, and idempotency in a distributed LLM evaluation pipeline."
   canonicalPath="/studies/eval-pipeline.html"
 >
-  <header class="study-header" id="top">
-    <a class="study-wordmark" href={homeHref} aria-label="Return to portfolio">
-      <span class="wordmark-mark">MK</span>
-      <span>
-        <strong>Mrityunjay Kumar</strong>
-        <small>Design study · Scale-out architecture</small>
-      </span>
-    </a>
-    <a class="back-link" href={methodHref}>
-      Method <Icon name="arrow-up-right" size={15} />
-    </a>
-  </header>
+  <SiteHeader homeHref={homeHref} />
 
   <main id="main" class="study-page">
     <section class="study-hero" aria-labelledby="study-title">
-      <p class="eyebrow">Design study · Sized with estimates, not measurements</p>
+      <p class="article-label">Architecture study · Proposed design</p>
       <h1 id="study-title">Scaling out an LLM evaluation pipeline</h1>
+      <p class="article-byline">By <a href={homeHref}>Mrityunjay Kumar</a></p>
       <p class="hero-lede">
-        A platform for binary, point-in-time LLM evaluation. Every question gets a stored model
-        answer and a 0/1 verdict from a selected, pinned grader. Math500 is the sample dataset.
-        The happy path is easy. This study is about scale: what happens when the work spreads
-        across many workers, the model provider pushes back, and messages arrive twice.
+        When a model call times out, the evaluator has no answer to grade. Count it as wrong
+        and a service outage looks like a worse model. Drop it silently and a run that barely
+        finished can look like a success.
       </p>
+    </section>
+
+    <article class="reading-column" aria-label="Evaluation design decisions">
+      <p>This design separates accuracy from coverage. Accuracy describes the answers that received a verdict; coverage describes how much of the dataset received one. Keeping those counts separate changes what workers store and what a retry is allowed to change.</p>
+      <figure class="report-example">
+        <figcaption>One run, two denominators</figcaption>
+        <p>Illustrative example, not benchmark data: of five questions, three answers are correct, one is incorrect, and one has no verdict.</p>
+        <table>
+          <caption class="sr-only">Accuracy and coverage for the illustrative five-question run</caption>
+          <thead><tr><th scope="col">Measure</th><th scope="col">Calculation</th><th scope="col">Result</th></tr></thead>
+          <tbody><tr><th scope="row">Accuracy</th><td>3 correct / 4 graded</td><td>75%</td></tr><tr><th scope="row">Coverage</th><td>4 graded / 5 questions</td><td>80%</td></tr></tbody>
+        </table>
+      </figure>
+
+      <h2>Store the answer before grading it</h2>
+      <p>A dataset URL can serve different bytes tomorrow. Ingestion takes a snapshot; execution pins that snapshot, the model configuration and the grader version for the run. The report can then identify exactly what was evaluated.</p>
+      <p>The worker saves the generated answer separately from the verdict. If grading fails, it can retry against the saved answer rather than call the model again. A new grader can also assess those same answers without changing the original results.</p>
+
+      <h2>A retry must not count twice</h2>
+      <p>A worker can save a verdict and lose its connection before aggregation hears about it. In this proposal, the worker commits the result and an outgoing event together. A sender can deliver the event again; the receiver records its ID before updating the report.</p>
+      <p>This makes internal state effectively-once, not every external call. A provider may generate an answer even if the worker never receives it. A retry can incur a second call; the design must retain that uncertainty rather than promise exactly-once execution.</p>
+
+      <h2>Where adding workers stops helping</h2>
+      <p>The provider limits requests, tokens and calls in flight. Once that allowance is exhausted, another worker adds contention, not capacity. Execution shares a limiter at the provider-account and model boundary; ingestion and aggregation scale independently.</p>
+      <p>Those boundaries produce three services: ingestion owns dataset snapshots, execution owns answers and verdicts, and aggregation owns progress and reporting. They separate distinct kinds of load rather than divide one request into arbitrary network hops.</p>
+
+      <h2>What this design does not establish</h2>
+      <p>This is an architecture proposal, not a production deployment report. The reference sizes a target of 1,000 runs per hour on 500-question datasets. Its latency figures are estimates derived from workload assumptions, not measured service performance.</p>
+      <p>It also takes more than reliable delivery to make a grader trustworthy. The reference includes a separate analysis of judge agreement and uncertainty; a reproducible verdict is not necessarily a correct one.</p>
+    </article>
+
+    <details class="technical-reference" id="reference">
+      <summary>Technical reference <span>Architecture, figures, sizing assumptions and the full design document</span></summary>
+      <div class="reference-overview">
       <dl class="hero-facts">
         <div><dt>Target throughput, 500-question runs</dt><dd>1,000 evals/hour</dd></div>
         <div><dt>Est. P50 latency</dt><dd>24 min</dd></div>
@@ -648,14 +672,14 @@ const decisions = [
           <div><dt>{item.k}</dt><dd>{item.v}</dd></div>
         ))}
       </dl>
-    </section>
+      </div>
 
     <nav class="study-nav" aria-label="Study chapters">
       <ol>
-        {chapters.map((chapter, index) => (
+        {chapters.map((chapter) => (
           <li>
             <a href={`#${chapter.id}`}>
-              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{chapter.label}
+              {chapter.label}
             </a>
           </li>
         ))}
@@ -665,15 +689,14 @@ const decisions = [
     <section id="problem" class="study-section" aria-labelledby="problem-title">
       <div class="section-intro">
         <p class="eyebrow">01 / The problem</p>
-        <h2 id="problem-title">State the goal before drawing boxes.</h2>
+        <h2 id="problem-title">A missing answer is not a wrong answer</h2>
       </div>
       <div class="prose">
         <p>
-          The platform takes a dataset of questions with reference answers, by URL. Math500 is the
-          sample; nothing in the design depends on it. For each question it generates an answer
-          with an external LLM, asks the selected grader for a binary verdict, and aggregates the
-          verdicts into a report. Every step can take minutes, and a run can hold thousands of
-          questions.
+          Suppose a worker requests an answer and the model call times out. The grader has
+          nothing to score. Counting that question as incorrect would make a service failure
+          look like a model error. The report therefore gives two numbers: accuracy among
+          graded answers, and coverage across all questions in the dataset.
         </p>
         <p>
           Three goals come first. A result must be <strong>point-in-time</strong>: pinned to a
@@ -1478,6 +1501,8 @@ const decisions = [
         <DesignDoc />
       </article>
     </section>
+    </details>
+    <p class="article-return"><a href={homeHref}>Back to Mrityunjay Kumar's publication</a></p>
   </main>
 
   <SiteFooter name="Mrityunjay Kumar" year={year} />
@@ -1493,8 +1518,10 @@ const decisions = [
     startOnLoad: false,
     securityLevel: 'strict',
     theme: 'neutral',
+    htmlLabels: false,
+    markdownAutoWrap: false,
     fontFamily: "'Source Sans 3 Variable', sans-serif",
-    flowchart: { useMaxWidth: false },
+    flowchart: { useMaxWidth: false, wrappingWidth: 320 },
     sequence: { useMaxWidth: false, wrap: true, width: 140, actorMargin: 40 },
     state: { useMaxWidth: false },
     er: { useMaxWidth: false },
@@ -1508,11 +1535,67 @@ const decisions = [
     }
   };
 
-  mermaid.run({ querySelector: 'pre.mermaid' }).then(() => {
-    markScrollable();
-    window.addEventListener('resize', markScrollable, { passive: true });
-    document.documentElement.dataset.mermaid = 'rendered';
-  });
+  const reference = document.querySelector<HTMLDetailsElement>('#reference');
+  let rendering = false;
+
+  async function renderDiagrams() {
+    if (!reference?.open || rendering || document.documentElement.dataset.mermaid === 'rendered') return;
+    rendering = true;
+    try {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      await mermaid.run({ querySelector: '#reference pre.mermaid' });
+      for (const frame of reference.querySelectorAll<HTMLElement>('.diagram-scroll')) {
+        const figure = frame.closest('figure');
+        const caption = figure?.querySelector('figcaption');
+        if (!figure?.id || !caption || caption.querySelector('[data-diagram-size]')) continue;
+        frame.id = `${figure.id}-image`;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.diagramSize = '';
+        button.textContent = 'View full-size diagram';
+        button.setAttribute('aria-controls', frame.id);
+        button.setAttribute('aria-expanded', 'false');
+        button.addEventListener('click', () => {
+          const expanded = frame.dataset.expanded !== 'true';
+          frame.dataset.expanded = String(expanded);
+          button.setAttribute('aria-expanded', String(expanded));
+          button.textContent = expanded ? 'Fit diagram to column' : 'View full-size diagram';
+          frame.tabIndex = expanded ? 0 : -1;
+          if (expanded) {
+            frame.setAttribute('role', 'region');
+            frame.setAttribute('aria-label', 'Full-size diagram');
+            frame.focus({ preventScroll: true });
+          } else {
+            frame.removeAttribute('role');
+            frame.removeAttribute('aria-label');
+          }
+          markScrollable();
+        });
+        caption.append(button);
+      }
+      markScrollable();
+      document.documentElement.dataset.mermaid = 'rendered';
+      const target = document.getElementById(location.hash.slice(1));
+      if (target && reference.contains(target)) target.scrollIntoView({ behavior: 'instant' });
+    } catch (error) {
+      document.documentElement.dataset.mermaid = 'error';
+      console.error('Could not render the study diagrams.', error);
+    } finally {
+      rendering = false;
+    }
+  }
+
+  function followReferenceLink() {
+    const target = document.getElementById(location.hash.slice(1));
+    if (reference && target && reference.contains(target)) reference.open = true;
+    void renderDiagrams();
+  }
+
+  reference?.addEventListener('toggle', () => void renderDiagrams());
+  window.addEventListener('hashchange', followReferenceLink);
+  window.addEventListener('resize', markScrollable, { passive: true });
+  followReferenceLink();
 </script>
 
 <style>
@@ -1521,8 +1604,8 @@ const decisions = [
   }
 
   .diagram-scroll {
-    overflow-x: auto;
-    padding: 24px;
+    overflow: auto;
+    padding: 16px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-sm);
     background: var(--paper);
@@ -1530,7 +1613,9 @@ const decisions = [
 
   .diagram pre.mermaid {
     margin: 0;
-    min-width: max-content;
+    min-width: 0;
+    max-width: 100%;
+    overflow: auto;
     font-family: var(--mono);
     font-size: 13px;
     white-space: pre;
@@ -1539,26 +1624,16 @@ const decisions = [
   .diagram pre.mermaid :global(svg) {
     display: block;
     margin: 0 auto;
+    width: auto;
     height: auto;
+    max-width: 100%;
   }
 
-  @media (min-width: 861px) {
-    .diagram.fit pre.mermaid {
-      min-width: 0;
-    }
-
-    /* Shrink wide diagrams to the column; never enlarge small ones. */
-    .diagram.fit pre.mermaid :global(svg) {
-      max-width: 100%;
-    }
-  }
-
-  .diagram[data-scrollable='true'] figcaption::after {
-    content: 'Scroll sideways to see the whole diagram →';
-    color: var(--accent-strong);
-    font-family: var(--mono);
-    font-size: 12px;
-  }
+  /* Default view fits width only: a height cap shrank tall diagrams to unreadable text. */
+  .diagram .diagram-scroll[data-expanded='true'] { max-height: min(80svh, 900px); }
+  .diagram .diagram-scroll[data-expanded='true'] pre.mermaid { width: max-content; max-width: none; overflow: visible; }
+  .diagram .diagram-scroll[data-expanded='true'] pre.mermaid :global(svg) { max-width: none; max-height: none; }
+  .diagram figcaption :global([data-diagram-size]) { min-height: 44px; margin-left: auto; padding: 4px 0; border: 0; background: transparent; color: var(--accent-strong); font: inherit; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
 
   .diagram figcaption {
     display: flex;
@@ -1600,11 +1675,9 @@ const decisions = [
 
   .state-lists dt span {
     margin-left: 6px;
-    color: var(--ink-faint);
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 400;
   }
 
   .state-lists dd {
@@ -1713,11 +1786,9 @@ const decisions = [
   }
 
   .issue-grid dt {
-    color: var(--accent-strong);
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 600;
   }
 
   .issue-grid dd {
@@ -1832,67 +1903,44 @@ const decisions = [
     letter-spacing: 0;
   }
 
-  .study-header {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 68px;
-    padding: 0 var(--gutter);
-    background: color-mix(in srgb, var(--paper) 88%, transparent);
-    backdrop-filter: blur(18px) saturate(1.25);
-  }
-
-  .study-wordmark,
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .study-wordmark { gap: 11px; }
-  .study-wordmark > span:last-child { display: grid; line-height: 1.15; }
-  .study-wordmark strong { font-family: 'Bricolage Grotesque Variable', sans-serif; font-size: 15px; font-weight: 650; }
-  .study-wordmark small { margin-top: 3px; color: var(--ink-faint); font-size: 13px; }
-
-  .wordmark-mark {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
-    background: var(--ink);
-    color: #fff;
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .back-link { gap: 7px; color: var(--ink-soft); font-size: 14px; font-weight: 550; }
-
-  .study-hero,
   .study-section,
+  .reference-overview,
   .study-nav {
     padding-inline: var(--gutter);
   }
 
-  .study-hero {
-    padding-top: clamp(48px, 7vw, 96px);
-    padding-bottom: clamp(40px, 5vw, 64px);
-    background: #f4f6f3;
+  .study-hero, .reading-column, .article-return, .technical-reference > summary {
+    width: min(680px, calc(100% - 40px));
+    margin-inline: auto;
   }
+
+  .study-hero { padding: 48px 0 24px; }
+  .article-label { color: var(--ink-soft); font-size: 15px; font-weight: 600; }
+  .article-byline { margin: 20px 0 26px; font-size: 16px; color: var(--ink-soft); }
+  .article-byline a, .article-return a { color: var(--accent-strong); text-underline-offset: 4px; }
+  .reading-column { font: 20px/1.65 var(--sans); }
+  .reading-column > p { margin: 0 0 22px; }
+  .reading-column > h2 { margin: 40px 0 14px; font-size: 28px; font-weight: 600; line-height: 1.24; }
+  .report-example { margin: 30px 0 36px; padding: 20px 0; border-block: 1px solid var(--line-strong); font: 16px/1.6 var(--sans); }
+  .report-example figcaption { font-size: 18px; font-weight: 600; }
+  .report-example > p { margin: 10px 0 16px; color: var(--ink-soft); }
+  .report-example table { width: 100%; min-width: 0; border-collapse: collapse; }
+  .report-example th, .report-example td { padding: 10px 8px; font-size: 15px; text-align: left; text-transform: none; letter-spacing: 0; white-space: normal; }
+  .report-example th:first-child, .report-example td:first-child { padding-left: 0; }
+  .report-example th:last-child, .report-example td:last-child { padding-right: 0; text-align: right; }
+  .technical-reference > summary { margin-top: 40px; padding: 18px 0; border-block: 1px solid var(--line-strong); cursor: pointer; font-size: 18px; font-weight: 600; }
+  .technical-reference > summary span { display: block; margin-left: 20px; font-size: 15px; font-weight: 400; color: var(--ink-soft); }
+  .technical-reference[open] > summary { margin-bottom: 32px; }
+  .article-return { padding: 28px 0 60px; font-size: 16px; }
 
   .eyebrow,
   .mono-label {
     margin: 0;
-    color: var(--accent-strong);
-    font-family: var(--mono);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: none;
   }
 
   h1, h2, h3 {
@@ -1904,16 +1952,17 @@ const decisions = [
   h1 {
     max-width: 18ch;
     margin: 18px 0 0;
-    font-size: clamp(40px, 6vw, 72px);
+    font-size: 52px;
     font-weight: 650;
     line-height: 1.02;
   }
 
   .hero-lede {
-    max-width: 62ch;
+    max-width: 100%;
     margin: 24px 0 0;
     color: var(--ink-soft);
-    font-size: clamp(18px, 1.6vw, 20px);
+    font-family: var(--sans);
+    font-size: 22px;
     line-height: 1.55;
   }
 
@@ -1930,21 +1979,17 @@ const decisions = [
   .hero-facts dd { margin: 6px 0 0; font-family: var(--display); font-size: 24px; font-weight: 650; }
 
   .study-nav {
-    position: sticky;
-    top: 68px;
-    z-index: 10;
     background: var(--paper);
     border-bottom: 1px solid var(--line);
-    overflow-x: auto;
   }
 
   .study-nav ol {
-    display: flex;
-    gap: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    gap: 8px 24px;
     margin: 0;
     padding: 14px 0;
     list-style: none;
-    white-space: nowrap;
   }
 
   .study-nav a {
@@ -1956,7 +2001,7 @@ const decisions = [
     text-decoration: none;
   }
 
-  .study-nav a span { color: var(--accent-strong); font-family: var(--mono); font-size: 11px; }
+  .study-nav a span { display: none; }
   .study-nav a:hover { color: var(--ink); }
 
   .study-section {
@@ -2084,7 +2129,7 @@ const decisions = [
 
   table { width: 100%; border-collapse: collapse; font-size: 15px; background: var(--paper); }
   th, td { padding: 12px 14px; border-bottom: 1px solid var(--line-strong); text-align: left; vertical-align: top; }
-  thead th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; color: var(--ink-faint); }
+  thead th { font-size: 14px; font-weight: 600; color: var(--ink-soft); }
   tbody th { font-weight: 650; white-space: nowrap; }
 
   .definition-band {
@@ -2104,7 +2149,7 @@ const decisions = [
   }
 
   .formula-grid div { padding: 20px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); }
-  .formula-grid dt { color: var(--accent-strong); font-family: var(--mono); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  .formula-grid dt { color: var(--ink); font-size: 15px; font-weight: 600; }
   .formula-grid dd { margin: 8px 0 0; font-size: 16px; overflow-x: auto; }
 
   .sizing p:not(.mono-label) + p { margin-top: 12px; }
@@ -2117,7 +2162,7 @@ const decisions = [
     margin: 28px 0 0;
   }
   .glance div { padding: 16px 18px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--paper); }
-  .glance dt { color: var(--accent-strong); font-family: var(--mono); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .glance dt { color: var(--ink); font-size: 15px; font-weight: 600; }
   .glance dd { margin: 8px 0 0; color: var(--ink-soft); font-size: 15px; line-height: 1.5; }
 
   /* ---------- workload model and retry semantics ---------- */
@@ -2285,6 +2330,11 @@ const decisions = [
   }
 
   @media (max-width: 560px) {
+    .study-hero { padding-top: 30px; }
+    .study-hero h1 { font-size: 36px; line-height: 1.12; }
+    .hero-lede { font-size: 21px; }
+    .reading-column { font-size: 19px; line-height: 1.65; }
+    .reading-column > h2 { font-size: 25px; margin-top: 32px; }
     .reasoning-chain,
     .arch-external ul { grid-template-columns: minmax(0, 1fr); }
     tbody th { white-space: normal; }
